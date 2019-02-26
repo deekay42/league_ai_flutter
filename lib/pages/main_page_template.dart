@@ -10,13 +10,14 @@ class MainPageTemplateAnimator extends StatelessWidget {
   final Widget footer;
   final String backdrop;
   final MainPageTemplateAnimations animationController;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   MainPageTemplateAnimator(
       {AnimationController mainController,
       @required this.appBar,
       @required this.body,
       AnimationController mainBodyController,
-      @required this.footer,
+      this.footer,
       @required this.backdrop})
       : animationController = MainPageTemplateAnimations(
             controller: mainController,
@@ -35,7 +36,8 @@ class MainPageTemplateAnimator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print("Rebuild main page template");
-    return Scaffold(appBar: appBar, body: _buildAnimation(context));
+    return Scaffold(
+        key: scaffoldKey, appBar: appBar, body: _buildAnimation(context));
   }
 
   Widget _buildAnimation(BuildContext context) {
@@ -45,44 +47,54 @@ class MainPageTemplateAnimator extends StatelessWidget {
               alignment: AlignmentDirectional.topCenter,
               fit: StackFit.expand,
               children: <Widget>[
-        Opacity(
-          opacity: animationController.backdropOpacity.value,
-          child: new Image.asset(
-            backdrop,
-            fit: BoxFit.cover,
-          ),
-        ),
-        BackdropFilter(
-          filter: ui.ImageFilter.blur(
-            sigmaX: animationController.backdropBlur.value,
-            sigmaY: animationController.backdropBlur.value,
-          ),
-          child: Container(
-              color: Colors.black.withOpacity(0.5),
-              child: Container(
-                  margin: const EdgeInsets.only(left: 20.0, right: 20.0),
-                  child: Column(children: [
-                    Expanded(
-                      child: Container(),
-                      flex: 1,
-                    ),
-                body,
-                    Expanded(child: Container(), flex: 2),
-                  ]))),
-        ),
-                Positioned(
-                  top: 0,
-                  child: Padding(padding: EdgeInsets.only(top: 15), child: PoppingLogoAnimation(
-                    child: Image.asset(
-                      'assets/ic_launcher_foreground.png',
-                      fit: BoxFit.fitHeight,
-                    ),
-                    animation: animationController.logoPop,
-                  )),
+                Opacity(
+                  opacity: animationController.backdropOpacity.value,
+                  child: new Image.asset(
+                    backdrop,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                BackdropFilter(
+                  filter: ui.ImageFilter.blur(
+                    sigmaX: animationController.backdropBlur.value,
+                    sigmaY: animationController.backdropBlur.value,
+                  ),
+                  child: Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: Container(
+                            margin:
+                                const EdgeInsets.only(left: 20.0, right: 20.0),
+                            child: Column(children: [
+                              Expanded(
+                                child: Container(),
+                                flex: 3,
+                              ),
+                              Expanded(
+                                child: body,
+                                flex: 7,
+                              ),
+                              Expanded(child: Container(), flex:5),
+                            ])))
+                  ,
                 ),
                 Container(
+                    child: Column(children: [
+                  Expanded(
+                      flex: 1,
+                      child: Padding(
+                          padding: EdgeInsets.only(top: 15),
+                          child: PoppingLogoAnimation(
+                            child: Image.asset(
+                              'assets/ic_launcher_foreground.png',
+                              fit: BoxFit.fitHeight,
+                            ),
+                            animation: animationController.logoPop,
+                          ))),
+                  Expanded(child: Container(), flex: 5)
+                ])),
+                Container(
                   alignment: Alignment.bottomCenter,
-                  margin: const EdgeInsets.only(bottom: 100),
+                  margin: const EdgeInsets.only(bottom: 50),
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: footer,

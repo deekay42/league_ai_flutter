@@ -3,7 +3,7 @@ class Strings {
   static const String buildRec = "You should build these items:";
   static const String sub = "Subscribe";
   static const List<String> instructions = ["1. Start your League IQ Desktop client",
-  "2. Sort your scoreboard (Press Tab) by dragging the players into this order: Top, Jg, Mid, Bot, Sup",
+  "2. While in-game, sort your scoreboard (Press Tab) by dragging the players into this order: Top, Jg, Mid, Bot, Sup",
   "3. Press Tab + F12 while in-game for the next recommendation",
   ];
 
@@ -25,4 +25,9 @@ class Strings {
   static const String change = ">";
   static const String fineprint =
       "Bla bla bla legal bla bla bla legal blablabla";
+
+  static const String clientTokenError = "Unable to obtain payment token. Please try again later.";
+  static const String nonceError = "Unable to obtain payment nonce. Please try again later.";
+  static const String checkoutError = "Unable to complete checkout. Please try again later.";
+  static const String generalPaymentsError = "Unknown error. Please try again later.";
 }

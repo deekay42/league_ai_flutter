@@ -12,11 +12,13 @@ dependencies:
   intl: ^0.15.6
   flutter_firebase_ui: ^0.0.13
   firebase_admob: ^0.8.0
-
-
-
+  flutter_launcher_icons: ^0.7.0
   cupertino_icons: ^0.1.0
-  shrine_images: 1.1.1
+
+flutter_icons:
+  image_path: "assets/icon/ic_launcher_foreground.png"
+  android: true
+  ios: true
 
 dev_dependencies:
   flutter_test:

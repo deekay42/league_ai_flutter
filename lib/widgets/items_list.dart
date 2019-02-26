@@ -24,6 +24,10 @@ class SlidingList extends StatefulWidget {
 class _SlidingListState extends State<SlidingList>
     with TickerProviderStateMixin {
   GlobalKey listKey = GlobalKey();
+  GlobalKey key1 = GlobalKey(),
+      key2 = GlobalKey(),
+      key3 = GlobalKey(),
+      key4 = GlobalKey();
   SlidingListAnimations animations;
   bool dimsObtained = false;
 
@@ -46,6 +50,7 @@ class _SlidingListState extends State<SlidingList>
 
       setState(() {
         animations.setDivDy(sizeList.height / 2);
+        animations.setDivLength(sizeList.width);
         dimsObtained = true;
       });
     }
@@ -58,6 +63,12 @@ class _SlidingListState extends State<SlidingList>
         builder: (BuildContext context, Widget child) => _buildContent());
   }
 
+  void printSize(var key) {
+    final RenderBox renderBoxList = key.currentContext.findRenderObject();
+    final size = renderBoxList.size;
+    print(size);
+  }
+
   Widget _buildContent() {
     if (widget.children == null || widget.children.isEmpty) {
       return Container();
@@ -68,7 +79,7 @@ class _SlidingListState extends State<SlidingList>
 
     ListView mainList = ListView(
         key: listKey,
-        shrinkWrap: true,
+        shrinkWrap: false,
         padding: EdgeInsets.all(8.0),
         children: widget.children.map((child) {
           return SlidingListItem(
@@ -76,42 +87,37 @@ class _SlidingListState extends State<SlidingList>
               child: child,
               last: count >= animations.sliders.length);
         }).toList());
-    return Column(children: [
-      SizedBox(
-        height: 12,
-      ),
-      Text(
-        widget.title,
-        style: theme.textTheme.subtitle,
-        maxLines: 1,
-      ),
-      SizedBox(
-        height: 12,
-      ),
-      LayoutBuilder(builder: (context, constraints) {
-        animations.setDivLength(constraints.maxWidth);
-        return Container(
-            child: Column(children: [
-          SlideTransition(
-              position: animations.upperDivDy,
-              child: Container(
-                color: Colors.white,
-//          margin: const EdgeInsets.symmetric(vertical: 16.0),
-                width: animations.dividerLength.value,
-                height: 1.0,
-              )),
-          mainList,
-          SlideTransition(
-              position: animations.lowerDivDy,
-              child: Container(
-                color: Colors.white,
-//          margin: const EdgeInsets.symmetric(vertical: 16.0),
-                width: animations.dividerLength.value,
-                height: 1.0,
-              )),
-        ]));
-      })
-    ]);
+
+    return LayoutBuilder(builder: (context, constraints) {
+      animations.setDivLength(constraints.maxWidth);
+      return Container(
+          key: key1,
+          child: Column(key: key2, children: [
+            Text(
+              widget.title,
+              style: theme.textTheme.subtitle,
+              maxLines: 1,
+            ),
+            SizedBox(
+              height: 4,
+            ),
+            SlideTransition(
+                position: animations.upperDivDy,
+                child: Container(
+                  color: Colors.white,
+                  width: animations.dividerLength.value,
+                  height: 1.0,
+                )),
+            Expanded(key: key4, child: mainList),
+            SlideTransition(
+                position: animations.lowerDivDy,
+                child: Container(
+                  color: Colors.white,
+                  width: animations.dividerLength.value,
+                  height: 1.0,
+                )),
+          ]));
+    });
   }
 }
 
@@ -146,12 +152,16 @@ class MyItemListItem extends MyListItem {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-            Image.asset(
-              item.img,
-              height: 50,
-              width: 50,
-              fit: BoxFit.contain,
-            ),
+            ClipRRect(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                child: Image.asset(
+                  item.img,
+                  height: 50,
+                  width: 50,
+                  fit: BoxFit.contain,
+                )),
             SizedBox(width: 20),
             Container(
                 width: 100,
@@ -227,6 +237,16 @@ class SlidingListAnimations {
                 0.5,
                 curve: Curves.ease,
               )),
+        ),
+        dividerLength = new Tween(begin: 0.0, end: 200.0).animate(
+          new CurvedAnimation(
+            parent: controller,
+            curve: new Interval(
+              0.0,
+              0.25,
+              curve: Curves.linear,
+            ),
+          ),
         ) {
     this.sliders = List.generate(
       listLength,
@@ -249,8 +269,8 @@ class SlidingListAnimations {
     );
   }
 
-  static double calcLenForInterval(double overlap, int total_elements) {
-    return 1.0 / (1 + (1 - overlap) * (total_elements - 1));
+  static double calcLenForInterval(double overlap, int totalElements) {
+    return 1.0 / (1 + (1 - overlap) * (totalElements - 1));
   }
 
   static double calcStartingPointForInterval(

@@ -43,11 +43,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   String _remaining = '';
   bool hasSubscription = false;
   Ads ads = Ads();
+  BannerAd ad;
 
   AnimationController mainController;
   AnimationController mainBodyController;
 
   void checkIfUserHasSubscription() {
+
+
     CloudFunctions.instance
         .call(functionName: 'isValid')
         .then((dynamic remaining) {
@@ -55,22 +58,38 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         if (remaining == "true") {
           print("user has a subscription");
           hasSubscription = true;
-        } else
+        } else {
+          hasSubscription = false;
           _remaining = remaining;
+
+          ads.getBannerAd().then((BannerAd newAd) {
+            ad = newAd;
+            ad.show();
+          });
+        }
+      });
+    }).catchError((e) {
+
+      setState(() {
+        _remaining = "10";
+        ads.getBannerAd().then((BannerAd newAd) {
+          ad = newAd;
+          ad.show();
+        });
       });
     });
   }
 
   void initState() {
     super.initState();
-
+    print("Calling initstate now");
     mainController =
-      AnimationController(duration: Duration(seconds: 10), vsync: this);
-    mainBodyController = AnimationController(duration: Duration(seconds: 10), vsync: this);
-    _playFullAnimation();
+        AnimationController(duration: Duration(seconds: 10), vsync: this);
+    mainBodyController =
+        AnimationController(duration: Duration(seconds: 10), vsync: this);
     initFirebaseMessaging();
-    checkIfUserHasSubscription();
 
+    onReload();
   }
 
   Future<void> _playFullAnimation() async {
@@ -92,25 +111,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-  void dispose()
-  {
+  void dispose() {
     mainBodyController.dispose();
     mainController.dispose();
+    ad?.dispose();
     super.dispose();
   }
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-    List<String> items_s = message['aps']['alert']['body'].split(",");
+    List<String> itemsS = message['aps']['alert']['body'].split(",");
 
     Iterable<Future<Item>> mappedList =
-        items_s.map((i) async => await itemsRepo.getItem(i));
+        itemsS.map((i) async => await itemsRepo.getItem(i));
     Future<List<Item>> futureList = Future.wait(mappedList);
     List<Item> items = await futureList;
 
-    _playListAnimation();
-    setState(() {
-      _items = items;
-    });
+    _items = items;
+    if (mounted) {
+      setState(() {});
+      _playListAnimation();
+    }
   }
 
   void initFirebaseMessaging() {
@@ -135,19 +155,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       print("Settings registered: $settings");
     });
     print("FCM configured!");
-    Future.delayed(
-        const Duration(seconds: 5),
-        () => Timer.periodic(
-            Duration(seconds: 10),
-            (Timer t) => _handleNewMessageIncoming(<String, dynamic>{
-                  'aps': <String, dynamic>{
-                    'alert': <String, dynamic>{'body': "1,2,3,4,5"}
-                  }
-                })));
+//    Future.delayed(
+//        const Duration(seconds: 5),
+//        () => Timer.periodic(
+//            Duration(seconds: 10),
+//            (Timer t) => _handleNewMessageIncoming(<String, dynamic>{
+//                  'aps': <String, dynamic>{
+//                    'alert': <String, dynamic>{'body': "1,2,3,4,5,6,7,8"}
+//                  }
+//                })));
   }
 
   void _unsubscribe() {
     print('unsubscribe');
+    CloudFunctions.instance
+        .call(functionName: 'cancelSub')
+        .then((dynamic result) {
+      setState(() {
+        hasSubscription = false;
+        _remaining = "10";
+        onReload();
+      });
+    });
   }
 
   void _myaccount() {
@@ -174,37 +203,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return BasicAppBar(false, choices);
   }
 
-  Widget _buildInstructions(BuildContext context, AnimationController mainBodyController) {
+  Widget _buildInstructions(
+      BuildContext context, AnimationController mainBodyController) {
     int counter = 0;
     ThemeData theme = Theme.of(context);
 
     print("Now building slidinglist");
-      return SlidingList(
-          title: "Instructions",
-          children: Strings.instructions
-              .map((p) => Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          p,
-                          textAlign: TextAlign.start,
-                          style: theme.textTheme.body1,
+    return SlidingList(
+        title: "Instructions",
+        children: Strings.instructions
+            .map((p) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    p,
+                    textAlign: TextAlign.start,
+                    style: theme.textTheme.body1,
+                  ),
+                  ++counter == Strings.instructions.length
+                      ? null
+                      : SizedBox(
+                          height: 36,
                         ),
-                        ++counter == Strings.instructions.length
-                            ? null
-                            : SizedBox(
-                                height: 36,
-                              ),
-                      ].where(notNull)
-                          .toList())).toList()
-              ,animationController: mainBodyController,
-          origin: Offset(10, 0));
+                ].where(notNull).toList()))
+            .toList(),
+        animationController: mainBodyController,
+        origin: Offset(10, 0));
   }
 
   Widget _getBody() {
     var mainContent;
     if (_items == null)
-      mainContent = Container(child: _buildInstructions(context, mainBodyController));
+      mainContent =
+          Container(child: _buildInstructions(context, mainBodyController));
     else {
       int counter = 0;
       var listItems = _items.map((item) {
@@ -212,14 +243,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       }).toList();
 
       mainContent = SlidingList(
-        title: Strings.buildRec,
-        children: listItems,
-        animationController: mainBodyController
-      );
+          title: Strings.buildRec,
+          children: listItems,
+          animationController: mainBodyController);
     }
 
-    return Container(
-        margin: EdgeInsets.symmetric(horizontal: 20), child: mainContent);
+    return mainContent;
+
+//    return Container(
+//        margin: EdgeInsets.symmetric(horizontal: 20), child: mainContent);
   }
 
   Widget _getFooter(BuildContext context) {
@@ -239,15 +271,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   style: theme.textTheme.subtitle,
                   maxLines: 1,
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 8),
                 RaisedButton(
                   child: Text(Strings.sub),
                   onPressed: () async {
+                    print("Here's the ad we're disposing: $ad");
+                    ad?.dispose();
                     await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => SubscribePage()),
                     );
-                    _playFullAnimation();
+                    onReload();
                   },
                 )
               ]),
@@ -255,15 +289,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
   }
 
+  void onReload() {
+    _playFullAnimation();
+    checkIfUserHasSubscription();
+  }
+
   @override
   Widget build(BuildContext context) {
     print("Rebuild home page");
-//    if(!hasSubscription)
-//      ads.getBannerAd().then((BannerAd ad){ad.show(
-////      anchorOffset: 60.0,
-////      // Banner Position
-////      anchorType: AnchorType.bottom,
-//      );});
     return MainPageTemplateAnimator(
       mainController: mainController,
       appBar: _myAppBar(),

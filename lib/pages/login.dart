@@ -39,12 +39,13 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     assert(_currentUser == null);
     return new SignInScreen(
+      color: Colors.grey[900],
       title: "Welcome",
       header: new Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: new Padding(
           padding: const EdgeInsets.all(16.0),
-          child: new Text("Demo"),
+          child: new Text("Please Sign In"),
         ),
       ),
       providers: [

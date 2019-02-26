@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
-import '../resources/Strings.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import '../resources/Colors.dart';
+import 'package:flutter/material.dart';
+
+import '../resources/Strings.dart';
 
 enum ConfirmResult { SUCCESS, CHANGING }
 
@@ -24,6 +24,8 @@ class ConfirmDialog extends StatelessWidget {
         print(resp);
         return ConfirmResult.CHANGING;
       }
+    }).catchError(() {
+      return null;
     });
   }
 
@@ -78,44 +80,69 @@ class ConfirmDialog extends StatelessWidget {
         Divider(
           color: Colors.white,
         ),
-        Padding(padding: EdgeInsets.symmetric(vertical: 5), child:
-        Row(children: [
-          SizedBox(width: 15,),
-          Text(
-            desc,
-            style: theme.textTheme.subtitle,
-          ),
-          Expanded(child: Container()),
-          InkWell(
-            child: Text(
-              Strings.change,
-              style:
-                  theme.textTheme.body2,
-            ),
-            onTap: () async {
-              print("Now returning ConfirmResult.CHANGING");
-              Navigator.pop(context, ConfirmResult.CHANGING);
-            },
-          ),
-          SizedBox(width: 15,)
-        ])),
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: 5),
+            child: Row(children: [
+              SizedBox(
+                width: 15,
+              ),
+              Text(
+                desc,
+                style: theme.textTheme.subtitle,
+              ),
+              Expanded(child: Container()),
+              InkWell(
+                child: Text(
+                  Strings.change,
+                  style: theme.textTheme.body2,
+                ),
+                onTap: () async {
+                  print("Now returning ConfirmResult.CHANGING");
+                  Navigator.pop(context, ConfirmResult.CHANGING);
+                },
+              ),
+              SizedBox(
+                width: 15,
+              )
+            ])),
         Divider(
           color: Colors.white,
         ),
-    Padding(padding: EdgeInsets.symmetric(vertical: 5), child:
-        Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          SizedBox(width: 15),
-          Text(
-            Strings.fineprint,
-            style: theme.textTheme.overline,
-          )
-        ])),
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: 5),
+            child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              SizedBox(width: 15),
+              Text(
+                Strings.fineprint,
+                style: theme.textTheme.overline,
+              )
+            ])),
         Row(children: [
           Expanded(
             child: RaisedButton(
               child: Text(Strings.sub),
               onPressed: () async {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) => Container(
+                        color: Colors.black.withOpacity(0.5),
+                        child: new Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(
+                              width: 15,
+                            ),
+                            Text("Loading", style: theme.textTheme.body1),
+                          ],
+                        ),
+                      ),
+                );
+
                 ConfirmResult result = await checkout();
+                Navigator.pop(context);
                 Navigator.pop(context, result);
               },
             ),

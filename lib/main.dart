@@ -13,7 +13,34 @@
 // limitations under the License.
 
 import 'package:flutter/material.dart';
-
 import 'package:Shrine/app.dart';
 
 void main() => runApp(MainApp());
+
+//class LOL extends StatelessWidget {
+//
+//  GlobalKey box1 = GlobalKey();
+//  GlobalKey box2 = GlobalKey();
+//  GlobalKey box3 = GlobalKey();
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    return MaterialApp(home:Scaffold(body:Container(key: box1,
+//      child: Column(key: box2, children: [
+//
+//          SizedBox(key:box3,
+//            height: 50,
+//            child: RaisedButton(child: Text("LOL"),onPressed: (){printSize(box1); printSize(box2); printSize(box3);},)
+//          )])
+//
+//      )));
+//  }
+//
+//
+//  void printSize(var key)
+//  {
+//      final RenderBox renderBoxList = key.currentContext.findRenderObject();
+//      final size = renderBoxList.size;
+//      print(size);
+//  }
+//}
