@@ -130,9 +130,9 @@ packages:
   flutter_firebase_ui:
     dependency: "direct main"
     description:
-      name: flutter_firebase_ui
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: flutter_firebase_ui
+      relative: true
+    source: path
     version: "0.0.13"
   flutter_launcher_icons:
     dependency: "direct main"
