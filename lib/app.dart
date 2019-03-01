@@ -24,6 +24,8 @@ import 'package:flutter/material.dart';
 import 'resources/Colors.dart';
 import 'resources/Strings.dart';
 
+import 'dart:io' show Platform;
+
 class MainApp extends StatefulWidget {
   @override
   _MainAppState createState() => _MainAppState();
@@ -39,18 +41,21 @@ class _MainAppState extends State<MainApp> {
   void initState() {
     super.initState();
 
-    _deviceID = _firebaseMessaging.getToken();
+    if (Platform.isAndroid || Platform.isIOS) {
+      _deviceID = _firebaseMessaging.getToken();
 
-    _listener =
-        FirebaseAuth.instance.onAuthStateChanged.listen((FirebaseUser result) {
-      print("AUTHCHANGE!!");
-      print('This is hte user: ');
-      print(result.toString());
-      setState(() {
-        user = result;
-        if (result != null) onSignInSuccess();
-      });
-    });
+      _listener =
+          FirebaseAuth.instance.onAuthStateChanged.listen((
+              FirebaseUser result) {
+            print("AUTHCHANGE!!");
+            print('This is hte user: ');
+            print(result.toString());
+            setState(() {
+              user = result;
+              if (result != null) onSignInSuccess();
+            });
+          });
+    }
   }
 
   void onSignInSuccess() {
@@ -75,13 +80,14 @@ class _MainAppState extends State<MainApp> {
 
   @override
   void dispose() {
-    _listener.cancel();
+
+    _listener?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: Strings.name, home: user == null ? LoginPage() : HomePage(), theme: _myTheme);
+    return MaterialApp(title: Strings.name, home: user == null && (Platform.isAndroid || Platform.isIOS) ? LoginPage() : HomePage(), theme: _myTheme);
   }
 }
 

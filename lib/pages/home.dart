@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -87,7 +88,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         AnimationController(duration: Duration(seconds: 10), vsync: this);
     mainBodyController =
         AnimationController(duration: Duration(seconds: 10), vsync: this);
-    initFirebaseMessaging();
+
+    if (Platform.isAndroid || Platform.isIOS) initFirebaseMessaging();
 
     onReload();
   }
@@ -223,7 +225,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ++counter == Strings.instructions.length
                       ? null
                       : SizedBox(
-                          height: 36,
+                          height: 64,
                         ),
                 ].where(notNull).toList()))
             .toList(),
@@ -299,10 +301,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     print("Rebuild home page");
     return MainPageTemplateAnimator(
       mainController: mainController,
-      appBar: _myAppBar(),
+      appBar: (Platform.isAndroid || Platform.isIOS) ? _myAppBar() : Container(),
       body: _getBody(),
       mainBodyController: mainBodyController,
-      footer: _getFooter(context),
+      footer: (Platform.isAndroid || Platform.isIOS) ? _getFooter(context) : Container(),
       backdrop: "assets/main_backdrop.png",
     );
   }

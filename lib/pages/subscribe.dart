@@ -117,7 +117,7 @@ class _SubscribePageState extends State<SubscribePage>
                       ++counter == Strings.instructions.length
                           ? null
                           : SizedBox(
-                              height: 36,
+                              height: 64,
                             ),
                     ].where(notNull).toList()))
                 .toList(),

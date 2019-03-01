@@ -14,8 +14,27 @@
 
 import 'package:flutter/material.dart';
 import 'package:Shrine/app.dart';
+import 'package:flutter/foundation.dart'
+    show debugDefaultTargetPlatformOverride;
 
-void main() => runApp(MainApp());
+import 'dart:io' show Platform;
+
+void _setTargetPlatformForDesktop() {
+  TargetPlatform targetPlatform;
+  if (Platform.isMacOS) {
+    targetPlatform = TargetPlatform.iOS;
+  } else if (Platform.isLinux || Platform.isWindows) {
+    targetPlatform = TargetPlatform.android;
+  }
+  if (targetPlatform != null) {
+    debugDefaultTargetPlatformOverride = targetPlatform;
+  }
+}
+
+void main() {
+  _setTargetPlatformForDesktop();
+  runApp(MainApp());
+}
 
 //class LOL extends StatelessWidget {
 //
