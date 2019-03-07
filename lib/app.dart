@@ -38,7 +38,7 @@ class _MainAppState extends State<MainApp> {
   StreamSubscription<FirebaseUser> _listener;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   Future<String> _deviceID;
-
+  Future<String> desktopUID;
 
   void initState() {
     super.initState();
@@ -87,30 +87,28 @@ class _MainAppState extends State<MainApp> {
     super.dispose();
   }
 
-Future<String> getPhoneDID() async
+  Future<void> listenForUIDFile(String dirPath, String filePath) async
   {
-    String dirPath = ".";
-    String filePath = dirPath+"/device_id";
-    //device ID already present
-    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-      return await File(filePath).readAsString();
-    
-
-  //device id not present. need to wait until file appears which contains it.
+    //UID not present. need to wait until file appears which contains it.
     Stream<FileSystemEvent> dirStream = Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var value in dirStream) {
-      print("Some event!!");
-      if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-        return await File(filePath).readAsString();    
-    }
-    
+          await for (var value in dirStream) {
+            print("Some event!!");
+            if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+              setState(() {desktopUID = File(filePath).readAsString();});    
+          }        
   }
 
-  bool UIDPresentForDesktop()
+  Future<String> getUIDForDesktop()
   {
     String dirPath = ".";
     String filePath = dirPath+"/uid";
-    return FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound;
+    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+      return File(filePath).readAsString();
+    else 
+    { 
+      listenForUIDFile(dirPath, filePath);
+      return null;
+    }
   }
 
   Future<String> getUIDDBKeyForDesktop() async
@@ -124,12 +122,30 @@ Future<String> getPhoneDID() async
 
   Widget buildHome()
   {
-    if( user == null && (Platform.isAndroid || Platform.isIOS)) 
-      return LoginPage();
-    else if(UIDPresentForDesktop())
-      return HomePage();
+    print("Building home!");
+    if(Platform.isAndroid || Platform.isIOS)
+    {
+      if(user == null)
+        return HomePage();
+      else
+        return LoginPage(); 
+    }   
+    if(desktopUID != null)
+    {
+      print("first");
+      return HomePage(desktopUID: desktopUID);
+    }
+    desktopUID = getUIDForDesktop();
+    if(desktopUID != null)
+    {
+      print("second");
+      return HomePage(desktopUID: desktopUID);
+    }
     else
+    {
+      print("third");
       return QRPage(dataString: getUIDDBKeyForDesktop());
+    } 
   }
 
   @override

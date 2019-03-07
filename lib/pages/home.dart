@@ -36,7 +36,7 @@ import '../resources/ads.dart';
 bool notNull(Object o) => o != null;
 
 class HomePage extends StatefulWidget {
-  final String desktopUID;
+  final Future<String> desktopUID;
   HomePage({this.desktopUID});
 
   @override
@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   bool paired = true;
   Ads ads;
   BannerAd ad;
-  String desktopUID;
+  Future<String> desktopUID;
   bool errorOccurred = false;
 
   AnimationController mainController;
@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         print("Contents: "+contents);
 
         var url = "https://us-central1-neuralleague.cloudfunctions.net/relayMessage";
-        var body = {"uid": widget.desktopUID, "items":contents};
+        var body = {"uid": await widget.desktopUID, "items":contents};
         http.post(url, body: body)
             .then((response) {
           print("Response status: ${response.statusCode}");
