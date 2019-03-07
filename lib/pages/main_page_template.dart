@@ -13,8 +13,8 @@ class MainPageTemplateAnimator extends StatelessWidget {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   MainPageTemplateAnimator(
-      {AnimationController mainController,
-      @required this.appBar,
+      {@required AnimationController mainController,
+      this.appBar,
       @required this.body,
       AnimationController mainBodyController,
       this.footer,
@@ -25,7 +25,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
     animationController.logoPop.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
         try {
-          await animationController.mainBodyController.forward().orCancel;
+          await animationController.mainBodyController?.forward()?.orCancel;
         } on TickerCanceled {
           // the animation got canceled, probably because we were disposed
         }
@@ -107,7 +107,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
 
 class MainPageTemplateAnimations {
   MainPageTemplateAnimations(
-      {@required this.controller, @required this.mainBodyController})
+      {@required this.controller, this.mainBodyController})
       : backdropOpacity = new Tween(begin: 0.5, end: 1.0).animate(
           new CurvedAnimation(
             parent: controller,

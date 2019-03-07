@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:Shrine/pages/home.dart';
 import 'package:Shrine/pages/login.dart';
@@ -23,6 +24,7 @@ import 'package:flutter/material.dart';
 
 import 'resources/Colors.dart';
 import 'resources/Strings.dart';
+import 'pages/QRPage.dart';
 
 import 'dart:io' show Platform;
 
@@ -85,9 +87,55 @@ class _MainAppState extends State<MainApp> {
     super.dispose();
   }
 
+Future<String> getPhoneDID() async
+  {
+    String dirPath = ".";
+    String filePath = dirPath+"/device_id";
+    //device ID already present
+    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+      return await File(filePath).readAsString();
+    
+
+  //device id not present. need to wait until file appears which contains it.
+    Stream<FileSystemEvent> dirStream = Directory(dirPath).watch(events: FileSystemEvent.create);
+    await for (var value in dirStream) {
+      print("Some event!!");
+      if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+        return await File(filePath).readAsString();    
+    }
+    
+  }
+
+  bool UIDPresentForDesktop()
+  {
+    String dirPath = ".";
+    String filePath = dirPath+"/uid";
+    return FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound;
+  }
+
+  Future<String> getUIDDBKeyForDesktop() async
+  {
+    String dirPath = ".";
+    String filePath = dirPath+"/db_key";
+    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+      return await File(filePath).readAsString();
+    else throw "WAAAAH";
+  }
+
+  Widget buildHome()
+  {
+    if( user == null && (Platform.isAndroid || Platform.isIOS)) 
+      return LoginPage();
+    else if(UIDPresentForDesktop())
+      return HomePage();
+    else
+      return QRPage(dataString: getUIDDBKeyForDesktop());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(title: Strings.name, home: user == null && (Platform.isAndroid || Platform.isIOS) ? LoginPage() : HomePage(), theme: _myTheme);
+    
+    return MaterialApp(title: Strings.name, home: buildHome(), theme: _myTheme);
   }
 }
 
