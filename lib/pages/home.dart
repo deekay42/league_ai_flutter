@@ -32,12 +32,14 @@ import '../resources/Strings.dart';
 import '../widgets/appbar.dart';
 import '../widgets/items_list.dart';
 import '../resources/ads.dart';
+import '../supplemental/utils.dart';
 
 bool notNull(Object o) => o != null;
 
 class HomePage extends StatefulWidget {
   final Future<String> desktopUID;
-  HomePage({this.desktopUID});
+  final bool paired;
+  HomePage({this.desktopUID, this.paired = true});
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -49,29 +51,40 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String _remaining = '';
   bool hasSubscription = false;
-  bool paired = true;
+  bool paired;
   Ads ads;
   BannerAd ad;
   Future<String> desktopUID;
   bool errorOccurred = false;
+  bool waitingForPairingToComplete = false;
 
   AnimationController mainController;
   AnimationController mainBodyController;
 
-  void checkIfUserHasSubscription() {
+  void checkIfUserHasSubscription() async {
 
-
+    String deviceID = await _firebaseMessaging.getToken();
+    print("Got device_id: $deviceID");
+    assert(deviceID != null);
+    print("isValid");
     CloudFunctions.instance
-        .call(functionName: 'isValid')
+        .call(functionName: 'isValid',
+        parameters: <String, dynamic>{"device_id": deviceID})
         .then((dynamic remaining) {
       setState(() {
-        paired = remaining.split(',')[1];
+        print("isValid returned");
+        print(remaining);
+
+        var parsed = remaining.split(',');
+        if (parsed[1] == "false") paired = false;
+        print("isValid: $remaining paired:");
+        print(paired ? "true" : "false");
         if (remaining.startsWith("true")) {
           print("user has a subscription");
           hasSubscription = true;
         } else {
           hasSubscription = false;
-          _remaining = remaining;
+          _remaining = parsed[0];
 
           ads.getBannerAd().then((BannerAd newAd) {
             ad = newAd;
@@ -80,7 +93,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         }
       });
     }).catchError((e) {
-
+      print("isvalid ERROR " + e.message);
       setState(() {
         _remaining = "10";
         ads.getBannerAd().then((BannerAd newAd) {
@@ -92,34 +105,44 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void initState() {
-    super.initState();
-    print("Calling initstate now");
-    
-    mainController =
-        AnimationController(duration: Duration(seconds: 10), vsync: this);
-    mainBodyController =
-        AnimationController(duration: Duration(seconds: 10), vsync: this);
 
-    if (Platform.isAndroid || Platform.isIOS)
-    {
+    super.initState();
+
+    print("Calling initstate now");
+    paired = widget.paired;
+    mainController =
+        AnimationController(duration: Duration(milliseconds: 1500), vsync: this);
+
+    mainBodyController =
+        AnimationController(duration: Duration(milliseconds: 2500), vsync: this);
+    initialLogin();
+
+    if (Platform.isAndroid || Platform.isIOS) {
       initFirebaseMessaging();
       ads = Ads();
-    }
-    else
+    } else
       initDesktopReadMessage();
 
-    onReload();
+
+  }
+
+  void initialLogin() async {
+    if (Platform.isAndroid || Platform.isIOS) checkIfUserHasSubscription();
+    _playFullAnimation();
   }
 
   Future<void> _playFullAnimation() async {
     try {
       mainController.reset();
       mainBodyController.reset();
-      await mainController.forward().orCancel;
+      mainController.forward().orCancel;
+      _playListAnimation();
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
   }
+
+
 
   Future<void> _playListAnimation() async {
     try {
@@ -138,15 +161,41 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-
-    String content = message['aps']['alert']['body'];
     //its the pairing confirmation message
-    if(message == "PAIRING SUCCESSFUL")
-    {  
-      setState((){paired = true;});
+    if (message['notification']['title'] == "PAIRING SUCCESSFUL") {
+      showDialog<Null>(
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) => AlertDialog(
+              title: Text("Success"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Pairing successful"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  RaisedButton(
+                    child: Text("OK"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+            ),
+      );
+
+      setState(() {
+        paired = true;
+      });
+      _playFullAnimation();
+
       return;
     }
 
+    String content = message['notification']['body'];
     //its a new build recommendation
     List<String> itemsS = content.split(",");
 
@@ -162,60 +211,50 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
-
-  void initDesktopReadMessage() async
-  {
+  void initDesktopReadMessage() async {
     String dirPath = ".";
-    String filePath = dirPath+"/last";
-    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-    {
+    String filePath = dirPath + "/last";
+    if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound) {
       File file = File.fromUri(Uri.file(filePath));
       file.delete();
     }
 
-    Stream<FileSystemEvent> dirStream = Directory(dirPath).watch(events: FileSystemEvent.create);
+    Stream<FileSystemEvent> dirStream =
+        Directory(dirPath).watch(events: FileSystemEvent.create);
     await for (var value in dirStream) {
       print("Some event!!");
-      if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-      {
+      if (FileSystemEntity.typeSync(filePath) !=
+          FileSystemEntityType.notFound) {
         File file = File.fromUri(Uri.file(filePath));
         var contents = await File(filePath).readAsString();
         file.delete();
-        
-        print("Contents: "+contents);
 
-        var url = "https://us-central1-neuralleague.cloudfunctions.net/relayMessage";
-        var body = {"uid": await widget.desktopUID, "items":contents};
-        http.post(url, body: body)
-            .then((response) {
+        print("Contents: " + contents);
+
+        var url =
+            "https://us-central1-neuralleague.cloudfunctions.net/relayMessage";
+        var body = {"uid": await widget.desktopUID, "items": contents};
+        http.post(url, body: body).then((response) {
           print("Response status: ${response.statusCode}");
           print("Response body: ${response.body}");
 
-          if(response.body.startsWith("SUCCESSFUL"))
-          {
+          if (response.body.startsWith("SUCCESSFUL")) {
             _remaining = response.body.split(',')[1];
             // means that somebody is subscribed
-            if(_remaining == "1337")
-              hasSubscription = true;
+            if (_remaining == "1337") hasSubscription = true;
             Map<String, dynamic> arg = {
-                    'aps': <String, dynamic>{
-                      'alert': <String, dynamic>{'body': contents}
-                    }
-                  };
-            _handleNewMessageIncoming(arg); 
-          }
-          else if(response.body == "UID DOES NOT EXIST")
-          {
+              'aps': <String, dynamic>{
+                'alert': <String, dynamic>{'body': contents}
+              }
+            };
+            _handleNewMessageIncoming(arg);
+          } else if (response.body == "UID DOES NOT EXIST") {
             setState(() => {});
           }
-        });  
-      } 
-    
+        });
+      }
     }
-    
   }
-
- 
 
   void initFirebaseMessaging() {
     _firebaseMessaging.configure(
@@ -288,7 +327,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildInstructions(
-      BuildContext context, AnimationController mainBodyController) {
+      BuildContext context, Animation<double> mainBodyController) {
     int counter = 0;
     ThemeData theme = Theme.of(context);
 
@@ -316,26 +355,27 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _getBody(BuildContext context) {
-    if(errorOccurred)
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: new Text("Error"),
-          content: new Text("Unable to find user id. Make sure to create an account on the mobile app first. Then redownload and reinstall this desktop app."),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text("Close"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+    if (errorOccurred)
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          // return object of type Dialog
+          return AlertDialog(
+            title: new Text("Error"),
+            content: new Text(
+                "Unable to find user id. Make sure to create an account on the mobile app first. Then redownload and reinstall this desktop app."),
+            actions: <Widget>[
+              // usually buttons at the bottom of the dialog
+              new FlatButton(
+                child: new Text("Close"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
     var mainContent;
     if (_items == null)
       mainContent =
@@ -376,19 +416,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   maxLines: 1,
                 ),
                 SizedBox(height: 8),
-                (Platform.isAndroid || Platform.isIOS) ?
-                RaisedButton(
-                  child: Text(Strings.sub),
-                  onPressed: () async {
-                    print("Here's the ad we're disposing: $ad");
-                    ad?.dispose();
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SubscribePage()),
-                    );
-                    onReload();
-                  },
-                ) : Container()
+                (Platform.isAndroid || Platform.isIOS)
+                    ? RaisedButton(
+                        child: Text(Strings.sub),
+                        onPressed: () async {
+                          print("Here's the ad we're disposing: $ad");
+                          ad?.dispose();
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SubscribePage()),
+                          );
+                          onReload();
+                        },
+                      )
+                    : Container()
               ]),
             )),
       );
@@ -396,15 +438,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void onReload() {
     _playFullAnimation();
-    if(Platform.isAndroid || Platform.isIOS)
-      checkIfUserHasSubscription();
+    if (Platform.isAndroid || Platform.isIOS) checkIfUserHasSubscription();
   }
 
-  Widget buildHomePage()
-  {
-    
-
-return MainPageTemplateAnimator(
+  Widget buildHomePage() {
+    return MainPageTemplateAnimator(
       mainController: mainController,
       appBar: (Platform.isAndroid || Platform.isIOS) ? _myAppBar() : null,
       body: _getBody(context),
@@ -412,57 +450,60 @@ return MainPageTemplateAnimator(
       footer: _getFooter(context),
       backdrop: "assets/main_backdrop.png",
     );
-
-          
   }
 
-  Widget getPairingPageContent()
-  {
-    return Column(children:[Text(Strings.pairingInstructions),
-    RaisedButton(child:Text("Pair Now"), 
-      onPressed: () async 
-      {
-        String realtimeDBID = await QRCodeReader()
-                .setAutoFocusIntervalInMs(200)
-                .setForceAutoFocus(true)
-                .setTorchEnabled(true)
-                .setHandlePermissions(true)
-                .setExecuteAfterPermissionGranted(true)
-                .scan();
+  void triggerPairing() async {
+    String realtimeDBID = await QRCodeReader()
+        .setAutoFocusIntervalInMs(200)
+        .setForceAutoFocus(true)
+        .setTorchEnabled(true)
+        .setHandlePermissions(true)
+        .setExecuteAfterPermissionGranted(true)
+        .scan();
 
-        print("Obtained the realtimeDBID: "+realtimeDBID);
-        
-        CloudFunctions.instance.call(
-          functionName: 'passUIDtoDesktop',
-          parameters: <String, dynamic>{
-            'realtimeDBID': realtimeDBID,
-          },  
-        );
-      }
-    )]);
+    print("Obtained the realtimeDBID: " + realtimeDBID);
+
+    CloudFunctions.instance.call(
+      functionName: 'passUIDtoDesktop',
+      parameters: <String, dynamic>{
+        'realtimeDBID': realtimeDBID,
+      },
+    ).then((dynamic result) {
+      if (result != "SUCCESS")
+        displayErrorDialog(context, "Pairing unsuccessful1. Please try again");
+      else
+        displayWaitingModal(context, "Trying to reach desktop app now...");
+    }).catchError((e) {
+      print("ERROR " + e.message);
+      displayErrorDialog(context, "Pairing unsuccessful2. Please try again");
+    });
   }
 
-  Widget buildPairingPage()
-  {
+  Widget getPairingPageContent(BuildContext context) {
+    return Column(children: [
+      Text(Strings.pairingInstructions),
+      RaisedButton(child: Text("Pair Now"), onPressed: triggerPairing)
+    ]);
+  }
 
-return MainPageTemplateAnimator(
+  Widget buildPairingPage(BuildContext context) {
+    return MainPageTemplateAnimator(
       mainController: mainController,
-      appBar:  _myAppBar(),
-      body: getPairingPageContent(),
+      appBar: _myAppBar(),
+      body: getPairingPageContent(context),
       mainBodyController: null,
       footer: _getFooter(context),
       backdrop: "assets/main_backdrop.png",
     );
-
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    print("Rebuild home page");
-    if(paired)
+    print("Rebuild home page. Paired: ");
+    print(paired);
+    if (paired)
       return buildHomePage();
     else
-      return buildPairingPage();
+      return buildPairingPage(context);
   }
 }

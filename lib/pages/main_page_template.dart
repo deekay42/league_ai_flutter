@@ -22,15 +22,16 @@ class MainPageTemplateAnimator extends StatelessWidget {
       : animationController = MainPageTemplateAnimations(
             controller: mainController,
             mainBodyController: mainBodyController) {
-    animationController.logoPop.addStatusListener((status) async {
-      if (status == AnimationStatus.completed) {
-        try {
-          await animationController.mainBodyController?.forward()?.orCancel;
-        } on TickerCanceled {
-          // the animation got canceled, probably because we were disposed
-        }
-      }
-    });
+//    animationController.logoPop.addStatusListener((status) async {
+//      if (status == AnimationStatus.completed) {
+//        try {
+//          print("NOW");
+//          await animationController.mainBodyController?.forward()?.orCancel;
+//        } on TickerCanceled {
+//          // the animation got canceled, probably because we were disposed
+//        }
+//      }
+//    });
   }
 
   @override
@@ -60,7 +61,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                     sigmaY: animationController.backdropBlur.value,
                   ),
                   child: Container(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withOpacity(0.1),
                         child: Container(
                             margin:
                                 const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -128,12 +129,12 @@ class MainPageTemplateAnimations {
             ),
           ),
         ),
-        logoPop = Tween(begin: 0.0, end: 100.0).animate(
+        logoPop = Tween(begin: 0.0, end: 1.0).animate(
           new CurvedAnimation(
             parent: controller,
             curve: new Interval(
-              0.0,
-              0.5,
+              0.2,
+              0.7,
               curve: Curves.elasticOut,
             ),
           ),

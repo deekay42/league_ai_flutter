@@ -4,18 +4,19 @@ description: Learn how to use Material for structure and layout.
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^0.3.0
-  cloud_firestore: ^0.9.0
-  cloud_functions: ^0.1.0
-  firebase_auth: ^0.6.2+1
-  firebase_messaging: ^3.0.0
+  firebase_core: ^0.3.1+1
+  cloud_firestore: ^0.9.5+2
+  cloud_functions: ^0.1.1+1
+  firebase_auth: ^0.8.1+4
+  firebase_messaging: ^4.0.0+1
   intl: ^0.15.6
-  firebase_admob: ^0.8.0
+  firebase_admob: ^0.8.0+3
   flutter_launcher_icons: ^0.7.0
   cupertino_icons: ^0.1.0
   http: ^0.12.0+1
   qr_flutter: ^2.0.0+51
   qrcode_reader: ^0.4.4
+  flutter_webview_plugin: ^0.3.0+2
 
   flutter_firebase_ui:
       path: flutter_firebase_ui

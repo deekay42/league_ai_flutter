@@ -9,7 +9,7 @@ class SlidingList extends StatefulWidget {
   final List<Widget> children;
   final String title;
   final Offset origin;
-  final AnimationController animationController;
+  final Animation<double> animationController;
 
   SlidingList(
       {@required this.title,
@@ -24,6 +24,8 @@ class SlidingList extends StatefulWidget {
 class _SlidingListState extends State<SlidingList>
     with TickerProviderStateMixin {
   GlobalKey listKey = GlobalKey();
+  GlobalKey builderKey = GlobalKey();
+
   GlobalKey key1 = GlobalKey(),
       key2 = GlobalKey(),
       key3 = GlobalKey(),
@@ -47,6 +49,8 @@ class _SlidingListState extends State<SlidingList>
     if (!dimsObtained) {
       final RenderBox renderBoxList = listKey.currentContext.findRenderObject();
       final sizeList = renderBoxList.size;
+      final RenderBox renderBoxBuilder = listKey.currentContext.findRenderObject();
+      final sizeBuilder = renderBoxBuilder.size;
 
       setState(() {
         animations.setDivDy(sizeList.height / 2);
@@ -59,6 +63,7 @@ class _SlidingListState extends State<SlidingList>
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
+        key: builderKey,
         animation: animations.controller,
         builder: (BuildContext context, Widget child) => _buildContent());
   }
@@ -79,7 +84,7 @@ class _SlidingListState extends State<SlidingList>
 
     ListView mainList = ListView(
         key: listKey,
-        shrinkWrap: false,
+        shrinkWrap: true,
         padding: EdgeInsets.all(8.0),
         children: widget.children.map((child) {
           return SlidingListItem(
@@ -90,9 +95,7 @@ class _SlidingListState extends State<SlidingList>
 
     return LayoutBuilder(builder: (context, constraints) {
       animations.setDivLength(constraints.maxWidth);
-      return Container(
-          key: key1,
-          child: Column(key: key2, children: [
+      return Column(key: key2, children: [
             Text(
               widget.title,
               style: theme.textTheme.subtitle,
@@ -108,7 +111,7 @@ class _SlidingListState extends State<SlidingList>
                   width: animations.dividerLength.value,
                   height: 1.0,
                 )),
-            Expanded(key: key4, child: mainList),
+            Expanded(child:mainList),
             SlideTransition(
                 position: animations.lowerDivDy,
                 child: Container(
@@ -116,7 +119,7 @@ class _SlidingListState extends State<SlidingList>
                   width: animations.dividerLength.value,
                   height: 1.0,
                 )),
-          ]));
+          ]);
     });
   }
 }
@@ -209,7 +212,7 @@ class SlidingListAnimations {
           CurvedAnimation(
               parent: controller,
               curve: Interval(
-                0.5,
+                0.55,
                 1.0,
                 curve: Curves.ease,
               )),
@@ -283,8 +286,8 @@ class SlidingListAnimations {
       new CurvedAnimation(
         parent: controller,
         curve: new Interval(
-          0.0,
-          0.25,
+          0.5,
+          0.55,
           curve: Curves.linear,
         ),
       ),
@@ -299,8 +302,8 @@ class SlidingListAnimations {
       CurvedAnimation(
           parent: controller,
           curve: Interval(
-            0.25,
-            0.5,
+            0.55,
+            0.65,
             curve: Curves.ease,
           )),
     );
@@ -311,14 +314,14 @@ class SlidingListAnimations {
       CurvedAnimation(
           parent: controller,
           curve: Interval(
-            0.25,
-            0.5,
+            0.55,
+            0.65,
             curve: Curves.ease,
           )),
     );
   }
 
-  final AnimationController controller;
+  final Animation<double> controller;
   final int listLength;
   List<Animation<Offset>> sliders;
   Animation<double> dividerLength;

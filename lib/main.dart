@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+
 import 'package:Shrine/app.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
-
-import 'dart:io' show Platform;
+import 'package:flutter/material.dart';
 
 void _setTargetPlatformForDesktop() {
   TargetPlatform targetPlatform;
@@ -36,30 +36,44 @@ void main() {
   runApp(MainApp());
 }
 
-//class LOL extends StatelessWidget {
+//class MyClass extends StatefulWidget {
+//  @override
+//  _MyClassState createState() => _MyClassState();
+//}
 //
-//  GlobalKey box1 = GlobalKey();
-//  GlobalKey box2 = GlobalKey();
-//  GlobalKey box3 = GlobalKey();
+//class _MyClassState extends State<MyClass> with TickerProviderStateMixin {
+//  AnimationController controller;
+//  Animation<double> logoPop;
+//
+//  void initState()
+//  {
+//    super.initState();
+//    controller =
+//        AnimationController(duration: Duration(milliseconds: 5000), vsync: this);
+//    logoPop = Tween(begin: 0.0, end: 100.0).animate(
+//      new CurvedAnimation(
+//        parent: controller,
+//        curve: new Interval(
+//          0.0,
+//          0.5,
+//          curve: Curves.elasticOut,
+//        ),
+//      ),
+//    );
+//    controller.forward();
+//  }
 //
 //  @override
 //  Widget build(BuildContext context) {
-//    return MaterialApp(home:Scaffold(body:Container(key: box1,
-//      child: Column(key: box2, children: [
+//    return MaterialApp(home:Scaffold(body:Container(
+//        child: Center(child: PoppingLogoAnimation(
+//          child: Image.asset(
+//            'assets/ic_launcher_foreground.png',
+//            fit: BoxFit.fitHeight,
+//          ),
+//          animation: logoPop,
+//        ))
 //
-//          SizedBox(key:box3,
-//            height: 50,
-//            child: RaisedButton(child: Text("LOL"),onPressed: (){printSize(box1); printSize(box2); printSize(box3);},)
-//          )])
-//
-//      )));
-//  }
-//
-//
-//  void printSize(var key)
-//  {
-//      final RenderBox renderBoxList = key.currentContext.findRenderObject();
-//      final size = renderBoxList.size;
-//      print(size);
+//    )));
 //  }
 //}

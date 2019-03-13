@@ -17,6 +17,13 @@ class EmailView extends StatefulWidget {
 
 class _EmailViewState extends State<EmailView> {
   final TextEditingController _controllerEmail = new TextEditingController();
+  bool alreadySubmitted;
+
+  void initState() {
+    super.initState();
+    alreadySubmitted = false;
+    print("initstate!!");
+  }
 
   @override
   Widget build(BuildContext context) => new Scaffold(
@@ -50,7 +57,10 @@ class _EmailViewState extends State<EmailView> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               new FlatButton(
-                  onPressed: () => _connexion(context),
+                  onPressed: () {
+                    print("BUTTON PRESSED");
+                    return _connexion(context);
+                  },
                   child: new Row(
                     children: <Widget>[
                       new Text(FFULocalizations.of(context).nextButtonLabel),
@@ -66,10 +76,14 @@ class _EmailViewState extends State<EmailView> {
   }
 
   _connexion(BuildContext context) async {
+    if (!alreadySubmitted) {
+      alreadySubmitted = true;
+    } else
+      return;
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
       List<String> providers =
-          await auth.fetchProvidersForEmail(email: _controllerEmail.text);
+          await auth.fetchSignInMethodsForEmail(email: _controllerEmail.text);
       print(providers);
 
       if (providers == null || providers.isEmpty) {
@@ -81,6 +95,12 @@ class _EmailViewState extends State<EmailView> {
         if (connected) {
           Navigator.pop(context);
         }
+        else
+          {
+            setState(() {
+              alreadySubmitted = false;
+            });
+          }
       } else if (providers.contains('password')) {
         bool connected = await Navigator.of(context)
             .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
@@ -89,6 +109,12 @@ class _EmailViewState extends State<EmailView> {
 
         if (connected) {
           Navigator.pop(context);
+        }
+        else
+        {
+          setState(() {
+            alreadySubmitted = false;
+          });
         }
       } else {
         String provider = await _showDialogSelectOtherProvider(

@@ -2,8 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:meta/meta.dart';
+
+import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 
 import 'email_view.dart';
 import 'utils.dart';
@@ -42,17 +43,20 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
+
   _handleGoogleSignIn() async {
-    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    final GoogleSignInAccount googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       if (googleAuth.accessToken != null) {
         try {
-          FirebaseUser user = await _auth.signInWithGoogle(
+
+          final AuthCredential credential = GoogleAuthProvider.getCredential(
             accessToken: googleAuth.accessToken,
             idToken: googleAuth.idToken,
           );
 
+          final FirebaseUser user = await _auth.signInWithCredential(credential);
           print(user);
         } catch (e) {
           showErrorDialog(context, e.details);
@@ -61,19 +65,72 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
+//  _handleGoogleSignIn() async {
+//    GoogleSignInAccount googleUser = await googleSignIn.signIn();
+//    if (googleUser != null) {
+//      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+//      if (googleAuth.accessToken != null) {
+//        try {
+//          FirebaseUser user = await _auth.signInWithGoogle(
+//            accessToken: googleAuth.accessToken,
+//            idToken: googleAuth.idToken,
+//          );
+//
+//          print(user);
+//        } catch (e) {
+//          showErrorDialog(context, e.details);
+//        }
+//      }
+//    }
+//  }
+
+
+
+
   _handleFacebookSignin() async {
-    FacebookLoginResult result =
+    print("trying to get fb token");
+    FacebookLoginResult facebookLoginResult =
         await facebookLogin.logInWithReadPermissions(['email']);
-    if (result.accessToken != null) {
+    print("got the result: $facebookLoginResult");
+    if (facebookLoginResult.accessToken != null) {
       try {
-        FirebaseUser user = await _auth.signInWithFacebook(
-            accessToken: result.accessToken.token);
+        print("getting fb token");
+        FacebookAccessToken myToken = facebookLoginResult.accessToken;
+        print("got fb token");
+        AuthCredential credential= FacebookAuthProvider.getCredential(accessToken: myToken.token);
+        print("got creds");
+        FirebaseUser user = await FirebaseAuth.instance.signInWithCredential(credential);
+        print("got user");
         print(user);
       } catch (e) {
         showErrorDialog(context, e.details);
       }
     }
   }
+
+
+
+//  void _handleTwitterSignin() async {
+//
+//    var twitterLogin = new TwitterLogin(
+//      consumerKey: widget.twitterConsumerKey,
+//      consumerSecret: widget.twitterConsumerSecret,
+//    );
+//
+//    final TwitterLoginResult result = await twitterLogin.authorize();
+//
+//    switch (result.status) {
+//      case TwitterLoginStatus.loggedIn:
+//        print("Twitter logged in");
+//        break;
+//      case TwitterLoginStatus.cancelledByUser:
+//        showErrorDialog(context, "Cancelled by user");
+//        break;
+//      case TwitterLoginStatus.error:
+//        showErrorDialog(context, "Error occured. Please try again later.");
+//        break;
+//    }
+//  }
 
   _handleTwitterSignin() async {
     var twitterLogin = new TwitterLogin(
@@ -85,9 +142,14 @@ class _LoginViewState extends State<LoginView> {
 
     switch (result.status) {
       case TwitterLoginStatus.loggedIn:
-        await _auth.signInWithTwitter(
+
+
+        final AuthCredential credential = TwitterAuthProvider.getCredential(
             authToken: result.session.token,
             authTokenSecret: result.session.secret);
+        final FirebaseUser user = await _auth.signInWithCredential(credential);
+        print("Twitter: $user");
+
         break;
       case TwitterLoginStatus.cancelledByUser:
         showErrorDialog(context, result.errorMessage);

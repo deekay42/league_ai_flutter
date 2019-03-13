@@ -12,9 +12,6 @@ class QRPage extends StatefulWidget {
 }
 
 class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
-  static const double _topSectionTopPadding = 50.0;
-  static const double _topSectionBottomPadding = 20.0;
-  static const double _topSectionHeight = 50.0;
 
   AnimationController mainController;
 
@@ -24,7 +21,6 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
       mainController: mainController,
       appBar: null,
       body: _getBody(),
-      mainBodyController: null,
       footer: null,
       backdrop: "assets/main_backdrop.png",
     );
@@ -32,6 +28,7 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
 
   void initState()
   {
+    super.initState();
         mainController =
         AnimationController(duration: Duration(seconds: 30), vsync: this);
 _playFullAnimation();

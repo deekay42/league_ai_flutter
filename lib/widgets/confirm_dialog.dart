@@ -24,7 +24,8 @@ class ConfirmDialog extends StatelessWidget {
         print(resp);
         return ConfirmResult.CHANGING;
       }
-    }).catchError(() {
+    }).catchError((e) {
+      print(e);
       return null;
     });
   }
@@ -92,10 +93,17 @@ class ConfirmDialog extends StatelessWidget {
               ),
               Expanded(child: Container()),
               InkWell(
-                child: Text(
-                  Strings.change,
-                  style: theme.textTheme.body2,
-                ),
+                child: Container(
+                    height: 30,
+                    width: 100,
+                    child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            Strings.change,
+                            style: theme.textTheme.body2,
+                          )
+                        ])),
                 onTap: () async {
                   print("Now returning ConfirmResult.CHANGING");
                   Navigator.pop(context, ConfirmResult.CHANGING);

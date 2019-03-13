@@ -8,10 +8,6 @@ class PoppingLogoAnimation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-        animation: animation,
-        builder: (BuildContext context, Widget child) => Container(
-            height: animation.value, width: animation.value, child: child),
-        child: child);
+    return ScaleTransition(scale: animation, child: Container(child: child),);
   }
 }

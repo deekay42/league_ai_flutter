@@ -42,14 +42,14 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.9.0"
+    version: "0.9.5+2"
   cloud_functions:
     dependency: "direct main"
     description:
       name: cloud_functions
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.1+1"
   collection:
     dependency: transitive
     description:
@@ -93,28 +93,28 @@ packages:
       name: firebase_admob
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.0"
+    version: "0.8.0+3"
   firebase_auth:
     dependency: "direct main"
     description:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.2+1"
+    version: "0.8.1+4"
   firebase_core:
     dependency: "direct main"
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1+1"
   firebase_messaging:
     dependency: "direct main"
     description:
       name: firebase_messaging
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "4.0.0+1"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -126,7 +126,7 @@ packages:
       name: flutter_facebook_login
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.0"
+    version: "2.0.0"
   flutter_firebase_ui:
     dependency: "direct main"
     description:
@@ -149,19 +149,24 @@ packages:
   flutter_twitter_login:
     dependency: transitive
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: b28bcb56f7f86319a966dcf3a08543de358b1424
-      url: "git://github.com/diegoveloper/flutter_twitter_login.git"
-    source: git
+      name: flutter_twitter_login
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.1.0"
+  flutter_webview_plugin:
+    dependency: "direct main"
+    description:
+      name: flutter_webview_plugin
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.0+2"
   google_sign_in:
     dependency: transitive
     description:
       name: google_sign_in
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.4"
+    version: "4.0.1+1"
   http:
     dependency: "direct main"
     description:

@@ -15,7 +15,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     lintOptions {
         disable 'InvalidPackage'
@@ -23,12 +23,14 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.mdc100series"
-        minSdkVersion 16
-        targetSdkVersion 27
+        applicationId "com.leagueiq.app"
+        minSdkVersion 21
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        multiDexKeepFile file('multidex-flutter.txt')
     }
 
     buildTypes {
@@ -46,8 +48,12 @@ flutter {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'androidx.test:runner:1.1.0-alpha4'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0-alpha4'
+    compileOnly files("$flutterRoot/bin/cache/artifacts/engine/android-x64/flutter.jar")
+    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'com.braintreepayments.api:drop-in:4.1.0'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

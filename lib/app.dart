@@ -14,19 +14,18 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:Shrine/pages/home.dart';
 import 'package:Shrine/pages/login.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
+import 'pages/QRPage.dart';
 import 'resources/Colors.dart';
 import 'resources/Strings.dart';
-import 'pages/QRPage.dart';
-
-import 'dart:io' show Platform;
 
 class MainApp extends StatefulWidget {
   @override
@@ -36,33 +35,31 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   FirebaseUser user;
   StreamSubscription<FirebaseUser> _listener;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  Future<String> _deviceID;
   Future<String> desktopUID;
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  bool newlyCreatedUser = false;
 
   void initState() {
     super.initState();
-
+    Future<String> deviceID = _firebaseMessaging.getToken();
     if (Platform.isAndroid || Platform.isIOS) {
-      _deviceID = _firebaseMessaging.getToken();
-
-      _listener =
-          FirebaseAuth.instance.onAuthStateChanged.listen((
-              FirebaseUser result) {
-            print("AUTHCHANGE!!");
-            print('This is hte user: ');
-            print(result.toString());
-            setState(() {
-              user = result;
-              if (result != null) onSignInSuccess();
-            });
-          });
-    }
-  }
-
-  void onSignInSuccess() {
-    if (user != null) {
-      updateDeviceID();
+      _listener = FirebaseAuth.instance.onAuthStateChanged
+          .listen((FirebaseUser result) {
+        print("AUTHCHANGE!!");
+        if (result != null &&
+            DateTime.now().millisecondsSinceEpoch -
+                    result.metadata.creationTimestamp <
+                15000) {
+          print("User was JUST created");
+          print(result?.metadata?.lastSignInTimestamp);
+          newlyCreatedUser = true;
+        }
+        print('This is hte user: ');
+        print(result.toString());
+        setState(() {
+          user = result;
+        });
+      });
     }
   }
 
@@ -71,87 +68,83 @@ class _MainAppState extends State<MainApp> {
 //    _remaining = '';
 //  }
 
-  void updateDeviceID() async {
-    String deviceID = await _deviceID;
-    print("Updating deviceID NOW: $deviceID");
-    assert(deviceID != null);
-    CloudFunctions.instance.call(
-        functionName: 'updateDeviceID',
-        parameters: <String, dynamic>{"device_id": deviceID});
-  }
-
   @override
   void dispose() {
-
     _listener?.cancel();
     super.dispose();
   }
 
-  Future<void> listenForUIDFile(String dirPath, String filePath) async
-  {
+  Future<void> listenForUIDFile(String dirPath, String filePath) async {
     //UID not present. need to wait until file appears which contains it.
-    Stream<FileSystemEvent> dirStream = Directory(dirPath).watch(events: FileSystemEvent.create);
-          await for (var value in dirStream) {
-            print("Some event!!");
-            if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-              setState(() {desktopUID = File(filePath).readAsString();});    
-          }        
+    Stream<FileSystemEvent> dirStream =
+        Directory(dirPath).watch(events: FileSystemEvent.create);
+    await for (var value in dirStream) {
+      print("Some event!!");
+      if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+        setState(() {
+          desktopUID = File(filePath).readAsString();
+        });
+    }
   }
 
-  Future<String> getUIDForDesktop()
-  {
+  Future<String> getUIDForDesktop() {
     String dirPath = ".";
-    String filePath = dirPath+"/uid";
-    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+    String filePath = dirPath + "/uid";
+    if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
       return File(filePath).readAsString();
-    else 
-    { 
+    else {
       listenForUIDFile(dirPath, filePath);
       return null;
     }
   }
 
-  Future<String> getUIDDBKeyForDesktop() async
-  {
+  Future<String> getUIDDBKeyForDesktop() async {
     String dirPath = ".";
-    String filePath = dirPath+"/db_key";
-    if(FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+    String filePath = dirPath + "/db_key";
+    if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
       return await File(filePath).readAsString();
-    else throw "WAAAAH";
+    else
+      throw "WAAAAH";
   }
 
-  Widget buildHome()
-  {
+  Widget buildHome() {
     print("Building home!");
-    if(Platform.isAndroid || Platform.isIOS)
-    {
-      if(user == null)
-        return HomePage();
+    if (Platform.isAndroid || Platform.isIOS) {
+      if (user != null)
+        return HomePage(
+          paired: !newlyCreatedUser,
+        );
       else
-        return LoginPage(); 
-    }   
-    if(desktopUID != null)
-    {
+        return LoginPage();
+    }
+    if (desktopUID != null) {
       print("first");
       return HomePage(desktopUID: desktopUID);
     }
     desktopUID = getUIDForDesktop();
-    if(desktopUID != null)
-    {
+    if (desktopUID != null) {
       print("second");
       return HomePage(desktopUID: desktopUID);
-    }
-    else
-    {
+    } else {
       print("third");
       return QRPage(dataString: getUIDDBKeyForDesktop());
-    } 
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    
-    return MaterialApp(title: Strings.name, home: buildHome(), theme: _myTheme);
+
+    return MaterialApp(
+      routes: {
+        "/": (_) => new WebviewScaffold(
+          url: "https://www.google.com",
+          appBar: new AppBar(
+            title: new Text("Widget webview"),
+          ),
+        )
+      },
+    );
+    //return MaterialApp(title: Strings.name, home: buildHome(), theme: _myTheme);
   }
 }
 

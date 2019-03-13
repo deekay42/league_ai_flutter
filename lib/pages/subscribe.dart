@@ -37,6 +37,7 @@ class _SubscribePageState extends State<SubscribePage>
   static const platform = const MethodChannel('getPaymentNonce');
   final Future<dynamic> _clientToken;
   var scaffoldKey;
+  bool subButtonPressed = false;
 
   AnimationController mainController;
   AnimationController mainBodyController;
@@ -44,9 +45,9 @@ class _SubscribePageState extends State<SubscribePage>
   void initState() {
     super.initState();
     mainController =
-        AnimationController(duration: Duration(seconds: 10), vsync: this);
+        AnimationController(duration: Duration(milliseconds: 1500), vsync: this);
     mainBodyController =
-        AnimationController(duration: Duration(seconds: 10), vsync: this);
+        AnimationController(duration: Duration(milliseconds: 2500), vsync: this);
     _playAnimation();
   }
 
@@ -60,7 +61,17 @@ class _SubscribePageState extends State<SubscribePage>
     try {
       mainController.reset();
       mainBodyController.reset();
-      await mainController.forward().orCancel;
+      mainController.forward().orCancel;
+      _playListAnimation();
+    } on TickerCanceled {
+      // the animation got canceled, probably because we were disposed
+    }
+  }
+
+  Future<void> _playListAnimation() async {
+    try {
+      mainBodyController.reset();
+      await mainBodyController.forward().orCancel;
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
@@ -78,6 +89,8 @@ class _SubscribePageState extends State<SubscribePage>
         .invokeMethod('getPaymentNonce', {"clientToken": await _clientToken});
     print("now got the the nonce");
     print(result.toString());
+    if(result == null)
+      return null;
     String nonce = result[0];
     String desc = result[1];
 
@@ -114,7 +127,7 @@ class _SubscribePageState extends State<SubscribePage>
                         textAlign: TextAlign.start,
                         style: theme.textTheme.body1,
                       ),
-                      ++counter == Strings.instructions.length
+                      ++counter == Strings.pitch.length
                           ? null
                           : SizedBox(
                               height: 64,
@@ -147,6 +160,12 @@ class _SubscribePageState extends State<SubscribePage>
 
       try {
         nonceDesc = await _getPaymentNonce();
+        //user tapped elsewhere on the screen dismissing the modal
+        if(nonceDesc == null)
+        {
+          subButtonPressed = false;
+          return;
+        }
       } catch (e) {
         print(e.message);
         throw NonceException(e.toString());
@@ -154,6 +173,7 @@ class _SubscribePageState extends State<SubscribePage>
       print('got the payment nonce!');
       try {
         result = await _getConfirmation(context, nonceDesc[0], nonceDesc[1]);
+        print("Got the result: $result");
       } catch (e) {
         throw CheckoutException(e.toString());
       }
@@ -173,25 +193,33 @@ class _SubscribePageState extends State<SubscribePage>
     return RaisedButton(
       child: Text(Strings.sub_price),
       onPressed: () async {
+        if(subButtonPressed)
+          return;
+        else
+          subButtonPressed = true;
         try {
           await runPaymentProcess(context);
         } on NonceException catch (e) {
           print("NonceException");
           showErrorSnackBar(
-              scaffoldKey, Strings.nonceError + "'${e.toString()}'");
+              scaffoldKey, Strings.nonceError + " '${e.toString()}'");
         } on ClientTokenException catch (e) {
           print("ClientTokenException");
           showErrorSnackBar(
-              scaffoldKey, Strings.clientTokenError + "'${e.toString()}'");
+              scaffoldKey, Strings.clientTokenError + " '${e.toString()}'");
         } on CheckoutException catch (e) {
           print("CheckoutException");
           showErrorSnackBar(
-              scaffoldKey, Strings.checkoutError + "'${e.toString()}'");
+              scaffoldKey, Strings.checkoutError + " '${e.toString()}'");
         } on Exception catch (e) {
           print("Exception");
           showErrorSnackBar(
-              scaffoldKey, Strings.generalPaymentsError + "'${e.toString()}'");
+              scaffoldKey, Strings.generalPaymentsError + " '${e.toString()}'");
         }
+        finally
+            {
+              subButtonPressed = false;
+            }
       },
     );
   }

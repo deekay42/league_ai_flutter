@@ -223,6 +223,8 @@ PODS:
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
   - Protobuf (3.6.1)
+  - qrcode_reader (0.0.1):
+    - Flutter
   - TwitterCore (3.2.0)
   - TwitterKit (3.4.2):
     - TwitterCore (>= 3.2.0)
@@ -242,6 +244,7 @@ DEPENDENCIES:
   - flutter_facebook_login (from `.symlinks/plugins/flutter_facebook_login/ios`)
   - flutter_twitter_login (from `.symlinks/plugins/flutter_twitter_login/ios`)
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
+  - qrcode_reader (from `.symlinks/plugins/qrcode_reader/ios`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -297,6 +300,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_twitter_login/ios"
   google_sign_in:
     :path: ".symlinks/plugins/google_sign_in/ios"
+  qrcode_reader:
+    :path: ".symlinks/plugins/qrcode_reader/ios"
 
 SPEC CHECKSUMS:
   Bolts: ac6567323eac61e203f6a9763667d0f711be34c8
@@ -309,7 +314,7 @@ SPEC CHECKSUMS:
   FBSDKLoginKit: c3079d9a4db27c492287b1eed7a4272b28cf8a59
   Firebase: 749a8ff4962f9d8c79dda1966de20f6f77583d67
   firebase_admob: b8cc46113ddf88a62fec340e9446607a5061a872
-  firebase_auth: 27a5a77a032d557c18f8e223aaf8ec1368f6cdbc
+  firebase_auth: a5b249720380ab4ee1c633368cbb84aac9959359
   firebase_core: c96aa8b2fcf7f5167d32f22034f502f9304952b8
   firebase_messaging: a5f5d4a9491b660f33a1f94bd0596558f820bad1
   FirebaseAnalytics: d35d47c03c50c73c14a7fd31463c5775843e78a9
@@ -337,6 +342,7 @@ SPEC CHECKSUMS:
   leveldb-library: 08cba283675b7ed2d99629a4bc5fd052cd2bb6a5
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   Protobuf: 1eb9700044745f00181c136ef21b8ff3ad5a0fd5
+  qrcode_reader: da11877390dff62dd3783964618d666a857e34c8
   TwitterCore: 8cbc9ad34d91c63a0035ea05bfbfc0d7ca72a28c
   TwitterKit: 5e4f41d70b9abdb41df5467f52d7aa2c0fd26ebb
 

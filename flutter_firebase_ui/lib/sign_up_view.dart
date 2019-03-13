@@ -25,6 +25,8 @@ class _SignUpViewState extends State<SignUpView> {
 
   bool _valid = false;
 
+  bool alreadySubmitted = false;
+
   @override
   dispose() {
     _focusPassword.dispose();
@@ -125,6 +127,12 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   _connexion(BuildContext context) async {
+    print("trying to connect");
+    if (!alreadySubmitted) {
+      alreadySubmitted = true;
+    } else
+      return;
+    print("not already");
     if (widget.passwordCheck &&
         _controllerPassword.text != _controllerCheckPassword.text) {
       showErrorDialog(context, FFULocalizations.of(context).passwordCheckError);
@@ -138,18 +146,21 @@ class _SignUpViewState extends State<SignUpView> {
         password: _controllerPassword.text,
       );
       try {
+        print("Successful auth!");
         var userUpdateInfo = new UserUpdateInfo();
         userUpdateInfo.displayName = _controllerDisplayName.text;
         await user.updateProfile(userUpdateInfo);
         Navigator.pop(context, true);
       } catch (e) {
-        showErrorDialog(context, e.details);
+        showErrorDialog(context, e.message);
+        alreadySubmitted = false;
       }
     } on PlatformException catch (e) {
       print(e.details);
       //TODO improve errors catching
 //      String msg = FFULocalizations.of(context).passwordLengthMessage;
       showErrorDialog(context, e.toString());
+      alreadySubmitted = false;
     }
   }
 

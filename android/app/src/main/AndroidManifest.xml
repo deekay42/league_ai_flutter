@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.mdc100series">
+    package="com.leagueiq.app">
 
     <!-- The INTERNET permission is required for development. Specifically,
          flutter needs it to communicate with the running application
@@ -13,10 +13,12 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name=".LeagueIQApp"
         android:label="@string/shr_app_name"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round">
+        android:roundIcon="@mipmap/ic_launcher_round"
+        >
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -39,6 +41,16 @@
             <intent-filter>
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.braintreepayments.api.BraintreeBrowserSwitchActivity"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${applicationId}.braintree" />
             </intent-filter>
         </activity>
 
