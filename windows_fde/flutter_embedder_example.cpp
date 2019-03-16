@@ -23,9 +23,10 @@
 #include "firebase/app.h"
 #include "firebase/database.h"
 
+#include <btnonce/btnonce_plugin.h>
 #include "flutter_desktop_embedding/flutter_window_controller.h"
 
-using namespace firebase;
+using ::firebase::Variant;
 
 // Include windows.h last, to minimize potential conflicts. The CreateWindow
 // macro needs to be undefined because it prevents calling
@@ -73,10 +74,10 @@ class UIDListener : public firebase::database::ValueListener {
 
     std::cout << (mymap.begin()->second).AsString().string_value() << std::endl;
     std::string uid = (mymap.begin()->second).AsString().string_value();
-    
+
     std::cout << "Here's the data: " << uid << std::endl;
     if (uid == "waiting") return;
-	std::ofstream myfile;
+    std::ofstream myfile;
     myfile.open("uid");
     myfile << uid;
     myfile.close();
@@ -117,12 +118,10 @@ static void LogVariantMap(const std::map<Variant, Variant> &variant_map,
     const Variant &key_string = it->first.AsString();
     const Variant &value = it->second;
     if (value.is_fundamental_type()) {
-     
       const Variant &string_value = value.AsString();
       printf("%s%s: %s,", indent_string.c_str(), key_string.string_value(),
              string_value.string_value());
     } else {
-      
       printf("%s%s:", indent_string.c_str(), key_string.string_value());
       if (value.is_vector()) {
         LogVariantVector(value.vector(), indent + 1);
@@ -165,9 +164,8 @@ void listenForUIDUpdate() {
   myfile << key;
   myfile.close();
   std::cout << "Now setting data" << std::endl;
-  myRef.Child(key)
-      .Child("uid")
-      .SetValue("waiting");  // this creates the reqs key-value pair
+  myRef.Child(key).Child("uid").SetValue(
+      "waiting");  // this creates the reqs key-value pair
   std::cout << "Data is now set" << std::endl;
 
   UIDListener *listener = new UIDListener();
@@ -175,23 +173,19 @@ void listenForUIDUpdate() {
   myRef.Child(key).AddValueListener(listener);
 }
 
-void runPythonCode() {
-  Py_Initialize();
-  PyRun_SimpleString(
-      "import "
-      "sys\nsys.path.append(r\"C:\\Users\\Dom\\code\\flutter-desktop-"
-      "embedding\\example\\windows_fde\")\n");
+int runFlutterCode();
 
-  PyRun_SimpleString("print('Python search path %s' % sys.path)");
-  PyObject *obj = Py_BuildValue("s", "screenshot.py");
-  FILE *file = _Py_fopen_obj(obj, "r+");
-  if (file != NULL) {
-    PyRun_SimpleFile(file, "screenshot.py");
+int main(int argc, char **argv) {
+  std::ifstream file("uid");
+  if (!file) {
+    listenForUIDUpdate();
   }
-  Py_FinalizeEx();
+
+  return runFlutterCode();
 }
 
 int runFlutterCode() {
+  // Resources are located relative to the executable.
   std::string base_directory = GetExecutableDirectory();
   if (base_directory.empty()) {
     base_directory = ".";
@@ -209,25 +203,14 @@ int runFlutterCode() {
       icu_data_path);
 
   // Start the engine.
-  if (!flutter_controller.CreateWindow(480, 640, assets_path, arguments)) {
+  if (!flutter_controller.CreateWindow(640, 480, assets_path, arguments)) {
     return EXIT_FAILURE;
   }
+
+  BTNonceRegisterWithRegistrar(
+      flutter_controller.GetRegistrarForPlugin("BTNonce"));
 
   // Run until the window is closed.
   flutter_controller.RunEventLoop();
   return EXIT_SUCCESS;
-}
-
-int main(int argc, char **argv) {
-  std::ifstream file("uid");
-  if (!file) {
-    listenForUIDUpdate();
-  }
-  
-  // std::thread pythonThread(runPythonCode);
-  // Resources are located relative to the executable.
-  return runFlutterCode();
-  //std::string lol;
-  //std::cin >> lol;
-  //return 0;
 }

@@ -21,7 +21,6 @@ import 'package:Shrine/pages/login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
 
 import 'pages/QRPage.dart';
 import 'resources/Colors.dart';
@@ -41,8 +40,9 @@ class _MainAppState extends State<MainApp> {
 
   void initState() {
     super.initState();
-    Future<String> deviceID = _firebaseMessaging.getToken();
+    
     if (Platform.isAndroid || Platform.isIOS) {
+      Future<String> deviceID = _firebaseMessaging.getToken();
       _listener = FirebaseAuth.instance.onAuthStateChanged
           .listen((FirebaseUser result) {
         print("AUTHCHANGE!!");
@@ -134,17 +134,7 @@ class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
 
-    return MaterialApp(
-      routes: {
-        "/": (_) => new WebviewScaffold(
-          url: "https://www.google.com",
-          appBar: new AppBar(
-            title: new Text("Widget webview"),
-          ),
-        )
-      },
-    );
-    //return MaterialApp(title: Strings.name, home: buildHome(), theme: _myTheme);
+    return MaterialApp(title: Strings.name, home: buildHome(), theme: _myTheme);
   }
 }
 

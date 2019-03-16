@@ -1,7 +1,9 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
 
+import 'package:btnonce/btnonce.dart' as btnonce;
 import '../pages/main_page_template.dart';
 import '../resources/Strings.dart';
 import '../widgets/confirm_dialog.dart';
@@ -31,6 +33,21 @@ class SubscribePage extends StatefulWidget {
   @override
   _SubscribePageState createState() => _SubscribePageState();
 }
+
+/// Possible file chooser operation types.
+enum _BTNonceType { save, open }
+
+/// Returns display text reflecting the result of a file chooser operation.
+String _resultTextForFileChooserOperation(
+    _BTNonceType type, btnonce.BTNonceResult result,
+    [List<String> paths]) {
+  if (result == btnonce.BTNonceResult.cancel) {
+    return '${type == _BTNonceType.open ? 'Open' : 'Save'} cancelled';
+  }
+  final statusText = type == _BTNonceType.open ? 'Opened' : 'Saved';
+  return '$statusText: ${paths.join('\n')}';
+}
+
 
 class _SubscribePageState extends State<SubscribePage>
     with TickerProviderStateMixin {
@@ -85,16 +102,28 @@ class _SubscribePageState extends State<SubscribePage>
 
   Future<List<String>> _getPaymentNonce() async {
     print("now getting the nonce");
-    dynamic result = await platform
-        .invokeMethod('getPaymentNonce', {"clientToken": await _clientToken});
-    print("now got the the nonce");
-    print(result.toString());
-    if(result == null)
-      return null;
-    String nonce = result[0];
-    String desc = result[1];
+    if (Platform.isAndroid || Platform.isIOS)
+                    
+      dynamic result = await platform
+          .invokeMethod('getPaymentNonce', {"clientToken": await _clientToken});
+    else
+      {
+        btnonce.showSavePanel((result, paths) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text(_resultTextForFileChooserOperation(
+                    _BTNonceType.save, result, paths)),
+              ));
+            }, suggestedFileName: 'save_test.txt');
+      }
+    return null;
+    // print("now got the the nonce");
+    // print(result.toString());
+    // if(result == null)
+    //   return null;
+    // String nonce = result[0];
+    // String desc = result[1];
 
-    return [nonce, desc];
+    // return [nonce, desc];
   }
 
   Future<ConfirmResult> _getConfirmation(
@@ -149,6 +178,7 @@ class _SubscribePageState extends State<SubscribePage>
   }
 
   Future<void> runPaymentProcess(BuildContext context) async {
+    _getPaymentNonce();
     try {
       await _clientToken;
     } catch (e) {

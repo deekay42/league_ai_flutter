@@ -416,8 +416,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   maxLines: 1,
                 ),
                 SizedBox(height: 8),
-                (Platform.isAndroid || Platform.isIOS)
-                    ? RaisedButton(
+                 RaisedButton(
                         child: Text(Strings.sub),
                         onPressed: () async {
                           print("Here's the ad we're disposing: $ad");
@@ -430,7 +429,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           onReload();
                         },
                       )
-                    : Container()
+                    
               ]),
             )),
       );
