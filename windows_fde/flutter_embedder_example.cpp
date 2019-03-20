@@ -13,20 +13,46 @@
 // limitations under the License.
 
 #include <fstream>
-#include <iostream>
-#include <string>
 #include <vector>
 
-#include <Python.h>
+//#include <Python.h>
+#include <inttypes.h>
+#include <stdarg.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <sstream>
 #include <thread>
-
 #include "firebase/app.h"
+#include "firebase/auth.h"
 #include "firebase/database.h"
+#include "firebase/functions.h"
+#include "firebase/future.h"
+#include "firebase/log.h"
+#include "firebase/util.h"
+#include "common.h"
+#include "firebase_commons.h"
 
 #include <btnonce/btnonce_plugin.h>
+//#include <fbfunctions/fbfunctions_plugin.h>
 #include "flutter_desktop_embedding/flutter_window_controller.h"
 
 using ::firebase::Variant;
+
+::firebase::App *app = nullptr;
+::firebase::database::Database *database = nullptr;
+::firebase::functions::Functions *functions = nullptr;
+::firebase::auth::Auth *auth = nullptr;
+
+
+firebase::Future<firebase::functions::HttpsCallableResult> GetCustomToken(
+    const std::string &uid, const std::string &secret);
+
+void OnTokenCompleteCallback(
+    const firebase::Future<firebase::functions::HttpsCallableResult> &future);
 
 // Include windows.h last, to minimize potential conflicts. The CreateWindow
 // macro needs to be undefined because it prevents calling
@@ -59,8 +85,28 @@ std::string GetExecutableDirectory() {
 static void LogVariantMap(const std::map<Variant, Variant> &variant_map,
                           int indent);
 
-class UIDListener : public firebase::database::ValueListener {
+class MyAuthStateListener : public firebase::auth::AuthStateListener {
  public:
+  void OnAuthStateChanged(firebase::auth::Auth *auth) override {
+    ::user = auth->current_user();
+    if (user != nullptr) {
+      // User is signed in
+      printf("OnAuthStateChanged: signed_in %s\n", user->uid().c_str());
+    } else {
+      // User is signed out
+      printf("OnAuthStateChanged: signed_out\n");
+    }
+    // ...
+  }
+};
+
+class UIDListener : public firebase::database::ValueListener {
+ private:
+  firebase::database::DatabaseReference myRef;
+
+ public:
+  UIDListener(firebase::database::DatabaseReference myRef) : myRef(myRef) {}
+
   void OnValueChanged(
       const firebase::database::DataSnapshot &snapshot) override {
     if (snapshot.value().is_null()) return;
@@ -73,21 +119,34 @@ class UIDListener : public firebase::database::ValueListener {
     std::cout << "EOD----------------------------------" << std::endl;
 
     std::cout << (mymap.begin()->second).AsString().string_value() << std::endl;
-    std::string uid = (mymap.begin()->second).AsString().string_value();
+    auto it = mymap.begin();
+    std::string uid = (it->second).AsString().string_value();
+    ++it;
+    std::string secret = (it->second).AsString().string_value();
 
-    std::cout << "Here's the data: " << uid << std::endl;
+    std::cout << "Here's the data: " << uid << "\n" << secret << std::endl;
     if (uid == "waiting") return;
-    std::ofstream myfile;
-    myfile.open("uid");
-    myfile << uid;
-    myfile.close();
-    // Do something with the data in snapshot...
+    std::ofstream uid_file;
+    uid_file.open("uid");
+    uid_file << uid;
+    uid_file.close();
+
+    std::ofstream secret_file;
+    secret_file.open("secret");
+    secret_file << secret;
+    secret_file.close();
+
+    myRef.RemoveValue();
+    //auto future = GetCustomToken(uid, secret);
+   // future.OnCompletion(OnTokenCompleteCallback);
   }
   void OnCancelled(const firebase::database::Error &error_code,
                    const char *error_message) override {
     std::cout << "LOL" << std::endl;
   }
 };
+
+
 
 // Log a vector of variants.
 static void LogVariantVector(const std::vector<Variant> &variants, int indent) {
@@ -134,23 +193,94 @@ static void LogVariantMap(const std::map<Variant, Variant> &variant_map,
     }
   }
 }
+/*
+firebase::Future<firebase::functions::HttpsCallableResult> GetCustomToken(
+    const std::string &uid, const std::string &secret) {
+  // Create the arguments to the callable function.
+  firebase::Variant data = firebase::Variant::EmptyMap();
+  std::cout << "lol0\n";
+  data.map()["uid"] = firebase::Variant(uid);
+  data.map()["secret"] = firebase::Variant(secret);
 
-void listenForUIDUpdate() {
-  std::cout << "Hello1" << std::endl;
-  std::ifstream file("google-services.json");
+  // auto lol = functions->GetHttpsCallable("client_token").Call();
+  std::cout << "lol1\n";
+  // Call the function and add a callback for the result.
+  firebase::functions::HttpsCallableReference getToken =
+      functions->GetHttpsCallable("getCustomToken");
+  std::cout << "lol2	\n";
+  firebase::Future<firebase::functions::HttpsCallableResult> res =
+      getToken.Call();
+  std::cout << "lol3	\n";
+  return res;
+}
+
+void OnTokenCompleteCallback(
+    const firebase::Future<firebase::functions::HttpsCallableResult> &future) {
+  std::cout << "in callback" << std::endl;
+  if (future.error() != firebase::functions::kErrorNone) {
+    // Function error code, will be kErrorInternal if the failure was not
+    // handled properly in the function call.
+    auto code = static_cast<firebase::functions::Error>(future.error());
+
+    // Display the error in the UI.
+    std::cerr << future.error_message();
+    return;
+  }
+
+  const firebase::functions::HttpsCallableResult *result = future.result();
+  firebase::Variant data = result->data();
+  // This will assert if the result returned from the function wasn't a string.
+  std::string custom_token = data.string_value();
+  // Display the result in the UI.
+  std::cout << custom_token;
+  user_future = auth->SignInWithCustomToken(custom_token.c_str());
+}
+*/
+std::string readFile(std::string filename) {
+  std::ifstream file(filename);
   std::string str;
   std::string file_contents;
   while (std::getline(file, str)) {
     file_contents += str;
     file_contents.push_back('\n');
   }
+  return file_contents;
+}
+/*
+firebase::functions::HttpsCallableReference initFirebase() {
+  std::string init_file_contents = readFile("google-services.json");
   std::cout << "Hello2" << std::endl;
-  ::firebase::AppOptions *appOptions =
-      ::firebase::AppOptions::LoadFromJsonConfig(file_contents.c_str());
+  std::cout << init_file_contents << std::endl;
+  firebase::AppOptions *appOptions =
+      firebase::AppOptions::LoadFromJsonConfig(init_file_contents.c_str());
   // firebase::App *app = firebase::App::GetInstance();
-  firebase::App *app = ::firebase::App::Create(*appOptions);
-  ::firebase::database::Database *database =
-      ::firebase::database::Database::GetInstance(app);
+  app = firebase::App::Create(*appOptions);
+  auth = firebase::auth::Auth::GetAuth(app);
+  database = firebase::database::Database::GetInstance(app);
+  // functions = firebase::functions::Functions::GetInstance(app);
+
+  // ...
+  myfunctions = firebase::functions::Functions::GetInstance(app);
+  std::cout << "Hello3" << std::endl;
+  myfuture = AddMessage("hahahaha");
+  std::cout << "Hello4" << std::endl;
+  myfuture.OnCompletion(lulzz);
+
+  // Create the arguments to the callable function.
+  firebase::Variant data = firebase::Variant::EmptyMap();
+  // data.map()["text"] = firebase::Variant("lulz");
+  // data.map()["push"] = true;
+
+  // Call the function and add a callback for the result.
+  firebase::functions::HttpsCallableReference doSomething =
+      functions->GetHttpsCallable("client_token");
+  return doSomething;
+  // std::cout << "success\n";
+}
+*/
+
+void listenForUIDUpdate() {
+  std::cout << "Hello1" << std::endl;
 
   firebase::database::DatabaseReference myRef =
       database->GetReference().Child("uids");
@@ -168,21 +298,11 @@ void listenForUIDUpdate() {
       "waiting");  // this creates the reqs key-value pair
   std::cout << "Data is now set" << std::endl;
 
-  UIDListener *listener = new UIDListener();
+  UIDListener *listener = new UIDListener(myRef.Child(key));
   // firebase::Future<firebase::database::DataSnapshot> result =
   myRef.Child(key).AddValueListener(listener);
 }
 
-int runFlutterCode();
-
-int main(int argc, char **argv) {
-  std::ifstream file("uid");
-  if (!file) {
-    listenForUIDUpdate();
-  }
-
-  return runFlutterCode();
-}
 
 int runFlutterCode() {
   // Resources are located relative to the executable.
@@ -209,8 +329,196 @@ int runFlutterCode() {
 
   BTNonceRegisterWithRegistrar(
       flutter_controller.GetRegistrarForPlugin("BTNonce"));
+  // FBFunctionsRegisterWithRegistrar(
+  //  flutter_controller.GetRegistrarForPlugin("FBFunctions"));
 
   // Run until the window is closed.
   flutter_controller.RunEventLoop();
   return EXIT_SUCCESS;
 }
+
+// Wait for a Future to be completed. If the Future returns an error, it will
+// be logged.
+void WaitForCompletion(const firebase::FutureBase &future, const char *name) {
+  while (future.status() == firebase::kFutureStatusPending) {
+    ProcessEvents(100);
+  }
+}
+
+void initializeFirebase()
+{
+  std::string init_file_contents = readFile("google-services.json");
+  firebase::AppOptions *appOptions =
+  firebase::AppOptions::LoadFromJsonConfig(init_file_contents.c_str());
+  app = firebase::App::Create(*appOptions);
+
+  LogMessage("Initialized Firebase App.");
+
+  LogMessage("Initializing Firebase Auth and Cloud Functions.");
+
+  // Use ModuleInitializer to initialize both Auth and Functions, ensuring no
+  // dependencies are missing.
+  void *initialize_targets[] = {&auth, &functions, &database};
+
+  const firebase::ModuleInitializer::InitializerFn initializers[] = {
+      [](::firebase::App *app, void *data) {
+        LogMessage("Attempt to initialize Firebase Auth.");
+        void **targets = reinterpret_cast<void **>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<::firebase::auth::Auth **>(targets[0]) =
+            ::firebase::auth::Auth::GetAuth(app, &result);
+        return result;
+      },
+      [](::firebase::App *app, void *data) {
+        LogMessage("Attempt to initialize Cloud Functions.");
+        void **targets = reinterpret_cast<void **>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<::firebase::functions::Functions **>(targets[1]) =
+            ::firebase::functions::Functions::GetInstance(app, &result);
+        return result;
+      },
+      [](::firebase::App *app, void *data) {
+        LogMessage("Attempt to initialize Realtime Database");
+        void **targets = reinterpret_cast<void **>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<::firebase::database::Database **>(targets[2]) =        
+            ::firebase::database::Database::GetInstance(app, &result);
+        return result;
+      }};
+
+  ::firebase::ModuleInitializer initializer;
+  initializer.Initialize(app, initialize_targets, initializers,
+                         sizeof(initializers) / sizeof(initializers[0]));
+
+  WaitForCompletion(initializer.InitializeLastResult(), "Initialize");
+
+  if (initializer.InitializeLastResult().error() != 0) {
+    LogMessage("Failed to initialize Firebase libraries: %s",
+               initializer.InitializeLastResult().error_message());
+    ProcessEvents(2000);
+  }
+  LogMessage("Successfully initialized Firebase Auth, Cloud Functions and Realtime Database.");
+
+  // To test against a local emulator, uncomment this line:
+  //   functions->UseFunctionsEmulator("http://localhost:5005");
+  // Or when running in an Android emulator:
+  //   functions->UseFunctionsEmulator("http://10.0.2.2:5005");
+}
+
+
+void signIn(std::string custom_token) {
+  firebase::Future<firebase::auth::User *> sign_in_future =
+      auth->SignInWithCustomToken(custom_token.c_str());
+  WaitForCompletion(sign_in_future, "SignIn");
+  if (sign_in_future.error() == firebase::auth::kAuthErrorNone) {
+    LogMessage("Auth: Signed in as user!");
+  } else {
+    LogMessage("ERROR: Could not sign in anonymously. Error %d: %s",
+               sign_in_future.error(), sign_in_future.error_message());
+  }
+}
+
+std::string callFBFunctionSync(
+    const char *functionName,
+    std::map<std::string, firebase::Variant> *data = nullptr) {
+  firebase::Future<firebase::functions::HttpsCallableResult> future;
+  // Create a callable.
+  LogMessage("Calling function %s", functionName);
+  firebase::functions::HttpsCallableReference caller;
+  caller = functions->GetHttpsCallable(functionName);
+  { future = data ? caller.Call(*data) : caller.Call(); }
+  WaitForCompletion(future, "Call");
+  if (future.error() != firebase::functions::kErrorNone) {
+    LogMessage("FAILED!");
+    LogMessage("  Error %d: %s", future.error(), future.error_message());
+  } else {
+    firebase::Variant result = future.result()->data();
+    std::string result_string = result.string_value();
+    LogMessage("SUCCESS.");
+    LogMessage("  Got expected result: %s", result_string.c_str());
+    return result_string;
+  }
+}
+
+void shutdownFirebase() {
+  LogMessage("Shutting down the Functions library.");
+  delete functions;
+  functions = nullptr;
+
+  LogMessage("Signing out from account.");
+  auth->SignOut();
+  LogMessage("Shutting down the Auth library.");
+  delete auth;
+  auth = nullptr;
+
+  LogMessage("Shutting down Firebase App.");
+  delete app;
+}
+
+extern "C" int common_main(int argc, const char *argv[]) {
+
+  initializeFirebase();
+
+  std::ifstream file_uid("uid");
+  std::ifstream file_secret("secret");
+  //if (!file_uid || !file_secret) {
+  //  listenForUIDUpdate();
+  // std::cout << "update\n";
+ //} else 
+
+    std::string uid;
+    std::string secret;
+    std::getline(file_uid, uid);
+    std::getline(file_secret, secret);
+    std::cout << "got the uid and the secret:" << uid << " " << secret
+              << std::endl;
+	
+    std::map<std::string, firebase::Variant> data;
+    data["uid"] = firebase::Variant(uid);
+    data["auth_secret"] = firebase::Variant(secret);
+    std::string customToken;
+    customToken = callFBFunctionSync("getCustomToken", &data);
+
+	signIn(customToken);
+
+  callFBFunctionSync("client_token");
+  
+
+  shutdownFirebase();
+
+  // Wait until the user wants to quit the app.
+  while (!ProcessEvents(1000)) {
+  }
+
+  return 0;
+}
+
+/*
+
+int main(int argc, char **argv) {
+  firebase::functions::HttpsCallableReference lol = initFirebase();
+  auto mylol = lol.Call();
+  std::cout << "firebase inited" << std::endl;
+  MyAuthStateListener state_change_listener;
+  auth->AddAuthStateListener(&state_change_listener);
+
+  std::ifstream file_uid("uid");
+  std::ifstream file_secret("secret");
+  if (!file_uid || !file_secret) {
+    listenForUIDUpdate();
+  } else {
+    std::string uid;
+    std::string secret;
+    std::getline(file_uid, uid);
+    std::getline(file_secret, secret);
+    std::cout << "got the uid and the secret:" << uid << " " << secret
+              << std::endl;
+    auto future = GetCustomToken(uid, secret);
+    std::cout << "getcustomtoken complete" << std::endl;
+    future.OnCompletion(OnTokenCompleteCallback);
+    std::cout << "oncompletiong complete" << std::endl;
+  }
+
+  return runFlutterCode();
+}
+*/
