@@ -11,10 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import 'callbacks.dart';
-import 'channel_controller.dart';
+#include "plugins/btnonce/common/channel_constants.h"
 
-Future<String> finishPayment({String clientToken}) {
-  return BTNonceChannelController.instance
-      .finishPayment(clientToken:clientToken);
-}
+namespace plugins_btnonce {
+
+const char kChannelName[] = "flutter/btnonce";
+
+const char kShowOpenPanelMethod[] = "BTNonce.Show.Open";
+
+
+}  // namespace plugins_file_chooser

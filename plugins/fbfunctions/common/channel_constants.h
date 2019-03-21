@@ -11,10 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import 'callbacks.dart';
-import 'channel_controller.dart';
+#ifndef PLUGINS_FBFUNCTIONS_COMMON_CHANNEL_CONSTANTS_H_
+#define PLUGINS_FBFUNCTIONS_COMMON_CHANNEL_CONSTANTS_H_
 
-Future<String> finishPayment({String clientToken}) {
-  return BTNonceChannelController.instance
-      .finishPayment(clientToken:clientToken);
-}
+namespace plugins_fbfunctions {
+
+// This file contains constants used in the platform channel, which are shared
+// across all native platform implementations.
+
+// The name of the plugin's platform channel.
+extern const char kChannelName[];
+
+}  // namespace plugins_file_chooser
+
+#endif  // PLUGINS_FILE_CHOOSER_COMMON_CHANNEL_CONSTANTS_H_

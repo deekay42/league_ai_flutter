@@ -24,35 +24,6 @@ extern const char kChannelName[];
 
 // The method name to instruct the native plugin to show an open panel.
 extern const char kShowOpenPanelMethod[];
-// The method name to instruct the native plugin to show a save panel.
-extern const char kShowSavePanelMethod[];
-
-// Configuration parameters for file chooser panels:
-
-// The path, as a string, for initial directory to display. Default behavior is
-// left to the OS if not provided.
-extern const char kInitialDirectoryKey[];
-
-// The initial file name that should appears in the file chooser. Defaults to an
-// empty string if not provided.
-extern const char kInitialFileNameKey[];
-
-// An array of UTI or file extension strings a panel is allowed to choose.
-extern const char kAllowedFileTypesKey[];
-
-// The text that appears on the panel's confirmation button. If not provided,
-// the OS default is used.
-extern const char kConfirmButtonTextKey[];
-
-// Configuration parameters from this point on apply only to open panels:
-
-// A boolean indicating whether a panel should allow choosing multiple file
-// paths. Defaults to false if not set.
-extern const char kAllowsMultipleSelectionKey[];
-
-// A boolean indicating whether a panel should allow choosing directories
-// instead of files. Defaults to false if not set.
-extern const char kCanChooseDirectoriesKey[];
 
 }  // namespace plugins_file_chooser
 

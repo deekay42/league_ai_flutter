@@ -33,11 +33,10 @@
 #include "firebase/future.h"
 #include "firebase/log.h"
 #include "firebase/util.h"
-#include "common.h"
 #include "firebase_commons.h"
 
 #include <btnonce/btnonce_plugin.h>
-//#include <fbfunctions/fbfunctions_plugin.h>
+#include <fbfunctions/fbfunctions_plugin.h>
 #include "flutter_desktop_embedding/flutter_window_controller.h"
 
 using ::firebase::Variant;
@@ -47,12 +46,11 @@ using ::firebase::Variant;
 ::firebase::functions::Functions *functions = nullptr;
 ::firebase::auth::Auth *auth = nullptr;
 
+std::string myuid = "";
+std::string mysecret = "";
 
 firebase::Future<firebase::functions::HttpsCallableResult> GetCustomToken(
     const std::string &uid, const std::string &secret);
-
-void OnTokenCompleteCallback(
-    const firebase::Future<firebase::functions::HttpsCallableResult> &future);
 
 // Include windows.h last, to minimize potential conflicts. The CreateWindow
 // macro needs to be undefined because it prevents calling
@@ -113,19 +111,20 @@ class UIDListener : public firebase::database::ValueListener {
     std::cout << "CALLBACK!!" << std::endl;
     auto mymap = snapshot.value().map();
 
-    std::cout << "Here's the data:--------------------------------- "
-              << std::endl;
-    LogVariantMap(mymap, 5);
-    std::cout << "EOD----------------------------------" << std::endl;
+    // std::cout << "Here's the data:--------------------------------- "
+    //           << std::endl;
+    // LogVariantMap(mymap, 5);
+    // std::cout << "EOD----------------------------------" << std::endl;
 
-    std::cout << (mymap.begin()->second).AsString().string_value() << std::endl;
+    // std::cout << (mymap.begin()->second).AsString().string_value() <<
+    // std::endl;
     auto it = mymap.begin();
-    std::string uid = (it->second).AsString().string_value();
+    std::string uid = (mymap["uid"]).AsString().string_value();
     ++it;
-    std::string secret = (it->second).AsString().string_value();
+    std::string secret = mymap["secret"].AsString().string_value();
 
     std::cout << "Here's the data: " << uid << "\n" << secret << std::endl;
-    if (uid == "waiting") return;
+    if (uid == "waiting" || secret == "waiting") return;
     std::ofstream uid_file;
     uid_file.open("uid");
     uid_file << uid;
@@ -136,17 +135,16 @@ class UIDListener : public firebase::database::ValueListener {
     secret_file << secret;
     secret_file.close();
 
+    myuid = uid;
+    mysecret = secret;
+
     myRef.RemoveValue();
-    //auto future = GetCustomToken(uid, secret);
-   // future.OnCompletion(OnTokenCompleteCallback);
   }
   void OnCancelled(const firebase::database::Error &error_code,
                    const char *error_message) override {
     std::cout << "LOL" << std::endl;
   }
 };
-
-
 
 // Log a vector of variants.
 static void LogVariantVector(const std::vector<Variant> &variants, int indent) {
@@ -303,7 +301,6 @@ void listenForUIDUpdate() {
   myRef.Child(key).AddValueListener(listener);
 }
 
-
 int runFlutterCode() {
   // Resources are located relative to the executable.
   std::string base_directory = GetExecutableDirectory();
@@ -329,27 +326,24 @@ int runFlutterCode() {
 
   BTNonceRegisterWithRegistrar(
       flutter_controller.GetRegistrarForPlugin("BTNonce"));
-  // FBFunctionsRegisterWithRegistrar(
-  //  flutter_controller.GetRegistrarForPlugin("FBFunctions"));
+  FBFunctionsRegisterWithRegistrar(
+      flutter_controller.GetRegistrarForPlugin("FBFunctions"));
 
   // Run until the window is closed.
   flutter_controller.RunEventLoop();
   return EXIT_SUCCESS;
 }
 
-// Wait for a Future to be completed. If the Future returns an error, it will
-// be logged.
 void WaitForCompletion(const firebase::FutureBase &future, const char *name) {
   while (future.status() == firebase::kFutureStatusPending) {
     ProcessEvents(100);
   }
 }
 
-void initializeFirebase()
-{
+void initializeFirebase() {
   std::string init_file_contents = readFile("google-services.json");
   firebase::AppOptions *appOptions =
-  firebase::AppOptions::LoadFromJsonConfig(init_file_contents.c_str());
+      firebase::AppOptions::LoadFromJsonConfig(init_file_contents.c_str());
   app = firebase::App::Create(*appOptions);
 
   LogMessage("Initialized Firebase App.");
@@ -381,7 +375,7 @@ void initializeFirebase()
         LogMessage("Attempt to initialize Realtime Database");
         void **targets = reinterpret_cast<void **>(data);
         ::firebase::InitResult result;
-        *reinterpret_cast<::firebase::database::Database **>(targets[2]) =        
+        *reinterpret_cast<::firebase::database::Database **>(targets[2]) =
             ::firebase::database::Database::GetInstance(app, &result);
         return result;
       }};
@@ -397,14 +391,15 @@ void initializeFirebase()
                initializer.InitializeLastResult().error_message());
     ProcessEvents(2000);
   }
-  LogMessage("Successfully initialized Firebase Auth, Cloud Functions and Realtime Database.");
+  LogMessage(
+      "Successfully initialized Firebase Auth, Cloud Functions and Realtime "
+      "Database.");
 
   // To test against a local emulator, uncomment this line:
   //   functions->UseFunctionsEmulator("http://localhost:5005");
   // Or when running in an Android emulator:
   //   functions->UseFunctionsEmulator("http://10.0.2.2:5005");
 }
-
 
 void signIn(std::string custom_token) {
   firebase::Future<firebase::auth::User *> sign_in_future =
@@ -415,28 +410,6 @@ void signIn(std::string custom_token) {
   } else {
     LogMessage("ERROR: Could not sign in anonymously. Error %d: %s",
                sign_in_future.error(), sign_in_future.error_message());
-  }
-}
-
-std::string callFBFunctionSync(
-    const char *functionName,
-    std::map<std::string, firebase::Variant> *data = nullptr) {
-  firebase::Future<firebase::functions::HttpsCallableResult> future;
-  // Create a callable.
-  LogMessage("Calling function %s", functionName);
-  firebase::functions::HttpsCallableReference caller;
-  caller = functions->GetHttpsCallable(functionName);
-  { future = data ? caller.Call(*data) : caller.Call(); }
-  WaitForCompletion(future, "Call");
-  if (future.error() != firebase::functions::kErrorNone) {
-    LogMessage("FAILED!");
-    LogMessage("  Error %d: %s", future.error(), future.error_message());
-  } else {
-    firebase::Variant result = future.result()->data();
-    std::string result_string = result.string_value();
-    LogMessage("SUCCESS.");
-    LogMessage("  Got expected result: %s", result_string.c_str());
-    return result_string;
   }
 }
 
@@ -456,33 +429,32 @@ void shutdownFirebase() {
 }
 
 extern "C" int common_main(int argc, const char *argv[]) {
-
   initializeFirebase();
 
   std::ifstream file_uid("uid");
   std::ifstream file_secret("secret");
-  //if (!file_uid || !file_secret) {
-  //  listenForUIDUpdate();
-  // std::cout << "update\n";
- //} else 
+  if (!file_uid || !file_secret) {
+    listenForUIDUpdate();
+    while (myuid == "" && mysecret == "") ProcessEvents(100);
+    std::cout << "update\n";
+  } else {
+    std::getline(file_uid, myuid);
+    std::getline(file_secret, mysecret);
+  }
+  delete database;
+  database = nullptr;
+  std::cout << "got the uid and the secret:" << myuid << " " << mysecret
+            << std::endl;
 
-    std::string uid;
-    std::string secret;
-    std::getline(file_uid, uid);
-    std::getline(file_secret, secret);
-    std::cout << "got the uid and the secret:" << uid << " " << secret
-              << std::endl;
-	
-    std::map<std::string, firebase::Variant> data;
-    data["uid"] = firebase::Variant(uid);
-    data["auth_secret"] = firebase::Variant(secret);
-    std::string customToken;
-    customToken = callFBFunctionSync("getCustomToken", &data);
+  std::map<std::string, firebase::Variant> data;
+  data["uid"] = firebase::Variant(myuid);
+  data["auth_secret"] = firebase::Variant(mysecret);
+  std::string customToken;
+  customToken = callFBFunctionSync("getCustomToken", &data).string_value();
 
-	signIn(customToken);
+  signIn(customToken);
 
-  callFBFunctionSync("client_token");
-  
+  runFlutterCode();
 
   shutdownFirebase();
 
@@ -519,6 +491,7 @@ int main(int argc, char **argv) {
     std::cout << "oncompletiong complete" << std::endl;
   }
 
-  return runFlutterCode();
+  
+
 }
 */

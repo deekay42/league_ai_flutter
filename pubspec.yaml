@@ -18,6 +18,8 @@ dependencies:
   qrcode_reader: ^0.4.4
   btnonce:
     path: ../plugins/btnonce
+  fbfunctions:
+    path: ../plugins/fbfunctions
 
 
   flutter_firebase_ui:

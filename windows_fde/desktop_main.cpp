@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <string>
 
-#include "common.h"
+#include "firebase_commons.h"
 
 // The TO_STRING macro is useful for command line defined strings as the quotes
 // get stripped.
@@ -80,6 +80,29 @@ void LogMessage(const char* format, ...) {
   va_end(list);
   printf("\n");
   fflush(stdout);
+}
+
+firebase::Variant callFBFunctionSync(
+    const char *functionName,
+    std::map<std::string, firebase::Variant> *data) {
+  firebase::Future<firebase::functions::HttpsCallableResult> future;
+  // Create a callable.
+  LogMessage("Calling function %s", functionName);
+  firebase::functions::HttpsCallableReference caller;
+  caller = functions->GetHttpsCallable(functionName);
+  { future = data ? caller.Call(*data) : caller.Call(); }
+  WaitForCompletion(future, "Call");
+  if (future.error() != firebase::functions::kErrorNone) {
+    LogMessage("FAILED!");
+    LogMessage("  Error %d: %s", future.error(), future.error_message());
+  } else {
+    firebase::Variant result = future.result()->data();
+
+    // std::string result_string = result.string_value();
+    // LogMessage("SUCCESS.");
+    // LogMessage("  Got expected result: %s", result_string.c_str());
+    return result;
+  }
 }
 
 // Change the current working directory to the directory containing the

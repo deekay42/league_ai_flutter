@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
+import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
@@ -63,14 +64,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void checkIfUserHasSubscription() async {
 
-    String deviceID = await _firebaseMessaging.getToken();
-    print("Got device_id: $deviceID");
-    assert(deviceID != null);
+    
+    
     print("isValid");
-    CloudFunctions.instance
+    dynamic resp;
+    if (Platform.isIOS || Platform.isAndroid)
+    {
+      String deviceID = await _firebaseMessaging.getToken();
+      print("Got device_id: $deviceID");
+    assert(deviceID != null);
+      resp = CloudFunctions.instance
         .call(functionName: 'isValid',
-        parameters: <String, dynamic>{"device_id": deviceID})
-        .then((dynamic remaining) {
+        parameters: <String, dynamic>{"device_id": deviceID});
+    }
+    else
+      resp =  fbfunctions.fb_call(methodName: 'isValid');
+        
+    resp.then((dynamic remaining) {
       setState(() {
         print("isValid returned");
         print(remaining);
@@ -86,14 +96,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           hasSubscription = false;
           _remaining = parsed[0];
 
-          ads.getBannerAd().then((BannerAd newAd) {
-            ad = newAd;
-            ad.show();
-          });
+          // ads.getBannerAd().then((BannerAd newAd) {
+          //   ad = newAd;
+          //   ad.show();
+          // });
         }
       });
     }).catchError((e) {
-      print("isvalid ERROR " + e.message);
+      print("isvalid ERROR " + e.error);
       setState(() {
         _remaining = "10";
         ads.getBannerAd().then((BannerAd newAd) {
@@ -127,7 +137,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void initialLogin() async {
-    if (Platform.isAndroid || Platform.isIOS) checkIfUserHasSubscription();
+    checkIfUserHasSubscription();
     _playFullAnimation();
   }
 
@@ -291,10 +301,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _unsubscribe() {
     print('unsubscribe');
-    CloudFunctions.instance
-        .call(functionName: 'cancelSub')
-        .then((dynamic result) {
+    dynamic resp;
+    if (Platform.isIOS || Platform.isAndroid)
+    {
+      resp = CloudFunctions.instance
+        .call(functionName: 'cancelSub');
+    }
+    else
+      resp =  fbfunctions.fb_call(methodName: 'cancelSub');
+
+    resp.then((dynamic result) {
       setState(() {
+        print("Unsubscribe done: $result");
+        if(result is bool) print("It is a bool");
         hasSubscription = false;
         _remaining = "10";
         onReload();
@@ -421,10 +440,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         onPressed: () async {
                           print("Here's the ad we're disposing: $ad");
                           ad?.dispose();
+                          String uid = await desktopUID;
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => SubscribePage()),
+                                builder: (context) => SubscribePage(desktopUID: (Platform.isAndroid || Platform.isIOS) ? null : uid)),
                           );
                           onReload();
                         },
@@ -437,7 +457,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void onReload() {
     _playFullAnimation();
-    if (Platform.isAndroid || Platform.isIOS) checkIfUserHasSubscription();
+    checkIfUserHasSubscription();
   }
 
   Widget buildHomePage() {

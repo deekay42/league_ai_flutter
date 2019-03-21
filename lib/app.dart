@@ -124,7 +124,7 @@ class _MainAppState extends State<MainApp> {
     desktopUID = getUIDForDesktop();
     if (desktopUID != null) {
       print("second");
-      return HomePage(desktopUID: desktopUID);
+      return HomePage(desktopUID: desktopUID, paired:true);
     } else {
       print("third");
       return QRPage(dataString: getUIDDBKeyForDesktop());

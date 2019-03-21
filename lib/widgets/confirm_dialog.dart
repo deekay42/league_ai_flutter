@@ -3,32 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../resources/Strings.dart';
 
-enum ConfirmResult { SUCCESS, CHANGING }
 
 class ConfirmDialog extends StatelessWidget {
   final String nonce, desc;
   ConfirmDialog({@required this.nonce, @required this.desc});
 
-  Future<ConfirmResult> checkout() async {
-    return CloudFunctions.instance.call(
-      functionName: 'subscribe',
-      parameters: <String, dynamic>{
-        'payment_method_nonce': nonce,
-      },
-    ).then((dynamic resp) {
-      if (resp == "SUCCESS") {
-        print("SUCCESS");
-        return ConfirmResult.SUCCESS;
-      } else {
-        print("No success");
-        print(resp);
-        return ConfirmResult.CHANGING;
-      }
-    }).catchError((e) {
-      print(e);
-      return null;
-    });
-  }
+  
 
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -130,24 +110,7 @@ class ConfirmDialog extends StatelessWidget {
             child: RaisedButton(
               child: Text(Strings.sub),
               onPressed: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) => Container(
-                        color: Colors.black.withOpacity(0.5),
-                        child: new Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircularProgressIndicator(),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Text("Loading", style: theme.textTheme.body1),
-                          ],
-                        ),
-                      ),
-                );
+                displayFullScreenWaitingModal("Loading");
 
                 ConfirmResult result = await checkout();
                 Navigator.pop(context);

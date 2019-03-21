@@ -1286,9 +1286,9 @@ const char* cb_result = nullptr;
 
 void my_cb(struct webview *w, const char *arg)
 {
-  printf("Callback!\n");
+  printf("\nmy_cb allback!\n");
   printf(arg);
-  cb_result = arg;
+  cb_result = _strdup(arg);
   webview_terminate(w);
 }
 

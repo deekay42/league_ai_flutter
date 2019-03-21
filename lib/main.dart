@@ -31,7 +31,7 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-void main() {
+void main() {  
   _setTargetPlatformForDesktop();
   runApp(MainApp());
 }

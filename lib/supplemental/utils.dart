@@ -54,3 +54,46 @@ Future<Null> displayWaitingModal(BuildContext context, String message,
   );
 }
 
+Future<Null> displayFullScreenModal(BuildContext context, MyDialog dialog) {
+      
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) => dialog,
+  );
+}
+
+class MyDialog extends StatefulWidget {
+
+  String modalText;
+  bool spinner;
+  MyDialog({this.modalText, this.spinner});
+
+  @override
+  _MyDialogState createState() => _MyDialogState();
+}
+
+class _MyDialogState extends State<MyDialog> {
+  Widget build(BuildContext context)
+  {
+    final ThemeData theme = Theme.of(context);
+    return Container(
+          color: Colors.black.withOpacity(0.5),
+          child: new Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: widget.spinner ? [
+              CircularProgressIndicator(),
+              SizedBox(
+                width: 15,
+              ),
+              Text(widget.modalText, style: theme.textTheme.body1),
+            ] : [Text(widget.modalText, style: theme.textTheme.body1)],
+          ),
+        );
+  }
+}
+
+
+
+

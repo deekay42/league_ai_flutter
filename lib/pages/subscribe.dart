@@ -2,12 +2,18 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
+import 'dart:convert';
 
 import 'package:btnonce/btnonce.dart' as btnonce;
+import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
 import '../pages/main_page_template.dart';
 import '../resources/Strings.dart';
-import '../widgets/confirm_dialog.dart';
+//import '../widgets/confirm_dialog.dart';
 import '../widgets/items_list.dart';
+import '../supplemental/utils.dart';
+
+
+enum ConfirmResult { SUCCESS, CHANGING }
 
 class ClientTokenException implements Exception {
   String cause;
@@ -30,6 +36,11 @@ class PaymentException implements Exception {
 }
 
 class SubscribePage extends StatefulWidget {
+
+  final String desktopUID;
+
+  SubscribePage({this.desktopUID = null});
+
   @override
   _SubscribePageState createState() => _SubscribePageState();
 }
@@ -52,15 +63,26 @@ String _resultTextForFileChooserOperation(
 class _SubscribePageState extends State<SubscribePage>
     with TickerProviderStateMixin {
   static const platform = const MethodChannel('getPaymentNonce');
-  final Future<dynamic> _clientToken;
+  Future<dynamic> _clientToken;
   var scaffoldKey;
   bool subButtonPressed = false;
+  MyDialog myDialog = null;
 
   AnimationController mainController;
   AnimationController mainBodyController;
 
   void initState() {
     super.initState();
+
+    if (Platform.isAndroid || Platform.isIOS)
+      _clientToken =
+            CloudFunctions.instance.call(functionName: 'client_token');
+    else 
+    {
+      _clientToken =
+            fbfunctions.fb_call(methodName: 'client_token');
+    }
+
     mainController =
         AnimationController(duration: Duration(milliseconds: 1500), vsync: this);
     mainBodyController =
@@ -94,50 +116,63 @@ class _SubscribePageState extends State<SubscribePage>
     }
   }
 
-  _SubscribePageState()
-      : _clientToken =
-            CloudFunctions.instance.call(functionName: 'client_token');
-
-
-
   Future<List<String>> _getPaymentNonce() async {
     print("now getting the nonce");
+    dynamic result = await platform
+        .invokeMethod('getPaymentNonce', {"clientToken": await _clientToken});
+    print("now got the the nonce");
+    print(result.toString());
+    if(result == null)
+      return null;
+    String nonce = result[0];
+    String desc = result[1];
+
+    return [nonce, desc];
+  }
+
+  Future<ConfirmResult> checkout(String nonce) async {
+    print("now attempting checkout");
+    var myFuture;
     if (Platform.isAndroid || Platform.isIOS)
-                    
-      dynamic result = await platform
-          .invokeMethod('getPaymentNonce', {"clientToken": await _clientToken});
-    else
-      {
-        btnonce.showSavePanel((result, paths) {
-              Scaffold.of(context).showSnackBar(SnackBar(
-                content: Text(_resultTextForFileChooserOperation(
-                    _BTNonceType.save, result, paths)),
-              ));
-            }, suggestedFileName: 'save_test.txt');
+      myFuture =
+            CloudFunctions.instance.call(
+      functionName: 'subscribe',
+      parameters: <String, dynamic>{
+        'payment_method_nonce': nonce,
+      },
+    );
+    else 
+      myFuture =
+            fbfunctions.fb_call(
+      methodName: 'subscribe',
+      args: <String, dynamic>{
+        'payment_method_nonce': nonce,
+      },
+      );
+    
+      dynamic resp = await myFuture;
+      if (resp == "SUCCESS") {
+        print("SUCCESS");
+        return ConfirmResult.SUCCESS;
+      } else {
+        print("No success");
+        print(resp);
+        throw CheckoutException("Problem checking out");
       }
-    return null;
-    // print("now got the the nonce");
-    // print(result.toString());
-    // if(result == null)
-    //   return null;
-    // String nonce = result[0];
-    // String desc = result[1];
-
-    // return [nonce, desc];
   }
 
-  Future<ConfirmResult> _getConfirmation(
-      BuildContext context, String nonce, String desc) async {
+  // Future<ConfirmResult> _getConfirmation(
+  //     BuildContext context, String nonce, String desc) async {
 
-    return await showModalBottomSheet<ConfirmResult>(
-        context: context,
-        builder: (BuildContext context) {
-          return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {},
-              child: ConfirmDialog(nonce: nonce, desc: desc));
-        });
-  }
+  //   return await showModalBottomSheet<ConfirmResult>(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return GestureDetector(
+  //             behavior: HitTestBehavior.opaque,
+  //             onTap: () {},
+  //             child: ConfirmDialog(nonce: nonce, desc: desc));
+  //       });
+  // }
 
   Widget _buildBody(BuildContext context) {
     int counter = 0;
@@ -177,38 +212,75 @@ class _SubscribePageState extends State<SubscribePage>
     );
   }
 
+  Future<String> getDesktopNonce() async
+  {
+    dynamic result = await btnonce.finishPayment(clientToken: await _clientToken);
+    setState((){});
+    print("Dart: this is the result: $result");
+    if(result != null)
+    {
+      var resultJson = jsonDecode(await result);
+      return resultJson["nonce"];
+    }
+    else
+      return null;
+  }
+
   Future<void> runPaymentProcess(BuildContext context) async {
-    _getPaymentNonce();
     try {
       await _clientToken;
     } catch (e) {
       throw ClientTokenException(e.toString());
     }
     ConfirmResult result = ConfirmResult.CHANGING;
-    do {
-      List<String> nonceDesc;
+    
+    
+      do {
+        List<String> nonceDesc;
 
-      try {
-        nonceDesc = await _getPaymentNonce();
-        //user tapped elsewhere on the screen dismissing the modal
-        if(nonceDesc == null)
-        {
-          subButtonPressed = false;
-          return;
+        try {
+          if (Platform.isAndroid || Platform.isIOS)
+            nonceDesc = await _getPaymentNonce();
+          else
+          {
+            String nonce = await getDesktopNonce();
+            if(nonce == null)
+              break;
+            nonceDesc = List<String>();
+            nonceDesc.add(nonce);
+          }
+          //user tapped elsewhere on the screen dismissing the modal
+          if(nonceDesc == null)
+          {
+            subButtonPressed = false;
+            return;
+          }
+        } catch (e) {
+          print(e.message);
+          throw NonceException(e.toString());
         }
-      } catch (e) {
-        print(e.message);
-        throw NonceException(e.toString());
+        print('got the payment nonce!');
+        try {
+          //result = await _getConfirmation(context, nonceDesc[0], nonceDesc[1]);
+          displayFullScreenModal(context, MyDialog(modalText:"Loading...", spinner: true));
+          
+          result = await checkout(nonceDesc[0]);
+          print("Got the result: $result");
+        } catch (e) {
+          throw CheckoutException(e.toString());
+        }
+      } while (result == ConfirmResult.CHANGING);
+      
+      if (result == ConfirmResult.SUCCESS) 
+      {
+        Navigator.pop(context);
+        displayFullScreenModal(context, MyDialog(modalText:"Success!", spinner:false));
+        Future.delayed(
+       const Duration(seconds: 2),
+       (){ Navigator.pop(context); Navigator.pop(context);});
+        
       }
-      print('got the payment nonce!');
-      try {
-        result = await _getConfirmation(context, nonceDesc[0], nonceDesc[1]);
-        print("Got the result: $result");
-      } catch (e) {
-        throw CheckoutException(e.toString());
-      }
-    } while (result == ConfirmResult.CHANGING);
-    if (result == ConfirmResult.SUCCESS) Navigator.pop(context);
+    
   }
 
   void showErrorSnackBar(var _scaffoldKey, String msg) {
