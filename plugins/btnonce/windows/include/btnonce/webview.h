@@ -74,9 +74,9 @@ struct webview_priv {
   RECT saved_rect;
 };
 #elif defined(WEBVIEW_COCOA)
-#include <objc/objc-runtime.h>
 #include <CoreGraphics/CoreGraphics.h>
 #include <limits.h>
+#include <objc/objc-runtime.h>
 
 struct webview_priv {
   id pool;
@@ -136,11 +136,11 @@ struct webview_dispatch_arg {
   "3E%3C%2Fdiv%3E%3Cscript%20type=%22text%2Fjavascript%22%3E%3C%2Fscript%3E%"  \
   "3C%2Fbody%3E%0A%3C%2Fhtml%3E"
 
-#define CSS_INJECT_FUNCTION                                                    \
-  "(function(e){var "                                                          \
-  "t=document.createElement('style'),d=document.head||document."               \
-  "getElementsByTagName('head')[0];t.setAttribute('type','text/"               \
-  "css'),t.styleSheet?t.styleSheet.cssText=e:t.appendChild(document."          \
+#define CSS_INJECT_FUNCTION                                           \
+  "(function(e){var "                                                 \
+  "t=document.createElement('style'),d=document.head||document."      \
+  "getElementsByTagName('head')[0];t.setAttribute('type','text/"      \
+  "css'),t.styleSheet?t.styleSheet.cssText=e:t.appendChild(document." \
   "createTextNode(e)),d.appendChild(t)})"
 
 static const char *webview_check_url(const char *url) {
@@ -406,15 +406,15 @@ WEBVIEW_API void webview_dialog(struct webview *w,
   } else if (dlgtype == WEBVIEW_DIALOG_TYPE_ALERT) {
     GtkMessageType type = GTK_MESSAGE_OTHER;
     switch (flags & WEBVIEW_DIALOG_FLAG_ALERT_MASK) {
-    case WEBVIEW_DIALOG_FLAG_INFO:
-      type = GTK_MESSAGE_INFO;
-      break;
-    case WEBVIEW_DIALOG_FLAG_WARNING:
-      type = GTK_MESSAGE_WARNING;
-      break;
-    case WEBVIEW_DIALOG_FLAG_ERROR:
-      type = GTK_MESSAGE_ERROR;
-      break;
+      case WEBVIEW_DIALOG_FLAG_INFO:
+        type = GTK_MESSAGE_INFO;
+        break;
+      case WEBVIEW_DIALOG_FLAG_WARNING:
+        type = GTK_MESSAGE_WARNING;
+        break;
+      case WEBVIEW_DIALOG_FLAG_ERROR:
+        type = GTK_MESSAGE_ERROR;
+        break;
     }
     dlg = gtk_message_dialog_new(GTK_WINDOW(w->priv.window), GTK_DIALOG_MODAL,
                                  type, GTK_BUTTONS_OK, "%s", title);
@@ -815,10 +815,10 @@ Frame_TranslateAccelerator(IOleInPlaceFrame FAR *This, LPMSG lpmsg, WORD wID) {
 static HRESULT STDMETHODCALLTYPE UI_QueryInterface(IDocHostUIHandler FAR *This,
                                                    REFIID riid,
                                                    LPVOID FAR *ppvObj) {
-  return (Site_QueryInterface((IOleClientSite *)((char *)This -
-                                                 sizeof(IOleClientSite) -
-                                                 sizeof(_IOleInPlaceSiteEx)),
-                              riid, ppvObj));
+  return (Site_QueryInterface(
+      (IOleClientSite *)((char *)This - sizeof(IOleClientSite) -
+                         sizeof(_IOleInPlaceSiteEx)),
+      riid, ppvObj));
 }
 static ULONG STDMETHODCALLTYPE UI_AddRef(IDocHostUIHandler FAR *This) {
   return 1;
@@ -961,48 +961,83 @@ static IDocHostUIHandlerVtbl MyIDocHostUIHandlerTable = {
     UI_TranslateUrl,
     UI_FilterDataObject};
 
-
-
-static HRESULT STDMETHODCALLTYPE IS_QueryInterface(IInternetSecurityManager FAR *This, REFIID riid, void **ppvObject) {
+static HRESULT STDMETHODCALLTYPE IS_QueryInterface(
+    IInternetSecurityManager FAR *This, REFIID riid, void **ppvObject) {
   return E_NOTIMPL;
 }
-static ULONG STDMETHODCALLTYPE IS_AddRef(IInternetSecurityManager FAR *This) { return 1; }
-static ULONG STDMETHODCALLTYPE IS_Release(IInternetSecurityManager FAR *This) { return 1; }
-static HRESULT STDMETHODCALLTYPE IS_SetSecuritySite(IInternetSecurityManager FAR *This, IInternetSecurityMgrSite *pSited) {
+static ULONG STDMETHODCALLTYPE IS_AddRef(IInternetSecurityManager FAR *This) {
+  return 1;
+}
+static ULONG STDMETHODCALLTYPE IS_Release(IInternetSecurityManager FAR *This) {
+  return 1;
+}
+static HRESULT STDMETHODCALLTYPE IS_SetSecuritySite(
+    IInternetSecurityManager FAR *This, IInternetSecurityMgrSite *pSited) {
   return INET_E_DEFAULT_ACTION;
 }
-static HRESULT STDMETHODCALLTYPE IS_GetSecuritySite(IInternetSecurityManager FAR *This, IInternetSecurityMgrSite **ppSite) {
+static HRESULT STDMETHODCALLTYPE IS_GetSecuritySite(
+    IInternetSecurityManager FAR *This, IInternetSecurityMgrSite **ppSite) {
   return INET_E_DEFAULT_ACTION;
 }
-static HRESULT STDMETHODCALLTYPE IS_MapUrlToZone(IInternetSecurityManager FAR *This, LPCWSTR pwszUrl, DWORD *pdwZone, DWORD dwFlags) {
+static HRESULT STDMETHODCALLTYPE
+IS_MapUrlToZone(IInternetSecurityManager FAR *This, LPCWSTR pwszUrl,
+                DWORD *pdwZone, DWORD dwFlags) {
   *pdwZone = URLZONE_LOCAL_MACHINE;
   return S_OK;
 }
-static HRESULT STDMETHODCALLTYPE IS_GetSecurityId(IInternetSecurityManager FAR *This, LPCWSTR pwszUrl, BYTE *pbSecurityId, DWORD *pcbSecurityId, DWORD_PTR dwReserved) {
+static HRESULT STDMETHODCALLTYPE IS_GetSecurityId(
+    IInternetSecurityManager FAR *This, LPCWSTR pwszUrl, BYTE *pbSecurityId,
+    DWORD *pcbSecurityId, DWORD_PTR dwReserved) {
   return INET_E_DEFAULT_ACTION;
 }
-static HRESULT STDMETHODCALLTYPE IS_ProcessUrlAction(IInternetSecurityManager FAR *This, LPCWSTR pwszUrl, DWORD dwAction, BYTE *pPolicy,  DWORD cbPolicy, BYTE *pContext, DWORD cbContext, DWORD dwFlags, DWORD dwReserved) {
+static HRESULT STDMETHODCALLTYPE IS_ProcessUrlAction(
+    IInternetSecurityManager FAR *This, LPCWSTR pwszUrl, DWORD dwAction,
+    BYTE *pPolicy, DWORD cbPolicy, BYTE *pContext, DWORD cbContext,
+    DWORD dwFlags, DWORD dwReserved) {
   return INET_E_DEFAULT_ACTION;
 }
-static HRESULT STDMETHODCALLTYPE IS_QueryCustomPolicy(IInternetSecurityManager FAR *This, LPCWSTR pwszUrl, REFGUID guidKey, BYTE **ppPolicy, DWORD *pcbPolicy, BYTE *pContext, DWORD cbContext, DWORD dwReserved) {
+static HRESULT STDMETHODCALLTYPE
+IS_QueryCustomPolicy(IInternetSecurityManager FAR *This, LPCWSTR pwszUrl,
+                     REFGUID guidKey, BYTE **ppPolicy, DWORD *pcbPolicy,
+                     BYTE *pContext, DWORD cbContext, DWORD dwReserved) {
   return INET_E_DEFAULT_ACTION;
 }
-static HRESULT STDMETHODCALLTYPE IS_SetZoneMapping(IInternetSecurityManager FAR *This, DWORD dwZone, LPCWSTR lpszPattern, DWORD dwFlags) {
+static HRESULT STDMETHODCALLTYPE
+IS_SetZoneMapping(IInternetSecurityManager FAR *This, DWORD dwZone,
+                  LPCWSTR lpszPattern, DWORD dwFlags) {
   return INET_E_DEFAULT_ACTION;
 }
-static HRESULT STDMETHODCALLTYPE IS_GetZoneMappings(IInternetSecurityManager FAR *This, DWORD dwZone, IEnumString **ppenumString, DWORD dwFlags) {
+static HRESULT STDMETHODCALLTYPE
+IS_GetZoneMappings(IInternetSecurityManager FAR *This, DWORD dwZone,
+                   IEnumString **ppenumString, DWORD dwFlags) {
   return INET_E_DEFAULT_ACTION;
 }
-static IInternetSecurityManagerVtbl MyInternetSecurityManagerTable = {IS_QueryInterface, IS_AddRef, IS_Release, IS_SetSecuritySite, IS_GetSecuritySite, IS_MapUrlToZone, IS_GetSecurityId, IS_ProcessUrlAction, IS_QueryCustomPolicy, IS_SetZoneMapping, IS_GetZoneMappings};
+static IInternetSecurityManagerVtbl MyInternetSecurityManagerTable = {
+    IS_QueryInterface,  IS_AddRef,           IS_Release,
+    IS_SetSecuritySite, IS_GetSecuritySite,  IS_MapUrlToZone,
+    IS_GetSecurityId,   IS_ProcessUrlAction, IS_QueryCustomPolicy,
+    IS_SetZoneMapping,  IS_GetZoneMappings};
 
-static HRESULT STDMETHODCALLTYPE SP_QueryInterface(IServiceProvider FAR *This, REFIID riid, void **ppvObject) {
+static HRESULT STDMETHODCALLTYPE SP_QueryInterface(IServiceProvider FAR *This,
+                                                   REFIID riid,
+                                                   void **ppvObject) {
   return (Site_QueryInterface(
-      (IOleClientSite *)((char *)This - sizeof(IOleClientSite) - sizeof(_IOleInPlaceSiteEx) - sizeof(_IDocHostUIHandlerEx) - sizeof(IDispatch)), riid, ppvObject));
+      (IOleClientSite *)((char *)This - sizeof(IOleClientSite) -
+                         sizeof(_IOleInPlaceSiteEx) -
+                         sizeof(_IDocHostUIHandlerEx) - sizeof(IDispatch)),
+      riid, ppvObject));
 }
-static ULONG STDMETHODCALLTYPE SP_AddRef(IServiceProvider FAR *This) { return 1; }
-static ULONG STDMETHODCALLTYPE SP_Release(IServiceProvider FAR *This) { return 1; }
-static HRESULT STDMETHODCALLTYPE SP_QueryService(IServiceProvider FAR *This, REFGUID siid, REFIID riid, void **ppvObject) {
-  if (iid_eq(siid, &IID_IInternetSecurityManager) && iid_eq(riid, &IID_IInternetSecurityManager)) {
+static ULONG STDMETHODCALLTYPE SP_AddRef(IServiceProvider FAR *This) {
+  return 1;
+}
+static ULONG STDMETHODCALLTYPE SP_Release(IServiceProvider FAR *This) {
+  return 1;
+}
+static HRESULT STDMETHODCALLTYPE SP_QueryService(IServiceProvider FAR *This,
+                                                 REFGUID siid, REFIID riid,
+                                                 void **ppvObject) {
+  if (iid_eq(siid, &IID_IInternetSecurityManager) &&
+      iid_eq(riid, &IID_IInternetSecurityManager)) {
     *ppvObject = &((_IServiceProviderEx *)This)->mgr;
   } else {
     *ppvObject = 0;
@@ -1010,7 +1045,8 @@ static HRESULT STDMETHODCALLTYPE SP_QueryService(IServiceProvider FAR *This, REF
   }
   return S_OK;
 }
-static IServiceProviderVtbl MyServiceProviderTable = {SP_QueryInterface, SP_AddRef, SP_Release, SP_QueryService};
+static IServiceProviderVtbl MyServiceProviderTable = {
+    SP_QueryInterface, SP_AddRef, SP_Release, SP_QueryService};
 
 static void UnEmbedBrowserObject(struct webview *w) {
   if (w->priv.browser != NULL) {
@@ -1083,7 +1119,7 @@ static int EmbedBrowserObject(struct webview *w) {
 
   printf("bottom: %d", rect.bottom);
   webBrowser2->lpVtbl->put_Left(webBrowser2, 0);
-  webBrowser2->lpVtbl->put_Top(webBrowser2, rect.bottom-520);
+  webBrowser2->lpVtbl->put_Top(webBrowser2, rect.bottom - 520);
   webBrowser2->lpVtbl->put_Width(webBrowser2, rect.right);
   webBrowser2->lpVtbl->put_Height(webBrowser2, rect.bottom);
   webBrowser2->lpVtbl->Release(webBrowser2);
@@ -1142,7 +1178,7 @@ static int DisplayHTMLPage(struct webview *w) {
       webBrowser2->lpVtbl->Release(webBrowser2);
       return (-6);
     }
-    webBrowser2->lpVtbl->put_Silent(webBrowser2,TRUE);
+    webBrowser2->lpVtbl->put_Silent(webBrowser2, TRUE);
     webBrowser2->lpVtbl->Navigate2(webBrowser2, &myURL, 0, 0, 0, 0);
     VariantClear(&myURL);
     if (!isDataURL) {
@@ -1204,58 +1240,54 @@ bool terminated = true;
 
 LRESULT CALLBACK myNewWndProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                               LPARAM lParam) {
-  if(!terminated)                              
-  switch (uMsg) {
-    case WM_LBUTTONDOWN:
-      printf("Button down!");
-      webview_terminate(current_w);
-      
-      break;
-  }
+  if (!terminated) switch (uMsg) {
+      case WM_LBUTTONDOWN:
+        printf("Button down!");
+        webview_terminate(current_w);
+
+        break;
+    }
 
   return CallWindowProc(prevWndProc, hwnd, uMsg, wParam, lParam);
-  //return DefWindowProc(hwnd, uMsg, wParam, lParam);
+  // return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
-
 
 static LRESULT CALLBACK wndproc(HWND hwnd, UINT uMsg, WPARAM wParam,
                                 LPARAM lParam) {
-                                    
   struct webview *w = (struct webview *)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   switch (uMsg) {
-                    
-  case WM_CREATE:
-    w = (struct webview *)((CREATESTRUCT *)lParam)->lpCreateParams;
-    w->priv.hwnd = hwnd;
-    return EmbedBrowserObject(w);
-  case WM_DESTROY:
-    UnEmbedBrowserObject(w);
-    PostQuitMessage(0);
-    return TRUE;
-  case WM_SIZE: {
-    IWebBrowser2 *webBrowser2;
-    IOleObject *browser = *w->priv.browser;
-    if (browser->lpVtbl->QueryInterface(browser, iid_unref(&IID_IWebBrowser2),
-                                        (void **)&webBrowser2) == S_OK) {
-      RECT rect;
-      GetClientRect(hwnd, &rect);
-      webBrowser2->lpVtbl->put_Width(webBrowser2, rect.right);
-      webBrowser2->lpVtbl->put_Height(webBrowser2, rect.bottom);
+    case WM_CREATE:
+      w = (struct webview *)((CREATESTRUCT *)lParam)->lpCreateParams;
+      w->priv.hwnd = hwnd;
+      return EmbedBrowserObject(w);
+    case WM_DESTROY:
+      UnEmbedBrowserObject(w);
+      PostQuitMessage(0);
+      return TRUE;
+    case WM_SIZE: {
+      IWebBrowser2 *webBrowser2;
+      IOleObject *browser = *w->priv.browser;
+      if (browser->lpVtbl->QueryInterface(browser, iid_unref(&IID_IWebBrowser2),
+                                          (void **)&webBrowser2) == S_OK) {
+        RECT rect;
+        GetClientRect(hwnd, &rect);
+        webBrowser2->lpVtbl->put_Width(webBrowser2, rect.right);
+        webBrowser2->lpVtbl->put_Height(webBrowser2, rect.bottom);
+      }
+      return TRUE;
     }
-    return TRUE;
-  }
-  case WM_WEBVIEW_DISPATCH: {
-    webview_dispatch_fn f = (webview_dispatch_fn)wParam;
-    void *arg = (void *)lParam;
-    (*f)(w, arg);
-    return TRUE;
-  }
+    case WM_WEBVIEW_DISPATCH: {
+      webview_dispatch_fn f = (webview_dispatch_fn)wParam;
+      void *arg = (void *)lParam;
+      (*f)(w, arg);
+      return TRUE;
+    }
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-#define WEBVIEW_KEY_FEATURE_BROWSER_EMULATION                                  \
-  "Software\\Microsoft\\Internet "                                             \
+#define WEBVIEW_KEY_FEATURE_BROWSER_EMULATION \
+  "Software\\Microsoft\\Internet "            \
   "Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION"
 
 static int webview_fix_ie_compat_mode() {
@@ -1282,10 +1314,9 @@ static int webview_fix_ie_compat_mode() {
   return 0;
 }
 
-const char* cb_result = nullptr;
+const char *cb_result = nullptr;
 
-void my_cb(struct webview *w, const char *arg)
-{
+void my_cb(struct webview *w, const char *arg) {
   printf("\nmy_cb allback!\n");
   printf(arg);
   cb_result = _strdup(arg);
@@ -1336,25 +1367,28 @@ WEBVIEW_API int webview_init(struct webview *w) {
   rect.left = left;
   rect.bottom = rect.bottom - rect.top + top;
   rect.top = top;
-  printf("Now creating window\n");
-  //SetWindowTextA(GetActiveWindow(), "LOLLOLOLOLOL");
 
   terminated = false;
   current_w = w;
-  w->priv.hwnd =  GetActiveWindow();
+  w->priv.hwnd = GetActiveWindow();
 
   if (!prevWndProc)
     prevWndProc = (WNDPROC)SetWindowLongPtr(w->priv.hwnd, GWLP_WNDPROC,
-                                          (LONG_PTR)&myNewWndProc);
-  printf("done, boom!");
+                                            (LONG_PTR)&myNewWndProc);
 
-  ::SetWindowPos(w->priv.hwnd, 0, 400, 0, 500, 800, SWP_NOOWNERZORDER | SWP_NOZORDER);
-  
-  EmbedBrowserObject(w);
-      // CreateWindowEx(0, classname, w->title, style, rect.left, rect.top,
-      //                rect.right - rect.left, rect.bottom - rect.top,
-      //                HWND_DESKTOP, NULL, hInstance, (void *)w);
- 
+  RECT myrect = {NULL};
+  if (GetWindowRect(w->priv.hwnd, &myrect)) {
+    ::SetWindowPos(w->priv.hwnd, 0, myrect.left, 0, 500, 800,
+                   SWP_NOOWNERZORDER | SWP_NOZORDER);
+  } else
+    ::SetWindowPos(w->priv.hwnd, 0, 0, 0, 500, 800,
+                   SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
+
+    EmbedBrowserObject(w);
+  // CreateWindowEx(0, classname, w->title, style, rect.left, rect.top,
+  //                rect.right - rect.left, rect.bottom - rect.top,
+  //                HWND_DESKTOP, NULL, hInstance, (void *)w);
+
   if (w->priv.hwnd == 0) {
     OleUninitialize();
     return -1;
@@ -1362,7 +1396,6 @@ WEBVIEW_API int webview_init(struct webview *w) {
 
   SetWindowLongPtr(w->priv.hwnd, GWLP_USERDATA, (LONG_PTR)w);
 
-  
   w->external_invoke_cb = my_cb;
 
   DisplayHTMLPage(w);
@@ -1375,8 +1408,6 @@ WEBVIEW_API int webview_init(struct webview *w) {
   return 0;
 }
 
-
-
 WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
   MSG msg;
   if (blocking) {
@@ -1385,32 +1416,32 @@ WEBVIEW_API int webview_loop(struct webview *w, int blocking) {
     PeekMessage(&msg, 0, 0, 0, PM_REMOVE);
   }
   switch (msg.message) {
-  case WM_QUIT:
-    return -1;
-  case WM_COMMAND:
-  case WM_KEYDOWN:
-  case WM_KEYUP: {
-    HRESULT r = S_OK;
-    IWebBrowser2 *webBrowser2;
-    IOleObject *browser = *w->priv.browser;
-    if (browser->lpVtbl->QueryInterface(browser, iid_unref(&IID_IWebBrowser2),
-                                        (void **)&webBrowser2) == S_OK) {
-      IOleInPlaceActiveObject *pIOIPAO;
-      if (browser->lpVtbl->QueryInterface(
-              browser, iid_unref(&IID_IOleInPlaceActiveObject),
-              (void **)&pIOIPAO) == S_OK) {
-        r = pIOIPAO->lpVtbl->TranslateAccelerator(pIOIPAO, &msg);
-        pIOIPAO->lpVtbl->Release(pIOIPAO);
+    case WM_QUIT:
+      return -1;
+    case WM_COMMAND:
+    case WM_KEYDOWN:
+    case WM_KEYUP: {
+      HRESULT r = S_OK;
+      IWebBrowser2 *webBrowser2;
+      IOleObject *browser = *w->priv.browser;
+      if (browser->lpVtbl->QueryInterface(browser, iid_unref(&IID_IWebBrowser2),
+                                          (void **)&webBrowser2) == S_OK) {
+        IOleInPlaceActiveObject *pIOIPAO;
+        if (browser->lpVtbl->QueryInterface(
+                browser, iid_unref(&IID_IOleInPlaceActiveObject),
+                (void **)&pIOIPAO) == S_OK) {
+          r = pIOIPAO->lpVtbl->TranslateAccelerator(pIOIPAO, &msg);
+          pIOIPAO->lpVtbl->Release(pIOIPAO);
+        }
+        webBrowser2->lpVtbl->Release(webBrowser2);
       }
-      webBrowser2->lpVtbl->Release(webBrowser2);
+      if (r != S_FALSE) {
+        break;
+      }
     }
-    if (r != S_FALSE) {
-      break;
-    }
-  }
-  default:
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
+    default:
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
   }
   return 0;
 }
@@ -1503,10 +1534,10 @@ WEBVIEW_API void webview_set_fullscreen(struct webview *w, int fullscreen) {
     MONITORINFO monitor_info;
     SetWindowLong(w->priv.hwnd, GWL_STYLE,
                   w->priv.saved_style & ~(WS_CAPTION | WS_THICKFRAME));
-    SetWindowLong(w->priv.hwnd, GWL_EXSTYLE,
-                  w->priv.saved_ex_style &
-                      ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
-                        WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
+    SetWindowLong(
+        w->priv.hwnd, GWL_EXSTYLE,
+        w->priv.saved_ex_style & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE |
+                                   WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
     monitor_info.cbSize = sizeof(monitor_info);
     GetMonitorInfo(MonitorFromWindow(w->priv.hwnd, MONITOR_DEFAULTTONEAREST),
                    &monitor_info);
@@ -1623,7 +1654,7 @@ WEBVIEW_API void webview_dialog(struct webview *w,
                                 enum webview_dialog_type dlgtype, int flags,
                                 const char *title, const char *arg,
                                 char *result, size_t resultsz) {
-                                  printf("There is a dialog!");
+  printf("There is a dialog!");
   if (dlgtype == WEBVIEW_DIALOG_TYPE_OPEN ||
       dlgtype == WEBVIEW_DIALOG_TYPE_SAVE) {
     IFileDialog *dlg = NULL;
@@ -1692,15 +1723,15 @@ WEBVIEW_API void webview_dialog(struct webview *w,
 #else
     UINT type = MB_OK;
     switch (flags & WEBVIEW_DIALOG_FLAG_ALERT_MASK) {
-    case WEBVIEW_DIALOG_FLAG_INFO:
-      type |= MB_ICONINFORMATION;
-      break;
-    case WEBVIEW_DIALOG_FLAG_WARNING:
-      type |= MB_ICONWARNING;
-      break;
-    case WEBVIEW_DIALOG_FLAG_ERROR:
-      type |= MB_ICONERROR;
-      break;
+      case WEBVIEW_DIALOG_FLAG_INFO:
+        type |= MB_ICONINFORMATION;
+        break;
+      case WEBVIEW_DIALOG_FLAG_WARNING:
+        type |= MB_ICONWARNING;
+        break;
+      case WEBVIEW_DIALOG_FLAG_ERROR:
+        type |= MB_ICONERROR;
+        break;
     }
     MessageBox(w->priv.hwnd, arg, title, type);
 #endif
@@ -1715,7 +1746,7 @@ WEBVIEW_API void webview_terminate(struct webview *w) {
 WEBVIEW_API void webview_exit(struct webview *w) {
   // DestroyWindow(w->priv.hwnd);
   UnEmbedBrowserObject(w);
-  
+
   OleUninitialize();
 }
 
@@ -1782,7 +1813,6 @@ static void webview_external_invoke(id self, SEL cmd, id contentController,
 
 static void run_open_panel(id self, SEL cmd, id webView, id parameters,
                            id frame, void (^completionHandler)(id)) {
-
   id openPanel = objc_msgSend((id)objc_getClass("NSOpenPanel"),
                               sel_registerName("openPanel"));
 
@@ -1823,13 +1853,12 @@ static void run_save_panel(id self, SEL cmd, id download, id filename,
 
 static void run_confirmation_panel(id self, SEL cmd, id webView, id message,
                                    id frame, void (^completionHandler)(bool)) {
-
   id alert =
       objc_msgSend((id)objc_getClass("NSAlert"), sel_registerName("new"));
-  objc_msgSend(alert, sel_registerName("setIcon:"),
-               objc_msgSend((id)objc_getClass("NSImage"),
-                            sel_registerName("imageNamed:"),
-                            get_nsstring("NSCaution")));
+  objc_msgSend(
+      alert, sel_registerName("setIcon:"),
+      objc_msgSend((id)objc_getClass("NSImage"),
+                   sel_registerName("imageNamed:"), get_nsstring("NSCaution")));
   objc_msgSend(alert, sel_registerName("setShowsHelp:"), 0);
   objc_msgSend(alert, sel_registerName("setInformativeText:"), message);
   objc_msgSend(alert, sel_registerName("addButtonWithTitle:"),
@@ -1849,10 +1878,10 @@ static void run_alert_panel(id self, SEL cmd, id webView, id message, id frame,
                             void (^completionHandler)(void)) {
   id alert =
       objc_msgSend((id)objc_getClass("NSAlert"), sel_registerName("new"));
-  objc_msgSend(alert, sel_registerName("setIcon:"),
-               objc_msgSend((id)objc_getClass("NSImage"),
-                            sel_registerName("imageNamed:"),
-                            get_nsstring("NSCaution")));
+  objc_msgSend(
+      alert, sel_registerName("setIcon:"),
+      objc_msgSend((id)objc_getClass("NSImage"),
+                   sel_registerName("imageNamed:"), get_nsstring("NSCaution")));
   objc_msgSend(alert, sel_registerName("setShowsHelp:"), 0);
   objc_msgSend(alert, sel_registerName("setInformativeText:"), message);
   objc_msgSend(alert, sel_registerName("addButtonWithTitle:"),
@@ -2182,7 +2211,6 @@ WEBVIEW_API void webview_set_fullscreen(struct webview *w, int fullscreen) {
 
 WEBVIEW_API void webview_set_color(struct webview *w, uint8_t r, uint8_t g,
                                    uint8_t b, uint8_t a) {
-
   id color = objc_msgSend((id)objc_getClass("NSColor"),
                           sel_registerName("colorWithRed:green:blue:alpha:"),
                           (float)r / 255.0, (float)g / 255.0, (float)b / 255.0,
@@ -2262,18 +2290,20 @@ WEBVIEW_API void webview_dialog(struct webview *w,
   } else if (dlgtype == WEBVIEW_DIALOG_TYPE_ALERT) {
     id a = objc_msgSend((id)objc_getClass("NSAlert"), sel_registerName("new"));
     switch (flags & WEBVIEW_DIALOG_FLAG_ALERT_MASK) {
-    case WEBVIEW_DIALOG_FLAG_INFO:
-      objc_msgSend(a, sel_registerName("setAlertStyle:"),
-                   NSAlertStyleInformational);
-      break;
-    case WEBVIEW_DIALOG_FLAG_WARNING:
-      printf("Warning\n");
-      objc_msgSend(a, sel_registerName("setAlertStyle:"), NSAlertStyleWarning);
-      break;
-    case WEBVIEW_DIALOG_FLAG_ERROR:
-      printf("Error\n");
-      objc_msgSend(a, sel_registerName("setAlertStyle:"), NSAlertStyleCritical);
-      break;
+      case WEBVIEW_DIALOG_FLAG_INFO:
+        objc_msgSend(a, sel_registerName("setAlertStyle:"),
+                     NSAlertStyleInformational);
+        break;
+      case WEBVIEW_DIALOG_FLAG_WARNING:
+        printf("Warning\n");
+        objc_msgSend(a, sel_registerName("setAlertStyle:"),
+                     NSAlertStyleWarning);
+        break;
+      case WEBVIEW_DIALOG_FLAG_ERROR:
+        printf("Error\n");
+        objc_msgSend(a, sel_registerName("setAlertStyle:"),
+                     NSAlertStyleCritical);
+        break;
     }
     objc_msgSend(a, sel_registerName("setShowsHelp:"), 0);
     objc_msgSend(a, sel_registerName("setShowsSuppressionButton:"), 0);

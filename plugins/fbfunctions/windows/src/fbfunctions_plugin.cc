@@ -160,6 +160,19 @@ FBFunctionsPlugin::~FBFunctionsPlugin() {}
 //   return doSomething.Call(data);
 // }
 
+bool signIn(std::string custom_token) {
+  firebase::Future<firebase::auth::User *> sign_in_future =
+      auth->SignInWithCustomToken(custom_token.c_str());
+  WaitForCompletion(sign_in_future, "SignIn");
+  if (sign_in_future.error() == firebase::auth::kAuthErrorNone) {
+    LogMessage("Auth: Signed in as user!");
+    return true;
+  } else {
+    LogMessage("ERROR: Could not sign in anonymously. Error %d: %s",
+               sign_in_future.error(), sign_in_future.error_message());
+    return false;
+  }
+}
 
 void FBFunctionsPlugin::HandleMethodCall(
     const flutter_desktop_embedding::MethodCall<Json::Value> &method_call,
@@ -170,14 +183,30 @@ void FBFunctionsPlugin::HandleMethodCall(
     result->Error("Bad Arguments", "Null file chooser method args received");
     return;
   }
-
-  std::map<std::string, firebase::Variant> data;
+  firebase::Variant variant_result;
   const Json::Value &args = *method_call.arguments();
-  auto members = args.getMemberNames();
-  for(auto it = members.begin(); it!=members.end(); ++it)
-    data[*it] = firebase::Variant(args[*it].asString());
-  firebase::Variant variant_result =
-      callFBFunctionSync(args["methodName"].asString().c_str(), &data);
+  if(args["methodName"] == "authenticate")
+  {
+    LogMessage("Trying to auth user!");
+    
+  std::map<std::string, firebase::Variant> data;
+  data["uid"] = firebase::Variant(myuid);
+  data["auth_secret"] = firebase::Variant(mysecret);
+    std::string customToken;
+    customToken = callFBFunctionSync("getCustomToken", &data).string_value();
+    variant_result = firebase::Variant(signIn(customToken));
+  }
+  else
+  {
+    std::map<std::string, firebase::Variant> data;
+    auto members = args.getMemberNames();
+    for(auto it = members.begin(); it!=members.end(); ++it)
+      data[*it] = firebase::Variant(args[*it].asString());
+    variant_result =
+        callFBFunctionSync(args["methodName"].asString().c_str(), &data);
+  }
+
+  
   
   Json::Value response_object(CreateResponseObject(variant_result));
   result->Success(&response_object);
