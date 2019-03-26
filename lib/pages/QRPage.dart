@@ -16,35 +16,9 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
   AnimationController mainController;
 
  @override
-  Widget build(BuildContext context) {
-    return MainPageTemplateAnimator(
-      mainController: mainController,
-      appBar: null,
-      body: _getBody(),
-      footer: null,
-      backdrop: "assets/main_backdrop.png",
-    );
-  }
-
-  void initState()
+ 
+  Widget build(BuildContext context)
   {
-    super.initState();
-        mainController =
-        AnimationController(duration: Duration(seconds: 30), vsync: this);
-_playFullAnimation();
-  }
-
-  Future<void> _playFullAnimation() async {
-    try {
-      await mainController.forward().orCancel;
-    } on TickerCanceled {
-      // the animation got canceled, probably because we were disposed
-    }
-  }
-
-  Widget _getBody()
-  {
-
     return Column(children: [
       Text("Please scan the QR Code using your League IQ app on your phone to complete the pairing."),
       Expanded(

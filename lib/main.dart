@@ -14,10 +14,12 @@
 
 import 'dart:io' show Platform;
 
+import 'resources/Strings.dart';
 import 'package:Shrine/app.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
+import 'resources/Colors.dart';
 
 void _setTargetPlatformForDesktop() {
   TargetPlatform targetPlatform;
@@ -33,47 +35,69 @@ void _setTargetPlatformForDesktop() {
 
 void main() {  
   _setTargetPlatformForDesktop();
-  runApp(MainApp());
+  runApp(MaterialApp(title: Strings.name, home: MainApp(), theme: _myTheme) );
 }
 
-//class MyClass extends StatefulWidget {
-//  @override
-//  _MyClassState createState() => _MyClassState();
-//}
-//
-//class _MyClassState extends State<MyClass> with TickerProviderStateMixin {
-//  AnimationController controller;
-//  Animation<double> logoPop;
-//
-//  void initState()
-//  {
-//    super.initState();
-//    controller =
-//        AnimationController(duration: Duration(milliseconds: 5000), vsync: this);
-//    logoPop = Tween(begin: 0.0, end: 100.0).animate(
-//      new CurvedAnimation(
-//        parent: controller,
-//        curve: new Interval(
-//          0.0,
-//          0.5,
-//          curve: Curves.elasticOut,
-//        ),
-//      ),
-//    );
-//    controller.forward();
-//  }
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return MaterialApp(home:Scaffold(body:Container(
-//        child: Center(child: PoppingLogoAnimation(
-//          child: Image.asset(
-//            'assets/ic_launcher_foreground.png',
-//            fit: BoxFit.fitHeight,
-//          ),
-//          animation: logoPop,
-//        ))
-//
-//    )));
-//  }
-//}
+
+// TODO: Build a Shrine Theme (103)
+final ThemeData _myTheme = _buildMyTheme();
+
+ThemeData _buildMyTheme() {
+  final ThemeData base = ThemeData.dark();
+  return base.copyWith(
+//    accentColor: kShrineBrown900,
+//    primaryColor: bgDark,
+    buttonTheme: base.buttonTheme.copyWith(
+      buttonColor: buttonDark,
+      textTheme: ButtonTextTheme.normal,
+    ),
+//    scaffoldBackgroundColor: kShrineBackgroundWhite,
+    textSelectionColor: kShrinePink100,
+    errorColor: kShrineErrorRed,
+    textTheme: _buildShrineTextTheme(base.textTheme),
+    primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
+    accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
+//    primaryIconTheme: base.iconTheme.copyWith(
+//        color: kShrineBrown900
+//    ),
+  );
+}
+
+// TODO: Build a Shrine Text Theme (103)
+TextTheme _buildShrineTextTheme(TextTheme base) {
+  return base
+      .copyWith(
+        headline: base.headline
+            .copyWith(fontWeight: FontWeight.w500, color: primaryText),
+        title: base.title.copyWith(fontSize: 18.0, color: primaryText),
+        display1: base.display1.copyWith(
+          fontWeight: FontWeight.w500,
+          fontSize: 16.0,
+          color: primaryText,
+        ),
+        caption: base.caption.copyWith(
+          fontWeight: FontWeight.w300,
+          fontSize: 13.0,
+          color: primaryText,
+        ),
+        body1: base.body1.copyWith(
+          fontWeight: FontWeight.w300,
+          fontSize: 16.0,
+          color: primaryText,
+          letterSpacing: 1.1
+        ),
+        body2: base.body2.copyWith(
+          fontWeight: FontWeight.w300,
+          fontSize: 14.0,
+          color: secondaryText,
+          letterSpacing: 1.1
+        ),
+        subtitle: base.subtitle.copyWith(
+            fontWeight: FontWeight.w500, fontSize: 14.0, color: secondaryText, letterSpacing: 1.3),
+        overline: base.overline.copyWith(
+            fontWeight: FontWeight.w300, fontSize: 13.0, color: secondaryText),
+      )
+      .apply(fontFamily: 'Roboto'
+//    bodyColor: kShrineBrown900,
+          );
+}

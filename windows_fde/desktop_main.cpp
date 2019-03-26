@@ -92,17 +92,20 @@ firebase::Variant callFBFunctionSync(
   caller = functions->GetHttpsCallable(functionName);
   { future = data ? caller.Call(*data) : caller.Call(); }
   WaitForCompletion(future, "Call");
+  firebase::Variant result;
   if (future.error() != firebase::functions::kErrorNone) {
     LogMessage("FAILED!");
     LogMessage("  Error %d: %s", future.error(), future.error_message());
+    result = firebase::Variant();
   } else {
-    firebase::Variant result = future.result()->data();
+    result = future.result()->data();
 
     // std::string result_string = result.string_value();
     // LogMessage("SUCCESS.");
     // LogMessage("  Got expected result: %s", result_string.c_str());
-    return result;
+    
   }
+  return result;
 }
 
 // Change the current working directory to the directory containing the

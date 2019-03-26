@@ -14,10 +14,21 @@ class Strings {
   static const String remaining = "You have N predictions remaining today";
 
 
-  static const List<String> pitch = [
-    "• Unlimited recommendations",
-    "• No ads",
-    "• Win more games!",
+  static const List<List<String>> pitch = [
+  ["Full access",
+  "Unlimited recommendations, no ads, max visibility"]
+,
+  ["Best next item in any situation",
+  "Recommendations are dynamic based on your champ, team composition, itemization and enemy team"]
+,
+  ["Real-time, in-game",
+  "No more memorizing static build-paths that don't apply to the game situation and are outdated after 14 days."]
+,
+  ["Trained by the best",
+  "Powerful AI trained with hundreds of thousands of Korean grandmaster games"]
+,
+  ["Always up to date",
+  "Constantly updated to the latest meta as new patches are released"]
   ];
 
   static const String sub_price = "Subscribe \$4.99";

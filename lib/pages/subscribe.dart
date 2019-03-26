@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:btnonce/btnonce.dart' as btnonce;
 import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
@@ -10,6 +11,7 @@ import '../pages/main_page_template.dart';
 import '../resources/Strings.dart';
 //import '../widgets/confirm_dialog.dart';
 import '../widgets/items_list.dart';
+import '../widgets/appbar.dart';
 import '../supplemental/utils.dart';
 
 
@@ -36,10 +38,7 @@ class PaymentException implements Exception {
 }
 
 class SubscribePage extends StatefulWidget {
-
-  final String desktopUID;
-
-  SubscribePage({this.desktopUID = null});
+  SubscribePage();
 
   @override
   _SubscribePageState createState() => _SubscribePageState();
@@ -67,12 +66,17 @@ class _SubscribePageState extends State<SubscribePage>
   var scaffoldKey;
   bool subButtonPressed = false;
   MyDialog myDialog = null;
+  String background;
 
   AnimationController mainController;
   AnimationController mainBodyController;
 
   void initState() {
     super.initState();
+
+    var list = ['assets/lol1.png', 'assets/lol2.png', 'assets/lol3.png', 'assets/lol4.png','assets/lol5.png'];
+    final _random = new Random();
+    background = list[_random.nextInt(list.length)];
 
     if (Platform.isAndroid || Platform.isIOS)
       _clientToken =
@@ -84,7 +88,7 @@ class _SubscribePageState extends State<SubscribePage>
     }
 
     mainController =
-        AnimationController(duration: Duration(milliseconds: 1500), vsync: this);
+        AnimationController(duration: Duration(milliseconds: 3500), vsync: this);
     mainBodyController =
         AnimationController(duration: Duration(milliseconds: 2500), vsync: this);
     _playAnimation();
@@ -101,7 +105,9 @@ class _SubscribePageState extends State<SubscribePage>
       mainController.reset();
       mainBodyController.reset();
       mainController.forward().orCancel;
-      _playListAnimation();
+      Future.delayed(
+       const Duration(seconds: 1),
+       (){ _playListAnimation();});
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
@@ -187,14 +193,22 @@ class _SubscribePageState extends State<SubscribePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        p,
+                        p[0],
                         textAlign: TextAlign.start,
-                        style: theme.textTheme.body1,
+                        style: theme.textTheme.display1,
+                      ),
+                      SizedBox(
+                              height: 4,
+                            ),
+                      Text(
+                        p[1],
+                        textAlign: TextAlign.start,
+                        style: theme.textTheme.body2,
                       ),
                       ++counter == Strings.pitch.length
                           ? null
                           : SizedBox(
-                              height: 64,
+                              height: 16,
                             ),
                     ].where(notNull).toList()))
                 .toList(),
@@ -203,12 +217,10 @@ class _SubscribePageState extends State<SubscribePage>
   }
 
   Widget _buildAppBar(BuildContext context) {
-    return AppBar(
-      leading: new IconButton(
-          icon: new Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          }),
+    return BasicAppBar(
+      false,
+      null,
+      true
     );
   }
 
@@ -244,10 +256,11 @@ class _SubscribePageState extends State<SubscribePage>
           else
           {
             String nonce = await getDesktopNonce();
-            if(nonce == null)
-              break;
-            nonceDesc = List<String>();
-            nonceDesc.add(nonce);
+            if(nonce != null)
+            {
+              nonceDesc = List<String>();
+              nonceDesc.add(nonce);
+            }
           }
           //user tapped elsewhere on the screen dismissing the modal
           if(nonceDesc == null)
@@ -328,13 +341,14 @@ class _SubscribePageState extends State<SubscribePage>
 
   @override
   Widget build(BuildContext context) {
+    
     var mainPage = MainPageTemplateAnimator(
       mainController: mainController,
       appBar: _buildAppBar(context),
       body: _buildBody(context),
       mainBodyController: mainBodyController,
       footer: _buildFooter(context),
-      backdrop: 'assets/subscribe_backdrop.png',
+      backdrop: background,
     );
     scaffoldKey = mainPage.scaffoldKey;
     return mainPage;

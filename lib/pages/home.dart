@@ -17,115 +17,47 @@ import 'dart:io' show Platform;
 import 'dart:io';
 import 'package:http/http.dart' as http;
 
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
 import 'package:firebase_admob/firebase_admob.dart';
-import 'package:qrcode_reader/qrcode_reader.dart';
-import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
 import '../pages/main_page_template.dart';
-import '../pages/subscribe.dart';
 import '../resources/Strings.dart';
-import '../widgets/appbar.dart';
 import '../widgets/items_list.dart';
 import '../resources/ads.dart';
 import '../supplemental/utils.dart';
+import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
 
 bool notNull(Object o) => o != null;
 
 class HomePage extends StatefulWidget {
-  final Future<String> desktopUID;
-  final bool paired;
-  HomePage({this.desktopUID, this.paired = true});
+  final bool hasSubscription;
+  final String remaining;
+  final AnimationController mainBodyController;
+  HomePage({this.hasSubscription = false, this.remaining, this.mainBodyController});
 
   @override
   _HomePageState createState() => new _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> {
   final ItemsRepository itemsRepo = new ItemsRepository();
   List<Item> _items;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  String _remaining = '';
-  bool hasSubscription = false;
-  bool paired;
+  String _remaining;
+  bool hasSubscription;
+ 
   Ads ads;
-  BannerAd ad;
-  Future<String> desktopUID;
-  bool errorOccurred = false;
-  bool waitingForPairingToComplete = false;
-
-  AnimationController mainController;
-  AnimationController mainBodyController;
-
-  void checkIfUserHasSubscription() async {
-
-    
-    
-    print("isValid");
-    dynamic resp;
-    if (Platform.isIOS || Platform.isAndroid)
-    {
-      String deviceID = await _firebaseMessaging.getToken();
-      print("Got device_id: $deviceID");
-    assert(deviceID != null);
-      resp = CloudFunctions.instance
-        .call(functionName: 'isValid',
-        parameters: <String, dynamic>{"device_id": deviceID});
-    }
-    else
-      resp =  fbfunctions.fb_call(methodName: 'isValid');
-        
-    resp.then((dynamic remaining) {
-      setState(() {
-        print("isValid returned");
-        print(remaining);
-
-        var parsed = remaining.split(',');
-        if (parsed[1] == "false") paired = false;
-        print("isValid: $remaining paired:");
-        print(paired ? "true" : "false");
-        if (remaining.startsWith("true")) {
-          print("user has a subscription");
-          hasSubscription = true;
-        } else {
-          hasSubscription = false;
-          _remaining = parsed[0];
-
-          // ads.getBannerAd().then((BannerAd newAd) {
-          //   ad = newAd;
-          //   ad.show();
-          // });
-        }
-      });
-    }).catchError((e) {
-      print("isvalid ERROR " + e.error);
-      setState(() {
-        _remaining = "10";
-        ads.getBannerAd().then((BannerAd newAd) {
-          ad = newAd;
-          ad.show();
-        });
-      });
-    });
-  }
+  BannerAd ad;  
 
   void initState() {
 
     super.initState();
 
-    print("Calling initstate now");
-    paired = widget.paired;
-    mainController =
-        AnimationController(duration: Duration(milliseconds: 1500), vsync: this);
-
-    mainBodyController =
-        AnimationController(duration: Duration(milliseconds: 2500), vsync: this);
-    initialLogin();
+    _remaining = widget.remaining;
+    hasSubscription = widget.hasSubscription;
 
     if (Platform.isAndroid || Platform.isIOS) {
       initFirebaseMessaging();
@@ -136,75 +68,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   }
 
-  void initialLogin() async {
-    checkIfUserHasSubscription();
-    _playFullAnimation();
-  }
-
-  Future<void> _playFullAnimation() async {
-    try {
-      mainController.reset();
-      mainBodyController.reset();
-      mainController.forward().orCancel;
-      _playListAnimation();
-    } on TickerCanceled {
-      // the animation got canceled, probably because we were disposed
-    }
-  }
-
-
-
   Future<void> _playListAnimation() async {
     try {
-      mainBodyController.reset();
-      await mainBodyController.forward().orCancel;
+      widget.mainBodyController.reset();
+      await widget.mainBodyController.forward().orCancel;
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
   }
 
   void dispose() {
-    mainBodyController.dispose();
-    mainController.dispose();
     ad?.dispose();
     super.dispose();
   }
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-    //its the pairing confirmation message
-    if (message['notification']['title'] == "PAIRING SUCCESSFUL") {
-      showDialog<Null>(
-        context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (BuildContext context) => AlertDialog(
-              title: Text("Success"),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("Pairing successful"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  RaisedButton(
-                    child: Text("OK"),
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
-      );
-
-      setState(() {
-        paired = true;
-      });
-      _playFullAnimation();
-
-      return;
-    }
-
     String content = message['notification']['body'];
     //its a new build recommendation
     List<String> itemsS = content.split(",");
@@ -241,10 +119,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
         print("Contents: " + contents);
 
-        var url =
-            "https://us-central1-neuralleague.cloudfunctions.net/relayMessage";
-        var body = {"uid": await widget.desktopUID, "items": contents};
-        http.post(url, body: body).then((response) {
+        fbfunctions.fb_call(methodName: 'relayMessage', args:<String, dynamic>{"items": contents})
+        .then((response) {
           print("Response status: ${response.statusCode}");
           print("Response body: ${response.body}");
 
@@ -281,78 +157,16 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         _handleNewMessageIncoming(message);
       },
     );
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-    print("FCM configured!");
-//    Future.delayed(
-//        const Duration(seconds: 5),
-//        () => Timer.periodic(
-//            Duration(seconds: 10),
-//            (Timer t) => _handleNewMessageIncoming(<String, dynamic>{
-//                  'aps': <String, dynamic>{
-//                    'alert': <String, dynamic>{'body': "1,2,3,4,5,6,7,8"}
-//                  }
-//                })));
   }
 
-  void _unsubscribe() {
-    print('unsubscribe');
-    dynamic resp;
-    if (Platform.isIOS || Platform.isAndroid)
-    {
-      resp = CloudFunctions.instance
-        .call(functionName: 'cancelSub');
-    }
-    else
-      resp =  fbfunctions.fb_call(methodName: 'cancelSub');
-
-    resp.then((dynamic result) {
-      setState(() {
-        print("Unsubscribe done: $result");
-        if(result is bool) print("It is a bool");
-        hasSubscription = false;
-        _remaining = "10";
-        onReload();
-      });
-    });
-  }
-
-  void _myaccount() {
-    print('myaccount');
-  }
-
-  Widget _myAppBar() {
-    var choices = <Choice>[
-      hasSubscription
-          ? Choice(
-              title: 'My Account',
-              icon: Icons.directions_boat,
-              action: _myaccount)
-          : null,
-      hasSubscription
-          ? Choice(
-              title: 'Unsubscribe',
-              icon: Icons.directions_bike,
-              action: _unsubscribe)
-          : null,
-      Choice(
-          title: 'Logout', icon: Icons.directions_car, action: signOutProviders)
-    ].where(notNull).toList();
-    return BasicAppBar(false, choices);
-  }
 
   Widget _buildInstructions(
-      BuildContext context, Animation<double> mainBodyController) {
+      BuildContext context) {
     int counter = 0;
     ThemeData theme = Theme.of(context);
 
-    print("Now building slidinglist");
     return SlidingList(
-        title: "Instructions",
+        title: "INSTRUCTIONS",
         children: Strings.instructions
             .map((p) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,40 +179,41 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ++counter == Strings.instructions.length
                       ? null
                       : SizedBox(
-                          height: 64,
+                          height: 72,
                         ),
                 ].where(notNull).toList()))
             .toList(),
-        animationController: mainBodyController,
+        animationController: widget.mainBodyController,
         origin: Offset(10, 0));
   }
 
-  Widget _getBody(BuildContext context) {
-    if (errorOccurred)
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          // return object of type Dialog
-          return AlertDialog(
-            title: new Text("Error"),
-            content: new Text(
-                "Unable to find user id. Make sure to create an account on the mobile app first. Then redownload and reinstall this desktop app."),
-            actions: <Widget>[
-              // usually buttons at the bottom of the dialog
-              new FlatButton(
-                child: new Text("Close"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+  Widget build(BuildContext context) {
+    // if (errorOccurred)
+    //   showDialog(
+    //     context: context,
+    //     builder: (BuildContext context) {
+    //       // return object of type Dialog
+    //       return AlertDialog(
+    //         title: new Text("Error"),
+    //         content: new Text(
+    //             "Unable to find user id. Make sure to create an account on the mobile app first. Then redownload and reinstall this desktop app."),
+    //         actions: <Widget>[
+    //           // usually buttons at the bottom of the dialog
+    //           new FlatButton(
+    //             child: new Text("Close"),
+    //             onPressed: () {
+    //               Navigator.of(context).pop();
+    //             },
+    //           ),
+    //         ],
+    //       );
+    //     },
+    //   );
+    print("Building home.dart");
     var mainContent;
     if (_items == null)
       mainContent =
-          Container(child: _buildInstructions(context, mainBodyController));
+          Container(child: _buildInstructions(context));
     else {
       int counter = 0;
       var listItems = _items.map((item) {
@@ -408,121 +223,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       mainContent = SlidingList(
           title: Strings.buildRec,
           children: listItems,
-          animationController: mainBodyController);
+          animationController: widget.mainBodyController);
     }
 
     return mainContent;
 
 //    return Container(
 //        margin: EdgeInsets.symmetric(horizontal: 20), child: mainContent);
-  }
-
-  Widget _getFooter(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    if (hasSubscription)
-      return null;
-    else
-      return Container(
-        margin: const EdgeInsets.symmetric(vertical: 20),
-        child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Text(
-                  Strings.remaining.replaceAll("N", _remaining),
-                  style: theme.textTheme.subtitle,
-                  maxLines: 1,
-                ),
-                SizedBox(height: 8),
-                 RaisedButton(
-                        child: Text(Strings.sub),
-                        onPressed: () async {
-                          print("Here's the ad we're disposing: $ad");
-                          ad?.dispose();
-                          String uid = await desktopUID;
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SubscribePage(desktopUID: (Platform.isAndroid || Platform.isIOS) ? null : uid)),
-                          );
-                          onReload();
-                        },
-                      )
-                    
-              ]),
-            )),
-      );
-  }
-
-  void onReload() {
-    _playFullAnimation();
-    checkIfUserHasSubscription();
-  }
-
-  Widget buildHomePage() {
-    return MainPageTemplateAnimator(
-      mainController: mainController,
-      appBar: (Platform.isAndroid || Platform.isIOS) ? _myAppBar() : null,
-      body: _getBody(context),
-      mainBodyController: mainBodyController,
-      footer: _getFooter(context),
-      backdrop: "assets/main_backdrop.png",
-    );
-  }
-
-  void triggerPairing() async {
-    String realtimeDBID = await QRCodeReader()
-        .setAutoFocusIntervalInMs(200)
-        .setForceAutoFocus(true)
-        .setTorchEnabled(true)
-        .setHandlePermissions(true)
-        .setExecuteAfterPermissionGranted(true)
-        .scan();
-
-    print("Obtained the realtimeDBID: " + realtimeDBID);
-
-    CloudFunctions.instance.call(
-      functionName: 'passUIDtoDesktop',
-      parameters: <String, dynamic>{
-        'realtimeDBID': realtimeDBID,
-      },
-    ).then((dynamic result) {
-      if (result != "SUCCESS")
-        displayErrorDialog(context, "Pairing unsuccessful1. Please try again");
-      else
-        displayWaitingModal(context, "Trying to reach desktop app now...");
-    }).catchError((e) {
-      print("ERROR " + e.message);
-      displayErrorDialog(context, "Pairing unsuccessful2. Please try again");
-    });
-  }
-
-  Widget getPairingPageContent(BuildContext context) {
-    return Column(children: [
-      Text(Strings.pairingInstructions),
-      RaisedButton(child: Text("Pair Now"), onPressed: triggerPairing)
-    ]);
-  }
-
-  Widget buildPairingPage(BuildContext context) {
-    return MainPageTemplateAnimator(
-      mainController: mainController,
-      appBar: _myAppBar(),
-      body: getPairingPageContent(context),
-      mainBodyController: null,
-      footer: _getFooter(context),
-      backdrop: "assets/main_backdrop.png",
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print("Rebuild home page. Paired: ");
-    print(paired);
-    if (paired)
-      return buildHomePage();
-    else
-      return buildPairingPage(context);
-  }
+  }  
 }

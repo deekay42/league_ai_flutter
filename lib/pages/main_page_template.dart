@@ -22,16 +22,6 @@ class MainPageTemplateAnimator extends StatelessWidget {
       : animationController = MainPageTemplateAnimations(
             controller: mainController,
             mainBodyController: mainBodyController) {
-//    animationController.logoPop.addStatusListener((status) async {
-//      if (status == AnimationStatus.completed) {
-//        try {
-//          print("NOW");
-//          await animationController.mainBodyController?.forward()?.orCancel;
-//        } on TickerCanceled {
-//          // the animation got canceled, probably because we were disposed
-//        }
-//      }
-//    });
   }
 
   @override
@@ -61,7 +51,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                     sigmaY: animationController.backdropBlur.value,
                   ),
                   child: Container(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withOpacity(0.2),
                         child: Container(
                             margin:
                                 const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -70,9 +60,9 @@ class MainPageTemplateAnimator extends StatelessWidget {
                                 child: Container(),
                                 flex: 3,
                               ),
-                              Expanded(
-                                child: body,
-                                flex: 7,
+                              Flexible(
+                                fit: FlexFit.loose,
+                                child: body,                                
                               ),
                               Expanded(child: Container(), flex:5),
                             ])))
@@ -109,12 +99,12 @@ class MainPageTemplateAnimator extends StatelessWidget {
 class MainPageTemplateAnimations {
   MainPageTemplateAnimations(
       {@required this.controller, this.mainBodyController})
-      : backdropOpacity = new Tween(begin: 0.5, end: 1.0).animate(
+      : backdropOpacity = new Tween(begin: 1.0, end: 0.5).animate(
           new CurvedAnimation(
             parent: controller,
             curve: Interval(
-              0.25,
-              0.75,
+              0.0,
+              1.0,
               curve: Curves.ease,
             ),
           ),
@@ -133,7 +123,7 @@ class MainPageTemplateAnimations {
           new CurvedAnimation(
             parent: controller,
             curve: new Interval(
-              0.2,
+              0.4,
               0.7,
               curve: Curves.elasticOut,
             ),

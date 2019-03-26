@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import '../model/item.dart';
 import '../resources/Colors.dart';
@@ -36,7 +37,7 @@ class _SlidingListState extends State<SlidingList>
   @override
   void initState() {
     super.initState();
-
+  print("Nimationsctronoler: ${widget.animationController}");
     animations = SlidingListAnimations(
         controller: widget.animationController,
         origin: widget.origin,

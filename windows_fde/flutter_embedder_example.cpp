@@ -320,9 +320,18 @@ int runFlutterCode() {
       icu_data_path);
 
   // Start the engine.
-  if (!flutter_controller.CreateWindow(640, 480, assets_path, arguments)) {
+  if (!flutter_controller.CreateWindow(500, 800, assets_path, arguments)) {
     return EXIT_FAILURE;
   }
+  HWND flutterWindow = GetActiveWindow();
+
+  RECT myrect = {NULL};
+  if (GetWindowRect(flutterWindow, &myrect)) {
+    ::SetWindowPos(flutterWindow, 0, myrect.left, 0, 500, 800,
+                   SWP_NOOWNERZORDER | SWP_NOZORDER);
+  } else
+    ::SetWindowPos(flutterWindow, 0, 0, 0, 500, 800,
+                   SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
 
   BTNonceRegisterWithRegistrar(
       flutter_controller.GetRegistrarForPlugin("BTNonce"));
@@ -401,17 +410,7 @@ void initializeFirebase() {
   //   functions->UseFunctionsEmulator("http://10.0.2.2:5005");
 }
 
-void signIn(std::string custom_token) {
-  firebase::Future<firebase::auth::User *> sign_in_future =
-      auth->SignInWithCustomToken(custom_token.c_str());
-  WaitForCompletion(sign_in_future, "SignIn");
-  if (sign_in_future.error() == firebase::auth::kAuthErrorNone) {
-    LogMessage("Auth: Signed in as user!");
-  } else {
-    LogMessage("ERROR: Could not sign in anonymously. Error %d: %s",
-               sign_in_future.error(), sign_in_future.error_message());
-  }
-}
+
 
 void shutdownFirebase() {
   LogMessage("Shutting down the Functions library.");
@@ -446,13 +445,7 @@ extern "C" int common_main(int argc, const char *argv[]) {
   std::cout << "got the uid and the secret:" << myuid << " " << mysecret
             << std::endl;
 
-  std::map<std::string, firebase::Variant> data;
-  data["uid"] = firebase::Variant(myuid);
-  data["auth_secret"] = firebase::Variant(mysecret);
-  std::string customToken;
-  customToken = callFBFunctionSync("getCustomToken", &data).string_value();
-
-  signIn(customToken);
+  
 
   runFlutterCode();
 

@@ -16,6 +16,8 @@ extern firebase::Future<firebase::auth::User *> user_future;
 extern firebase::auth::User *user;
 extern ::firebase::functions::Functions *functions;
 extern ::firebase::auth::Auth *auth;
+extern std::string myuid;
+extern std::string mysecret;
 
 
 // Wait for a Future to be completed. If the Future returns an error, it will
