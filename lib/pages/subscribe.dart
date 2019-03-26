@@ -184,9 +184,7 @@ class _SubscribePageState extends State<SubscribePage>
     int counter = 0;
     ThemeData theme = Theme.of(context);
 
-    return Container(
-        margin: EdgeInsets.symmetric(horizontal: 20),
-        child: SlidingList(
+    return  SlidingList(
             title: "",
             children: Strings.pitch
                 .map((p) => Column(
@@ -208,12 +206,12 @@ class _SubscribePageState extends State<SubscribePage>
                       ++counter == Strings.pitch.length
                           ? null
                           : SizedBox(
-                              height: 16,
+                              height: 42,
                             ),
                     ].where(notNull).toList()))
                 .toList(),
             animationController: mainBodyController,
-            origin: Offset(10, 0)));
+            origin: Offset(10, 0));
   }
 
   Widget _buildAppBar(BuildContext context) {
@@ -305,7 +303,7 @@ class _SubscribePageState extends State<SubscribePage>
 
   Widget _buildFooter(BuildContext context)
   {
-    return RaisedButton(
+    return Column(children:[SizedBox(height:12), RaisedButton(
       child: Text(Strings.sub_price),
       onPressed: () async {
         if(subButtonPressed)
@@ -336,7 +334,7 @@ class _SubscribePageState extends State<SubscribePage>
               subButtonPressed = false;
             }
       },
-    );
+    )]);
   }
 
   @override

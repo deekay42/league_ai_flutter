@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage> {
     var mainContent;
     if (_items == null)
       mainContent =
-          Container(child: _buildInstructions(context));
+          _buildInstructions(context);
     else {
       int counter = 0;
       var listItems = _items.map((item) {

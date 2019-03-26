@@ -96,7 +96,7 @@ class _SlidingListState extends State<SlidingList>
 
     return LayoutBuilder(builder: (context, constraints) {
       animations.setDivLength(constraints.maxWidth);
-      return Column(key: key2, children: [
+      return Column(key: key2, mainAxisAlignment:MainAxisAlignment.center, children: [
             Text(
               widget.title,
               style: theme.textTheme.subtitle,
@@ -112,7 +112,7 @@ class _SlidingListState extends State<SlidingList>
                   width: animations.dividerLength.value,
                   height: 1.0,
                 )),
-            Expanded(child:mainList),
+            Flexible(fit:FlexFit.loose, child:mainList),
             SlideTransition(
                 position: animations.lowerDivDy,
                 child: Container(

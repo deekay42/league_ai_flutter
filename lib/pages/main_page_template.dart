@@ -56,23 +56,25 @@ class MainPageTemplateAnimator extends StatelessWidget {
                             margin:
                                 const EdgeInsets.only(left: 20.0, right: 20.0),
                             child: Column(children: [
+                              SizedBox(height:100),
                               Expanded(
-                                child: Container(),
-                                flex: 3,
+
+                                child:Align(child:body, alignment:Alignment.center)
+                                                            
                               ),
-                              Flexible(
-                                fit: FlexFit.loose,
-                                child: body,                                
+                              Container(
+                                alignment: Alignment.bottomCenter,
+                                margin: const EdgeInsets.only(bottom: 50),
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: footer,
+                                ),
                               ),
-                              Expanded(child: Container(), flex:5),
                             ])))
                   ,
                 ),
-                Container(
-                    child: Column(children: [
-                  Expanded(
-                      flex: 1,
-                      child: Padding(
+                Positioned( top:0.0, height:100.0,
+                    child: Padding(
                           padding: EdgeInsets.only(top: 15),
                           child: PoppingLogoAnimation(
                             child: Image.asset(
@@ -80,18 +82,10 @@ class MainPageTemplateAnimator extends StatelessWidget {
                               fit: BoxFit.fitHeight,
                             ),
                             animation: animationController.logoPop,
-                          ))),
-                  Expanded(child: Container(), flex: 5)
-                ])),
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  margin: const EdgeInsets.only(bottom: 50),
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: footer,
-                  ),
-                )
-              ],
+                          )))
+                  
+              ]             
+              
             ));
   }
 }

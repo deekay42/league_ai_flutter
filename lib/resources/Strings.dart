@@ -3,8 +3,13 @@ class Strings {
   static const String buildRec = "You should build these items:";
   static const String sub = "Subscribe";
   static const List<String> instructions = ["1. Start your League IQ Desktop client",
-  "2. While in-game, sort your scoreboard (Press Tab) by dragging the players into this order: Top, Jg, Mid, Bot, Sup",
-  "3. Press Tab + F12 while in-game for the next recommendation",
+  "2. While in-game, sort your scoreboard (Press <Tab>) into this order: Top, Jg, Mid, Bot, Sup",
+  "3. Press Tab + F12 while in-game for the next recommendation, typically while channeling Back.",
+  ];
+
+  static const List<String> instructionsDesktop = ["1. Start the League IQ app on your phone or drag this window on your second screen so the game does not cover it",
+  "2. While in-game, sort your scoreboard (Press <Tab>) into this order: Top, Jg, Mid, Bot, Sup",
+  "3. Press Tab + F12 while in-game for the next recommendation, typically while backing.",
   ];
   static const String pairingInstructions = "It looks like your phone hasn't been paired with your desktop client yet. Please scan the QR code on your desktop app to complete the pairing.";
 
@@ -25,7 +30,7 @@ class Strings {
   "No more memorizing static build-paths that don't apply to the game situation and are outdated after 14 days."]
 ,
   ["Trained by the best",
-  "Powerful AI trained with hundreds of thousands of Korean grandmaster games"]
+  "Powerful AI trained with millions of game situations by Korean grandmasters"]
 ,
   ["Always up to date",
   "Constantly updated to the latest meta as new patches are released"]
