@@ -20,6 +20,8 @@ dependencies:
     path: ../plugins/btnonce
   fbfunctions:
     path: ../plugins/fbfunctions
+  launchbrowser:
+    path: ../plugins/launchbrowser
 
 
   flutter_firebase_ui:

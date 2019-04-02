@@ -51,7 +51,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\build\windows_fde\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows_fde\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir);$(ProjectDir)..\..\;$(IncludePath);$(ProjectDir)..\..\out\include\;$(ProjectDir)..\..\out\fde_cpp_wrapper\include;C:\Users\Dom\code\flutter-desktop-embedding\library\;C:\Users\Dom\code\flutter-desktop-embedding\library\include;C:\Users\Dom\code\flutter-desktop-embedding\third_party\jsoncpp\src\include;C:\Users\Dom\code\flutter-desktop-embedding\plugins\fbfunctions\windows\include;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows\src;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows\include\btnonce;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows\include;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows;C:\Users\Dom\code\flutter-desktop-embedding\plugins;C:\Users\Dom\code\firebase_cpp_sdk\include;C:\Program Files\Python37\include</IncludePath>
+    <IncludePath>C:\Users\Dom\code\flutter-desktop-embedding\plugins\launchbrowser\windows\include;$(ProjectDir);$(ProjectDir)..\..\;$(IncludePath);$(ProjectDir)..\..\out\include\;$(ProjectDir)..\..\out\fde_cpp_wrapper\include;C:\Users\Dom\code\flutter-desktop-embedding\library\;C:\Users\Dom\code\flutter-desktop-embedding\library\include;C:\Users\Dom\code\flutter-desktop-embedding\third_party\jsoncpp\src\include;C:\Users\Dom\code\flutter-desktop-embedding\plugins\fbfunctions\windows\include;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows\src;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows\include\btnonce;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows\include;C:\Users\Dom\code\flutter-desktop-embedding\plugins\btnonce\windows;C:\Users\Dom\code\flutter-desktop-embedding\plugins;C:\Users\Dom\code\firebase_cpp_sdk\include;C:\Program Files\Python37\include</IncludePath>
     <LibraryPath>$(ProjectDir)..\..\out;$(ProjectDir)..\..\out\gen\glfw\GLFW\;$(LibraryPath);C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x86\Release;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows;C:\Program Files\Python37;C:\Program Files\Python37\libs;$(ProjectDir)..\..\out;$(ProjectDir)..\..\out\gen\glfw\GLFW\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -151,6 +151,8 @@
     <ClCompile Include="..\..\plugins\btnonce\windows\src\btnonce_plugin.cc" />
     <ClCompile Include="..\..\plugins\fbfunctions\common\fb_channel_constants.cc" />
     <ClCompile Include="..\..\plugins\fbfunctions\windows\src\fbfunctions_plugin.cc" />
+    <ClCompile Include="..\..\plugins\launchbrowser\common\lb_channel_constants.cc" />
+    <ClCompile Include="..\..\plugins\launchbrowser\windows\src\launchbrowser_plugin.cc" />
     <ClCompile Include="..\..\third_party\jsoncpp\src\src\lib_json\json_reader.cpp" />
     <ClCompile Include="..\..\third_party\jsoncpp\src\src\lib_json\json_value.cpp" />
     <ClCompile Include="..\..\third_party\jsoncpp\src\src\lib_json\json_writer.cpp" />

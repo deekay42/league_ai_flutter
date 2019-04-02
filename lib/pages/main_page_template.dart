@@ -10,6 +10,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
   final Widget footer;
   final String backdrop;
   final MainPageTemplateAnimations animationController;
+  final Widget bottomSheet;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   MainPageTemplateAnimator(
@@ -18,7 +19,8 @@ class MainPageTemplateAnimator extends StatelessWidget {
       @required this.body,
       AnimationController mainBodyController,
       this.footer,
-      @required this.backdrop})
+      @required this.backdrop,
+      this.bottomSheet})
       : animationController = MainPageTemplateAnimations(
             controller: mainController,
             mainBodyController: mainBodyController) {
@@ -28,7 +30,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
   Widget build(BuildContext context) {
     print("Rebuild main page template");
     return Scaffold(
-        key: scaffoldKey, appBar: appBar, body: _buildAnimation(context));
+        key: scaffoldKey, appBar: appBar, body: _buildAnimation(context), bottomSheet:bottomSheet);
   }
 
   Widget _buildAnimation(BuildContext context) {

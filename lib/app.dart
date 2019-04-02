@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import 'package:launchbrowser/launchbrowser.dart' as launchbrowser;
 import 'widgets/appbar.dart';
 import 'pages/main_page_template.dart';
 import 'dart:math';
@@ -57,6 +58,7 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
   String _remaining;
   bool desktopAuthenticated = false;
   String background;
+  bool aiLoaded = false;
 
   AnimationController mainController;
   AnimationController mainBodyController;
@@ -104,6 +106,12 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
           checkIfUserHasSubscription();
         });
 
+    if(!Platform.isAndroid && !Platform.isIOS)
+    {
+      waitForAIToLoad();
+      checkForUpdate();
+    }
+    
   }
 
     Future<void> _playFullAnimation() async {
@@ -331,6 +339,69 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
     print('myaccount');
   }
 
+  void checkForUpdate() async
+  {
+    String updateURL = "http://news.ycombinator.com"; //await fbfunctions.fb_call(methodName: 'checkForUpdate', args: <String, dynamic>{
+      //   'version': Strings.version,
+      // });
+    
+    if(updateURL != null)
+      showDialog<Null>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) =>  AlertDialog(
+        title: Text("Update Available"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // CircularProgressIndicator(),
+            // SizedBox(height: 15,),
+            Text("A new update is available. To receive the best builds for the new meta, please download the latest update."),
+          ],
+        ),
+        actions:
+          <Widget>[
+              RaisedButton(
+                onPressed:()
+                  {
+                    launchbrowser.launchbrowser(url: updateURL);
+                    Navigator.pop(context); 
+                  }
+                ,
+                child: Text("Download Now")), 
+              FlatButton(
+                onPressed:()
+                {
+                  Navigator.pop(context);
+                }
+              , child: Text("Not now"))]
+        ),
+      );
+
+    
+  }
+
+  void waitForAIToLoad() async
+  {
+    String dirPath = ".";
+    String filePath = dirPath + "/ai_loaded";
+
+    Stream<FileSystemEvent> dirStream =
+        Directory(dirPath).watch(events: FileSystemEvent.create);
+    await for (var value in dirStream) {
+      print("Ai Loaded?!");
+      if (FileSystemEntity.typeSync(filePath) !=
+          FileSystemEntityType.notFound) {
+             print("Ai Loaded!!");
+        File file = File.fromUri(Uri.file(filePath));
+        var contents = await File(filePath).readAsString();
+        file.delete();
+        setState((){aiLoaded = true;});
+        break;
+      }
+    }
+  }
+
   Widget buildBody() {
     ThemeData theme = Theme.of(context);
     // isValid hasn't returned yet
@@ -350,7 +421,7 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
                 SizedBox(
                   height: 15,
                 ),
-                Text("Loading...", style: theme.textTheme.body1),
+                Text("Loading user profile...", style: theme.textTheme.body1),
               ],
             ),
           );
@@ -414,6 +485,20 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
       );
   }
 
+  Widget aiLoadingWidget()
+  { 
+    ThemeData theme = Theme.of(context);
+    if(aiLoaded)
+      return null;
+    else 
+      return Row(mainAxisAlignment:MainAxisAlignment.center, 
+            children:[
+              Text("Loading AI...", style:theme.textTheme.body2),
+              SizedBox(width: 15),
+              SizedBox(width: 15, height:15, child:CircularProgressIndicator(strokeWidth: 2))
+              ]);
+  }
+
   @override
   Widget build(BuildContext context) {
   if (user == null && (Platform.isAndroid || Platform.isIOS))
@@ -427,6 +512,7 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
       mainBodyController: mainBodyController,
       footer: _getFooter(context),
       backdrop: background,
+      bottomSheet: aiLoadingWidget()
     );
     }
   }

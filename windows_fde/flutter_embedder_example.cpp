@@ -15,7 +15,7 @@
 #include <fstream>
 #include <vector>
 
-//#include <Python.h>
+#include <Python.h>
 #include <inttypes.h>
 #include <stdarg.h>
 #include <algorithm>
@@ -37,6 +37,7 @@
 
 #include <btnonce/btnonce_plugin.h>
 #include <fbfunctions/fbfunctions_plugin.h>
+#include <launchbrowser/launchbrowser_plugin.h>
 #include "flutter_desktop_embedding/flutter_window_controller.h"
 
 using ::firebase::Variant;
@@ -191,49 +192,7 @@ static void LogVariantMap(const std::map<Variant, Variant> &variant_map,
     }
   }
 }
-/*
-firebase::Future<firebase::functions::HttpsCallableResult> GetCustomToken(
-    const std::string &uid, const std::string &secret) {
-  // Create the arguments to the callable function.
-  firebase::Variant data = firebase::Variant::EmptyMap();
-  std::cout << "lol0\n";
-  data.map()["uid"] = firebase::Variant(uid);
-  data.map()["secret"] = firebase::Variant(secret);
 
-  // auto lol = functions->GetHttpsCallable("client_token").Call();
-  std::cout << "lol1\n";
-  // Call the function and add a callback for the result.
-  firebase::functions::HttpsCallableReference getToken =
-      functions->GetHttpsCallable("getCustomToken");
-  std::cout << "lol2	\n";
-  firebase::Future<firebase::functions::HttpsCallableResult> res =
-      getToken.Call();
-  std::cout << "lol3	\n";
-  return res;
-}
-
-void OnTokenCompleteCallback(
-    const firebase::Future<firebase::functions::HttpsCallableResult> &future) {
-  std::cout << "in callback" << std::endl;
-  if (future.error() != firebase::functions::kErrorNone) {
-    // Function error code, will be kErrorInternal if the failure was not
-    // handled properly in the function call.
-    auto code = static_cast<firebase::functions::Error>(future.error());
-
-    // Display the error in the UI.
-    std::cerr << future.error_message();
-    return;
-  }
-
-  const firebase::functions::HttpsCallableResult *result = future.result();
-  firebase::Variant data = result->data();
-  // This will assert if the result returned from the function wasn't a string.
-  std::string custom_token = data.string_value();
-  // Display the result in the UI.
-  std::cout << custom_token;
-  user_future = auth->SignInWithCustomToken(custom_token.c_str());
-}
-*/
 std::string readFile(std::string filename) {
   std::ifstream file(filename);
   std::string str;
@@ -244,38 +203,6 @@ std::string readFile(std::string filename) {
   }
   return file_contents;
 }
-/*
-firebase::functions::HttpsCallableReference initFirebase() {
-  std::string init_file_contents = readFile("google-services.json");
-  std::cout << "Hello2" << std::endl;
-  std::cout << init_file_contents << std::endl;
-  firebase::AppOptions *appOptions =
-      firebase::AppOptions::LoadFromJsonConfig(init_file_contents.c_str());
-  // firebase::App *app = firebase::App::GetInstance();
-  app = firebase::App::Create(*appOptions);
-  auth = firebase::auth::Auth::GetAuth(app);
-  database = firebase::database::Database::GetInstance(app);
-  // functions = firebase::functions::Functions::GetInstance(app);
-
-  // ...
-  myfunctions = firebase::functions::Functions::GetInstance(app);
-  std::cout << "Hello3" << std::endl;
-  myfuture = AddMessage("hahahaha");
-  std::cout << "Hello4" << std::endl;
-  myfuture.OnCompletion(lulzz);
-
-  // Create the arguments to the callable function.
-  firebase::Variant data = firebase::Variant::EmptyMap();
-  // data.map()["text"] = firebase::Variant("lulz");
-  // data.map()["push"] = true;
-
-  // Call the function and add a callback for the result.
-  firebase::functions::HttpsCallableReference doSomething =
-      functions->GetHttpsCallable("client_token");
-  return doSomething;
-  // std::cout << "success\n";
-}
-*/
 
 void listenForUIDUpdate() {
   std::cout << "Hello1" << std::endl;
@@ -337,6 +264,8 @@ int runFlutterCode() {
       flutter_controller.GetRegistrarForPlugin("BTNonce"));
   FBFunctionsRegisterWithRegistrar(
       flutter_controller.GetRegistrarForPlugin("FBFunctions"));
+  LaunchBrowserRegisterWithRegistrar(
+      flutter_controller.GetRegistrarForPlugin("LaunchBrowser"));
 
   // Run until the window is closed.
   flutter_controller.RunEventLoop();
@@ -427,6 +356,34 @@ void shutdownFirebase() {
   delete app;
 }
 
+void initPythonCode()
+{
+  std::remove("ai_loaded");
+
+  //runpythoncode
+
+  std::ofstream loadingCompleteFile;
+  loadingCompleteFile.open("ai_loaded");
+  loadingCompleteFile << "true";
+  loadingCompleteFile.close();
+}
+
+void runPythonCode() {
+  Py_Initialize();
+  PyRun_SimpleString(
+      "import "
+      "sys\nsys.path.append(r\"C:\\Users\\Dom\\code\\flutter-desktop-"
+      "embedding\\example\\windows_fde\python\")\n");
+
+  PyRun_SimpleString("print('Python search path %s' % sys.path)");
+  PyObject *obj = Py_BuildValue("s", "screenshot.py");
+  FILE *file = _Py_fopen_obj(obj, "r+");
+  if (file != NULL) {
+    PyRun_SimpleFile(file, "screenshot.py");
+  }
+  Py_FinalizeEx();
+}
+
 extern "C" int common_main(int argc, const char *argv[]) {
   initializeFirebase();
 
@@ -444,8 +401,6 @@ extern "C" int common_main(int argc, const char *argv[]) {
   database = nullptr;
   std::cout << "got the uid and the secret:" << myuid << " " << mysecret
             << std::endl;
-
-  
 
   runFlutterCode();
 
