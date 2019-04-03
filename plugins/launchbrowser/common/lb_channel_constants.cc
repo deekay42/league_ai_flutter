@@ -11,21 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "plugins/btnonce/common/channel_constants.h"
+#include "plugins/launchbrowser/common/channel_constants.h"
 
-namespace plugins_btnonce {
+namespace plugins_launchbrowser {
 
-const char kChannelName[] = "flutter/btnonce";
+const char kChannelName[] = "flutter/launchbrowser";
 
-const char kShowOpenPanelMethod[] = "BTNonce.Show.Open";
-const char kShowSavePanelMethod[] = "BTNonce.Show.Save";
-
-const char kInitialDirectoryKey[] = "initialDirectory";
-const char kInitialFileNameKey[] = "initialFileName";
-const char kAllowedFileTypesKey[] = "allowedFileTypes";
-const char kConfirmButtonTextKey[] = "confirmButtonText";
-
-const char kAllowsMultipleSelectionKey[] = "allowsMultipleSelection";
-const char kCanChooseDirectoriesKey[] = "canChooseDirectories";
+const char kShowOpenPanelMethod[] = "LaunchBrowser.Call";
 
 }  // namespace plugins_file_chooser
