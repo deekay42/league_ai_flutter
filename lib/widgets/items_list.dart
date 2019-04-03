@@ -50,8 +50,8 @@ class _SlidingListState extends State<SlidingList>
     if (!dimsObtained) {
       final RenderBox renderBoxList = listKey.currentContext.findRenderObject();
       final sizeList = renderBoxList.size;
-      final RenderBox renderBoxBuilder = listKey.currentContext.findRenderObject();
-      final sizeBuilder = renderBoxBuilder.size;
+      //final RenderBox renderBoxBuilder = listKey.currentContext.findRenderObject();
+      //final sizeBuilder = renderBoxBuilder.size;
 
       setState(() {
         animations.setDivDy(sizeList.height / 2);

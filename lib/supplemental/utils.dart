@@ -54,7 +54,7 @@ Future<Null> displayWaitingModal(BuildContext context, String message,
   );
 }
 
-Future<Null> displayFullScreenModal(BuildContext context, MyDialog dialog) {
+void displayFullScreenModal(BuildContext context, MyDialog dialog) {
       
   showDialog(
     context: context,
@@ -65,8 +65,8 @@ Future<Null> displayFullScreenModal(BuildContext context, MyDialog dialog) {
 
 class MyDialog extends StatefulWidget {
 
-  String modalText;
-  bool spinner;
+  final String modalText;
+  final bool spinner;
   MyDialog({this.modalText, this.spinner});
 
   @override

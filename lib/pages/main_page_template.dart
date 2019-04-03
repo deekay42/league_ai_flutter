@@ -23,8 +23,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
       this.bottomSheet})
       : animationController = MainPageTemplateAnimations(
             controller: mainController,
-            mainBodyController: mainBodyController) {
-  }
+            mainBodyController: mainBodyController);
 
   @override
   Widget build(BuildContext context) {

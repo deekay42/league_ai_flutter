@@ -18,24 +18,21 @@ import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:Shrine/pages/home.dart';
-import 'package:Shrine/supplemental/utils.dart';
 import 'package:Shrine/pages/login.dart';
-import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
 import 'package:launchbrowser/launchbrowser.dart' as launchbrowser;
-import 'widgets/appbar.dart';
-import 'pages/main_page_template.dart';
-import 'dart:math';
 
-import 'pages/QRPage.dart';
-import 'resources/Colors.dart';
-import 'resources/Strings.dart';
 import 'pages/MobilePairingPage.dart';
+import 'pages/QRPage.dart';
+import 'pages/main_page_template.dart';
 import 'pages/subscribe.dart';
+import 'resources/Strings.dart';
+import 'widgets/appbar.dart';
 
 class AuthException implements Exception {
   String cause;
@@ -47,7 +44,7 @@ class MainApp extends StatefulWidget {
   _MainAppState createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
+class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   FirebaseUser user;
   StreamSubscription<FirebaseUser> _listener;
   Future<String> desktopUID;
@@ -59,26 +56,33 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
   bool desktopAuthenticated = false;
   String background;
   bool aiLoaded = false;
+  bool waitingOnIsValid = true;
 
   AnimationController mainController;
   AnimationController mainBodyController;
 
   void initState() {
     super.initState();
-      mainController =
-        AnimationController(duration: Duration(milliseconds: 3500), vsync: this);
-      mainBodyController =
-        AnimationController(duration: Duration(milliseconds: 2500), vsync: this);
+    mainController = AnimationController(
+        duration: Duration(milliseconds: 3500), vsync: this);
+    mainBodyController = AnimationController(
+        duration: Duration(milliseconds: 2500), vsync: this);
 
-      var list = ['assets/lol1.png', 'assets/lol2.png', 'assets/lol3.png', 'assets/lol4.png','assets/lol5.png'];
-      final _random = new Random();
-      background = list[_random.nextInt(list.length)];  
+    var list = [
+      'assets/lol1.png',
+      'assets/lol2.png',
+      'assets/lol3.png',
+      'assets/lol4.png',
+      'assets/lol5.png'
+    ];
+    final _random = new Random();
+    background = list[_random.nextInt(list.length)];
 
     _playFullAnimation();
     if (Platform.isAndroid || Platform.isIOS) {
       checkIfUserHasSubscription();
       initFirebaseMessaging();
-      Future<String> deviceID = _firebaseMessaging.getToken();
+
       _listener = FirebaseAuth.instance.onAuthStateChanged
           .listen((FirebaseUser result) {
         print("AUTHCHANGE!!");
@@ -95,35 +99,30 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
         setState(() {
           user = result;
         });
+        checkIfUserHasSubscription();
       });
-    }
-    else
-      fbfunctions.fb_call(methodName: 'authenticate')
-        .then((result)
-        {
-          if(result == false) throw AuthException("FATAL: Unable to authenticate user");
-          desktopAuthenticated = result;
-          checkIfUserHasSubscription();
-        });
+    } else
+      fbfunctions.fb_call(methodName: 'authenticate').then((result) {
+        if (result == false)
+          throw AuthException("FATAL: Unable to authenticate user");
+        desktopAuthenticated = result;
+        checkIfUserHasSubscription();
+      });
 
-    if(!Platform.isAndroid && !Platform.isIOS)
-    {
+    if (!Platform.isAndroid && !Platform.isIOS) {
       waitForAIToLoad();
-      checkForUpdate();
     }
-    
   }
 
-    Future<void> _playFullAnimation() async {
+  Future<void> _playFullAnimation() async {
     try {
       print("play full");
       mainController.reset();
       mainBodyController.reset();
       mainController.forward().orCancel;
-      Future.delayed(
-       const Duration(seconds: 1),
-       (){ _playListAnimation();});
-      
+      Future.delayed(const Duration(seconds: 1), () {
+        _playListAnimation();
+      });
     } on TickerCanceled {
       // the animation got canceled, probably because we were disposed
     }
@@ -210,45 +209,48 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
     }
   }
 
-  
   void checkIfUserHasSubscription() async {
+    waitingOnIsValid = true;
     dynamic resp;
-    if (Platform.isIOS || Platform.isAndroid)
-    {
+    if (Platform.isIOS || Platform.isAndroid) {
       String deviceID = await _firebaseMessaging.getToken();
       print("Got device_id: $deviceID");
-    assert(deviceID != null);
-      resp = CloudFunctions.instance
-        .call(functionName: 'isValid',
-        parameters: <String, dynamic>{"device_id": deviceID});
-    }
-    else
-      resp =  fbfunctions.fb_call(methodName: 'isValid');
-        
-    resp.then((dynamic result) {
-      setState(() {
-        
+      assert(deviceID != null);
+      resp = CloudFunctions.instance.call(
+          functionName: 'isValid',
+          parameters: <String, dynamic>{
+            "device_id": deviceID,
+            "current_version": Strings.version
+          });
+    } else
+      resp = fbfunctions.fb_call(
+          methodName: 'isValid',
+          args: <String, dynamic>{"current_version": Strings.version});
 
-        var parsed = result.split(',');
-        if (parsed[1] == "false") paired = false;
-        
-        if (result.startsWith("true")) {
-         
+    resp.then((dynamic result) {
+      print("Got the result: $result");
+      setState(() {
+        if (result["paired"] == "false")
+          paired = false;
+        else
+          paired = true;
+
+        if (result["subscribed"] == "true")
           hasSubscription = true;
-        } else {
-          hasSubscription = false;
-          _remaining = parsed[0];
+        else {
+          hasSubscription = true;
+          _remaining = result["remaining"];
 
           // ads.getBannerAd().then((BannerAd newAd) {
           //   ad = newAd;
           //   ad.show();
           // });
         }
-        
-       
       });
+      if (result.containsKey("latest_version"))
+        promptUpdate(result["latest_version"]);
     }).catchError((e) {
-      print("isvalid ERROR " + e.error);
+      print("isvalid ERROR " + e.message);
       setState(() {
         _remaining = "10";
         // ads.getBannerAd().then((BannerAd newAd) {
@@ -257,13 +259,14 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
         // });
       });
     });
+    waitingOnIsValid = false;
   }
 
   Future<void> listenForUIDFile(String dirPath, String filePath) async {
     //UID not present. need to wait until file appears which contains it.
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var value in dirStream) {
+    await for (var _ in dirStream) {
       print("Some event!!");
       if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
         setState(() {
@@ -292,111 +295,90 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
       throw "WAAAAH";
   }
 
-   Widget _myAppBar() {
+  Widget _myAppBar() {
     var choices = <Choice>[
       // hasSubscription != null && hasSubscription
       //     ? Choice(
       //         title: 'My Account',
-              
+
       //         action: _myaccount)
       //     : null,
-      hasSubscription != null && hasSubscription
-          ? Choice(
-              title: 'Unsubscribe',
-              
-              action: _unsubscribe)
-          : null,
-      (Platform.isIOS || Platform.isAndroid) ?
-      Choice(
-          title: 'Logout', action: signOutProviders) : null
+
+      (Platform.isIOS || Platform.isAndroid)
+          ? Choice(title: 'Logout', action: signOutProviders)
+          : hasSubscription != null && hasSubscription
+              ? Choice(title: 'Unsubscribe', action: _unsubscribe)
+              : null,
     ].where(notNull).toList();
     return BasicAppBar(false, choices, false);
   }
 
-  
   void _unsubscribe() {
     print('unsubscribe');
     dynamic resp;
-    if (Platform.isIOS || Platform.isAndroid)
-    {
-      resp = CloudFunctions.instance
-        .call(functionName: 'cancelSub');
-    }
-    else
-      resp =  fbfunctions.fb_call(methodName: 'cancelSub');
+    if (Platform.isIOS || Platform.isAndroid) {
+      resp = CloudFunctions.instance.call(functionName: 'cancelSub');
+    } else
+      resp = fbfunctions.fb_call(methodName: 'cancelSub');
 
     resp.then((dynamic result) {
       setState(() {
         print("Unsubscribe done: $result");
-        if(result is bool) print("It is a bool");
+        if (result is bool) print("It is a bool");
         hasSubscription = false;
         _remaining = "10";
       });
     });
   }
 
-  void _myaccount() {
-    print('myaccount');
-  }
-
-  void checkForUpdate() async
-  {
-    String updateURL = "http://news.ycombinator.com"; //await fbfunctions.fb_call(methodName: 'checkForUpdate', args: <String, dynamic>{
-      //   'version': Strings.version,
-      // });
-    
-    if(updateURL != null)
+  void promptUpdate(String updateURL) async {
+    if (updateURL != null)
       showDialog<Null>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) =>  AlertDialog(
-        title: Text("Update Available"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // CircularProgressIndicator(),
-            // SizedBox(height: 15,),
-            Text("A new update is available. To receive the best builds for the new meta, please download the latest update."),
-          ],
-        ),
-        actions:
-          <Widget>[
-              RaisedButton(
-                onPressed:()
-                  {
-                    launchbrowser.launchbrowser(url: updateURL);
-                    Navigator.pop(context); 
-                  }
-                ,
-                child: Text("Download Now")), 
-              FlatButton(
-                onPressed:()
-                {
-                  Navigator.pop(context);
-                }
-              , child: Text("Not now"))]
-        ),
+        context: context,
+        barrierDismissible: false, // user must tap button!
+        builder: (BuildContext context) => AlertDialog(
+                title: Text("Update Available"),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // CircularProgressIndicator(),
+                    // SizedBox(height: 15,),
+                    Text(
+                        "A new update is available. To receive the best builds for the new meta, please download the latest update."),
+                  ],
+                ),
+                actions: <Widget>[
+                  RaisedButton(
+                      onPressed: () {
+                        launchbrowser.launchbrowser(url: updateURL);
+                        Navigator.pop(context);
+                      },
+                      child: Text("Download Now")),
+                  FlatButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text("Not now"))
+                ]),
       );
-
-    
   }
 
-  void waitForAIToLoad() async
-  {
+  void waitForAIToLoad() async {
     String dirPath = ".";
     String filePath = dirPath + "/ai_loaded";
 
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var value in dirStream) {
+    await for (var _ in dirStream) {
       print("Ai Loaded?!");
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-             print("Ai Loaded!!");
+        print("Ai Loaded!!");
         File file = File.fromUri(Uri.file(filePath));
-        var contents = await File(filePath).readAsString();
         file.delete();
-        setState((){aiLoaded = true;});
+        setState(() {
+          aiLoaded = true;
+        });
         break;
       }
     }
@@ -404,43 +386,52 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
 
   Widget buildBody() {
     ThemeData theme = Theme.of(context);
-    // isValid hasn't returned yet
-    if(paired == null || !desktopAuthenticated)
-    {
+
+    if (waitingOnIsValid ||
+        (!(Platform.isIOS || Platform.isAndroid) && !desktopAuthenticated)) {
       print("piared is null");
 
       //return Container();
       //return MyDialog(modalText:"Loading...", spinner: true);
-     
-      return Container(           
-            child: new Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children:  [
-                CircularProgressIndicator(),
-                SizedBox(
-                  height: 15,
-                ),
-                Text("Loading user profile...", style: theme.textTheme.body1),
-              ],
+
+      return Container(
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(
+              height: 15,
             ),
-          );
+            Text("Loading user profile...", style: theme.textTheme.body1),
+          ],
+        ),
+      );
     }
     if (Platform.isAndroid || Platform.isIOS) {
-        if(paired)
-          return HomePage(hasSubscription:hasSubscription, remaining:_remaining, mainBodyController:mainBodyController);
-        else
-          return MobilePairingPage();
+      if (paired)
+        return HomePage(
+            hasSubscription: hasSubscription,
+            remaining: _remaining,
+            mainBodyController: mainBodyController);
+      else
+        return MobilePairingPage();
     }
     if (desktopUID != null) {
       print("first");
-      return HomePage(hasSubscription:hasSubscription, remaining:_remaining, mainBodyController:mainBodyController);
+      return HomePage(
+          hasSubscription: hasSubscription,
+          remaining: _remaining,
+          mainBodyController: mainBodyController);
     }
     desktopUID = getUIDForDesktop();
     if (desktopUID != null) {
       print("second");
       _playListAnimation();
-      return HomePage(hasSubscription:hasSubscription, remaining:_remaining, mainBodyController:mainBodyController);
+      return HomePage(
+          hasSubscription: hasSubscription,
+          remaining: _remaining,
+          mainBodyController: mainBodyController);
     } else {
       print("third");
       return QRPage(dataString: getUIDDBKeyForDesktop());
@@ -449,7 +440,9 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
 
   Widget _getFooter(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    if (hasSubscription != null && hasSubscription)
+    if (hasSubscription != null &&
+        hasSubscription &&
+        (Platform.isIOS || Platform.isAndroid))
       return null;
     else
       return Container(
@@ -459,61 +452,60 @@ class _MainAppState extends State<MainApp>  with TickerProviderStateMixin {
             child: Container(
               child:
                   Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                _remaining != null ? Text(
-                  Strings.remaining.replaceAll("N", _remaining),
-                  style: theme.textTheme.overline,
-                  maxLines: 1,
-                ):Container(),
-                SizedBox(height: 8),
-                 RaisedButton(
-                        child: Text(Strings.sub),
-                        onPressed: () async {
-                          //print("Here's the ad we're disposing: $ad");
-                          
-                          await Navigator.of(context).push(
-                            
-                            MaterialPageRoute(
-                                builder: (context) => SubscribePage()),
-                          );
-                          checkIfUserHasSubscription();
-                           _playFullAnimation();
-                        },
+                _remaining != null
+                    ? Text(
+                        Strings.remaining.replaceAll("N", _remaining),
+                        style: theme.textTheme.overline,
+                        maxLines: 1,
                       )
-                    
+                    : Container(),
+                SizedBox(height: 8),
+                RaisedButton(
+                  child: Text(Strings.sub),
+                  onPressed: () async {
+                    //print("Here's the ad we're disposing: $ad");
+
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => SubscribePage()),
+                    );
+                    checkIfUserHasSubscription();
+                    _playFullAnimation();
+                  },
+                )
               ]),
             )),
       );
   }
 
-  Widget aiLoadingWidget()
-  { 
+  Widget aiLoadingWidget() {
     ThemeData theme = Theme.of(context);
-    if(aiLoaded)
+    if (aiLoaded)
       return null;
-    else 
-      return Row(mainAxisAlignment:MainAxisAlignment.center, 
-            children:[
-              Text("Loading AI...", style:theme.textTheme.body2),
-              SizedBox(width: 15),
-              SizedBox(width: 15, height:15, child:CircularProgressIndicator(strokeWidth: 2))
-              ]);
+    else
+      return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text("Loading AI...", style: theme.textTheme.body2),
+        SizedBox(width: 15),
+        SizedBox(
+            width: 15,
+            height: 15,
+            child: CircularProgressIndicator(strokeWidth: 2))
+      ]);
   }
 
   @override
   Widget build(BuildContext context) {
-  if (user == null && (Platform.isAndroid || Platform.isIOS))
+    if (user == null && (Platform.isAndroid || Platform.isIOS))
       return LoginPage();
-   else 
-   {
-    return MainPageTemplateAnimator(
-      mainController: mainController,
-      appBar: _myAppBar(),
-      body: buildBody(),
-      mainBodyController: mainBodyController,
-      footer: _getFooter(context),
-      backdrop: background,
-      bottomSheet: aiLoadingWidget()
-    );
+    else {
+      return MainPageTemplateAnimator(
+          mainController: mainController,
+          appBar: _myAppBar(),
+          body: buildBody(),
+          mainBodyController: mainBodyController,
+          footer: _getFooter(context),
+          backdrop: background,
+          bottomSheet:
+              Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
     }
   }
 }

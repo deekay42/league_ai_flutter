@@ -15,20 +15,17 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:io';
-import 'package:http/http.dart' as http;
 
+import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
-import '../pages/main_page_template.dart';
 import '../resources/Strings.dart';
-import '../widgets/items_list.dart';
 import '../resources/ads.dart';
-import '../supplemental/utils.dart';
-import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import '../widgets/items_list.dart';
 
 bool notNull(Object o) => o != null;
 
@@ -36,7 +33,8 @@ class HomePage extends StatefulWidget {
   final bool hasSubscription;
   final String remaining;
   final AnimationController mainBodyController;
-  HomePage({this.hasSubscription = false, this.remaining, this.mainBodyController});
+  HomePage(
+      {this.hasSubscription = false, this.remaining, this.mainBodyController});
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -48,12 +46,11 @@ class _HomePageState extends State<HomePage> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String _remaining;
   bool hasSubscription;
- 
+
   Ads ads;
-  BannerAd ad;  
+  BannerAd ad;
 
   void initState() {
-
     super.initState();
 
     _remaining = widget.remaining;
@@ -64,8 +61,6 @@ class _HomePageState extends State<HomePage> {
       ads = Ads();
     } else
       initDesktopReadMessage();
-
-
   }
 
   Future<void> _playListAnimation() async {
@@ -109,7 +104,7 @@ class _HomePageState extends State<HomePage> {
 
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var value in dirStream) {
+    await for (var _ in dirStream) {
       print("Some event!!");
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
@@ -119,8 +114,9 @@ class _HomePageState extends State<HomePage> {
 
         print("Contents: " + contents);
 
-        fbfunctions.fb_call(methodName: 'relayMessage', args:<String, dynamic>{"items": contents})
-        .then((response) {
+        fbfunctions.fb_call(
+            methodName: 'relayMessage',
+            args: <String, dynamic>{"items": contents}).then((response) {
           print("Response status: ${response.statusCode}");
           print("Response body: ${response.body}");
 
@@ -159,9 +155,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-  Widget _buildInstructions(
-      BuildContext context) {
+  Widget _buildInstructions(BuildContext context) {
     int counter = 0;
     ThemeData theme = Theme.of(context);
 
@@ -212,8 +206,7 @@ class _HomePageState extends State<HomePage> {
     print("Building home.dart");
     var mainContent;
     if (_items == null)
-      mainContent =
-          _buildInstructions(context);
+      mainContent = _buildInstructions(context);
     else {
       int counter = 0;
       var listItems = _items.map((item) {
@@ -230,5 +223,5 @@ class _HomePageState extends State<HomePage> {
 
 //    return Container(
 //        margin: EdgeInsets.symmetric(horizontal: 20), child: mainContent);
-  }  
+  }
 }

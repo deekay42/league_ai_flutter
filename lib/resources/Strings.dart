@@ -46,5 +46,7 @@ class Strings {
   static const String clientTokenError = "Unable to obtain payment token. Please try again later.";
   static const String nonceError = "Unable to obtain payment nonce. Please try again later.";
   static const String checkoutError = "Unable to complete checkout. Please try again later.";
-  static const String generalPaymentsError = "Unknown error. Please try again later.";  
+  static const String generalPaymentsError = "Unknown error. Please try again later.";
+
+  static const String version = "0.0.1";
 }
