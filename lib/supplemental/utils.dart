@@ -1,8 +1,26 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_ui/l10n/localization.dart';
 
+void waitForFileToFinishLoading(File file) async
+{
+  int oldsize = -1;
+  while(true)
+  {
+      int size = await file.length();
+      if(size == oldsize)
+          break;
+      else
+      {
+        //print("File is still loading...: size is $size and oldsize is $oldsize");
+        oldsize = size;
+        sleep(Duration(milliseconds:50));
+      }
+  }
+  //print("File is fully loaded now");
+}
 
 Future<Null> displayErrorDialog(BuildContext context, String message,
     {String title}) {

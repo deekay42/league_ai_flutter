@@ -24,30 +24,47 @@ class SlidingList extends StatefulWidget {
 
 class _SlidingListState extends State<SlidingList>
     with TickerProviderStateMixin {
-  GlobalKey listKey = GlobalKey();
-  GlobalKey builderKey = GlobalKey();
+  GlobalKey listKey;
+  GlobalKey builderKey;
 
   GlobalKey key1 = GlobalKey(),
       key2 = GlobalKey(),
       key3 = GlobalKey(),
       key4 = GlobalKey();
   SlidingListAnimations animations;
-  bool dimsObtained = false;
-
+  bool dimsObtained;
+  
   @override
   void initState() {
     super.initState();
-  print("Nimationsctronoler: ${widget.animationController}");
     animations = SlidingListAnimations(
         controller: widget.animationController,
         origin: widget.origin,
         listLength: widget.children.length);
-
+    listKey = GlobalKey();
+    builderKey = GlobalKey();
+    dimsObtained = false;
     WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
   }
 
+  @override
+  void didUpdateWidget(SlidingList oldWidget) {
+     super.didUpdateWidget(oldWidget);
+     
+    animations = SlidingListAnimations(
+        controller: widget.animationController,
+        origin: widget.origin,
+        listLength: widget.children.length);
+      dimsObtained = false;
+      listKey = GlobalKey();
+      builderKey = GlobalKey();
+      WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+  }
+
   void _afterLayout(_) {
+    print("In afterLayout");
     if (!dimsObtained) {
+      print("Dims arent obtained yet!");
       final RenderBox renderBoxList = listKey.currentContext.findRenderObject();
       final sizeList = renderBoxList.size;
       //final RenderBox renderBoxBuilder = listKey.currentContext.findRenderObject();
@@ -82,7 +99,6 @@ class _SlidingListState extends State<SlidingList>
 
     final ThemeData theme = Theme.of(context);
     int count = 0;
-
     ListView mainList = ListView(
         key: listKey,
         shrinkWrap: true,
@@ -152,6 +168,7 @@ class MyItemListItem extends MyListItem {
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -167,12 +184,9 @@ class MyItemListItem extends MyListItem {
                   fit: BoxFit.contain,
                 )),
             SizedBox(width: 20),
-            Container(
-                width: 100,
-                child: Text(
+            Container(width:100, child:Text(
                   item.name,
-                  style: theme.textTheme.caption,
-                  maxLines: 1,
+                  style: theme.textTheme.caption
                 )),
           ]),
           last

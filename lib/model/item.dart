@@ -24,7 +24,7 @@ class Item {
   final String id;
   final String name;
 
-  String get img => 'assets/item_$id.png';
+  String get img => 'assets/items/$id.png';
 
   @override
   String toString() => "$name (id=$id)";

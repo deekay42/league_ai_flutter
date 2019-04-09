@@ -49,8 +49,8 @@ Future<dynamic> call({String methodName, Map args}) {
       _channel
           .invokeMethod(_kShowOpenPanelMethod, args)
           .then((response) {
-        
-        callResult.complete(response != null ? response[0] : null);
+        print("Got the fbfunctions result: $response");
+        callResult.complete(response != null ? (response is List ? response[0] : response) : null);
       });
     } on PlatformException catch (e) {
       print('FBFunctions plugin failure: ${e.message}');

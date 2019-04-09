@@ -33,7 +33,7 @@ class ItemsRepository
   ItemsRepository._internal();
 
   Future<String> _loadFile() {
-    return rootBundle.loadString('assets/data/item_int2string.json');
+    return rootBundle.loadString('assets/data/item2id.json');
   }
 
   init() async
@@ -45,7 +45,7 @@ class ItemsRepository
 
 //    _id2Item = id2String.map((k,v) => MapEntry(k, Item(id: k, name: v)));
     _id2Item = Map<String, Item>();
-    id2String.forEach((k,v) {_id2Item[k] = Item(id: k, name: v);});
+    id2String.forEach((k,v) {_id2Item[v["id"].toString()] = Item(id: v["id"].toString(), name: v["name"]);});
   }
 
   Future<Item> getItem(String id) async
@@ -54,6 +54,10 @@ class ItemsRepository
       await init();
     assert(_id2Item is Map);
     assert(_id2Item['1'].name == 'Boots of Speed');
-    return _id2Item[id];
+
+    if(_id2Item.containsKey(id))
+      return _id2Item[id];
+    else
+      return Item(id: "unknown", name: "Unknown");
   }
 }

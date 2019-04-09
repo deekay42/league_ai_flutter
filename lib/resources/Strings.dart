@@ -16,7 +16,7 @@ class Strings {
   static const String adMobAppId = "ca-app-pub-4748256700093905~2059247399";
 
 
-  static const String remaining = "You have N predictions remaining today";
+  static const String remaining = "You have N recommendations remaining today";
 
 
   static const List<List<String>> pitch = [

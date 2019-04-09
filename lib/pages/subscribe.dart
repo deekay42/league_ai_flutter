@@ -59,11 +59,11 @@ class _SubscribePageState extends State<SubscribePage>
     super.initState();
 
     var list = [
-      'assets/lol1.png',
-      'assets/lol2.png',
-      'assets/lol3.png',
-      'assets/lol4.png',
-      'assets/lol5.png'
+      'assets/imgs/lol1.png',
+      'assets/imgs/lol2.png',
+      'assets/imgs/lol3.png',
+      'assets/imgs/lol4.png',
+      'assets/imgs/lol5.png'
     ];
     final _random = new Random();
     background = list[_random.nextInt(list.length)];

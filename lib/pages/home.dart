@@ -26,6 +26,7 @@ import '../model/items_repository.dart';
 import '../resources/Strings.dart';
 import '../resources/ads.dart';
 import '../widgets/items_list.dart';
+import '../supplemental/utils.dart';
 
 bool notNull(Object o) => o != null;
 
@@ -78,7 +79,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-    String content = message['notification']['body'];
+    print("Received new message: $message");
+    String content = message['aps']['alert']['body'];
     //its a new build recommendation
     List<String> itemsS = content.split(",");
 
@@ -87,9 +89,10 @@ class _HomePageState extends State<HomePage> {
     Future<List<Item>> futureList = Future.wait(mappedList);
     List<Item> items = await futureList;
 
-    _items = items;
+    
+    
+    setState(() {_items = items;});
     if (mounted) {
-      setState(() {});
       _playListAnimation();
     }
   }
@@ -101,15 +104,17 @@ class _HomePageState extends State<HomePage> {
       File file = File.fromUri(Uri.file(filePath));
       file.delete();
     }
-
+    int oldsize = -1;
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var _ in dirStream) {
-      print("Some event!!");
+    await for (var lol in dirStream) {
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
+        //print("New last file detected!");    
         File file = File.fromUri(Uri.file(filePath));
-        var contents = await File(filePath).readAsString();
+        await waitForFileToFinishLoading(file);
+        var contents = await file.readAsString();
+                
         file.delete();
 
         print("Contents: " + contents);
@@ -117,11 +122,10 @@ class _HomePageState extends State<HomePage> {
         fbfunctions.fb_call(
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
-          print("Response status: ${response.statusCode}");
-          print("Response body: ${response.body}");
+          print("Response status: ${response}");
 
-          if (response.body.startsWith("SUCCESSFUL")) {
-            _remaining = response.body.split(',')[1];
+          if (response.startsWith("SUCCESSFUL")) {
+            _remaining = response.split(',')[1];
             // means that somebody is subscribed
             if (_remaining == "1337") hasSubscription = true;
             Map<String, dynamic> arg = {
@@ -130,7 +134,7 @@ class _HomePageState extends State<HomePage> {
               }
             };
             _handleNewMessageIncoming(arg);
-          } else if (response.body == "UID DOES NOT EXIST") {
+          } else if (response == "UID DOES NOT EXIST") {
             setState(() => {});
           }
         });
@@ -209,9 +213,11 @@ class _HomePageState extends State<HomePage> {
       mainContent = _buildInstructions(context);
     else {
       int counter = 0;
+      
       var listItems = _items.map((item) {
         return MyItemListItem(item: item, last: ++counter == _items.length);
       }).toList();
+    
 
       mainContent = SlidingList(
           title: Strings.buildRec,

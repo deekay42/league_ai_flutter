@@ -17,8 +17,8 @@ import 'dart:io';
 import 'dart:io' show Platform;
 import 'dart:math';
 
-import 'package:Shrine/pages/home.dart';
-import 'package:Shrine/pages/login.dart';
+import 'pages/home.dart';
+import 'pages/login.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -33,6 +33,8 @@ import 'pages/main_page_template.dart';
 import 'pages/subscribe.dart';
 import 'resources/Strings.dart';
 import 'widgets/appbar.dart';
+import 'supplemental/utils.dart';
+
 
 class AuthException implements Exception {
   String cause;
@@ -69,11 +71,11 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         duration: Duration(milliseconds: 2500), vsync: this);
 
     var list = [
-      'assets/lol1.png',
-      'assets/lol2.png',
-      'assets/lol3.png',
-      'assets/lol4.png',
-      'assets/lol5.png'
+      'assets/imgs/lol1.png',
+      'assets/imgs/lol2.png',
+      'assets/imgs/lol3.png',
+      'assets/imgs/lol4.png',
+      'assets/imgs/lol5.png'
     ];
     final _random = new Random();
     background = list[_random.nextInt(list.length)];
@@ -230,15 +232,15 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     resp.then((dynamic result) {
       print("Got the result: $result");
       setState(() {
-        if (result["paired"] == "false")
-          paired = false;
-        else
+        if (result["paired"] == "true")
           paired = true;
+        else
+          paired = false;
 
         if (result["subscribed"] == "true")
           hasSubscription = true;
         else {
-          hasSubscription = true;
+          hasSubscription = false;
           _remaining = result["remaining"];
 
           // ads.getBannerAd().then((BannerAd newAd) {
@@ -247,10 +249,11 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           // });
         }
       });
-      if (result.containsKey("latest_version"))
-        promptUpdate(result["latest_version"]);
+      if(!Platform.isIOS && !Platform.isAndroid)
+        if (result.containsKey("latest_version"))
+          promptUpdate(result["latest_version"]);
     }).catchError((e) {
-      print("isvalid ERROR " + e.message);
+      print("isvalid ERROR $e");
       setState(() {
         _remaining = "10";
         // ads.getBannerAd().then((BannerAd newAd) {
@@ -269,9 +272,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     await for (var _ in dirStream) {
       print("Some event!!");
       if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
+      {
+        File file = File.fromUri(Uri.file(filePath));
+        await waitForFileToFinishLoading(file);
         setState(() {
-          desktopUID = File(filePath).readAsString();
+          desktopUID = file.readAsString();
         });
+      }
     }
   }
 
@@ -303,12 +310,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
       //         action: _myaccount)
       //     : null,
-
+      Choice(title: 'Version '+Strings.version),
       (Platform.isIOS || Platform.isAndroid)
           ? Choice(title: 'Logout', action: signOutProviders)
           : hasSubscription != null && hasSubscription
               ? Choice(title: 'Unsubscribe', action: _unsubscribe)
               : null,
+      
     ].where(notNull).toList();
     return BasicAppBar(false, choices, false);
   }
@@ -440,9 +448,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Widget _getFooter(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    if (hasSubscription != null &&
-        hasSubscription &&
-        (Platform.isIOS || Platform.isAndroid))
+    if ((Platform.isIOS || Platform.isAndroid) || (hasSubscription != null &&
+        hasSubscription))
       return null;
     else
       return Container(

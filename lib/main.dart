@@ -15,7 +15,7 @@
 import 'dart:io' show Platform;
 
 import 'resources/Strings.dart';
-import 'package:Shrine/app.dart';
+import 'app.dart';
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';

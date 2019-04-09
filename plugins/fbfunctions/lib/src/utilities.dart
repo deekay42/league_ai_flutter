@@ -18,24 +18,3 @@ Future<dynamic> fb_call({String methodName, Map args}) {
   return FBFunctionsChannelController.instance
       .call(methodName:methodName, args:args);
 }
-
-/// Shows a file chooser for selecting a save path.
-///
-/// A number of configuration options are available:
-/// - [initialDirectory] defaults the panel to the given directory path.
-/// - [suggestedFileName] provides an initial value for the save filename.
-/// - [allowedFileTypes] restricts selection to the given file types.
-/// - [confirmButtonText] overrides the button that confirms selection.
-// void showSavePanel(FBFunctionsCallback callback,
-//     {String initialDirectory,
-//     String suggestedFileName,
-//     List<String> allowedFileTypes,
-//     String confirmButtonText}) {
-//   final options = FBFunctionsConfigurationOptions(
-//       initialDirectory: initialDirectory,
-//       initialFileName: suggestedFileName,
-//       allowedFileTypes: allowedFileTypes,
-//       confirmButtonText: confirmButtonText);
-//   FBFunctionsChannelController.instance
-//       .show(FBFunctionsType.save, options, callback);
-// }

@@ -14,10 +14,10 @@
 #include "plugins/fbfunctions/windows/include/fbfunctions/fbfunctions_plugin.h"
 
 #include <json/json.h>
+#include <exception>
 #include <iostream>
 #include <memory>
 #include <vector>
-#include <exception>
 
 #include <flutter_desktop_embedding/json_method_codec.h>
 #include <flutter_desktop_embedding/method_channel.h>
@@ -29,7 +29,6 @@
 #include "firebase/functions.h"
 
 #include "firebase_commons.h"
-
 
 // File chooser callback results.
 static constexpr int kCancelResultValue = 0;
@@ -66,22 +65,51 @@ static Json::Value CreateResponseObject(
   if (fbf_return_val.is_null()) {
     return Json::Value();
   }
-  if (fbf_return_val.is_container_type()) {
+  if (fbf_return_val.is_map()) {
+    Json::Value response;
+    const auto mymap = fbf_return_val.map();
+
+    for (auto it = mymap.begin(); it != mymap.end(); ++it) {
+      if (!it->first.is_string()) {
+        std::cerr << "function return map must use string keys\n";
+        throw std::runtime_error("function return map must use string keys\n");
+      }
+      std::string key = it->first.string_value();
+      auto val = it->second;
+
+      if (val.is_string())
+        response[key] = (val.string_value());
+      else if (val.is_bool())
+        response[key] = (val.bool_value());
+      else if (val.is_double())
+        response[key] = (val.double_value());
+      else if (val.is_int64())
+        response[key] = (val.int64_value());
+      else if (val.is_null())
+        response[key] = (nullptr);
+      else {
+        std::cerr << "function return type must be scalar type\n";
+        throw std::runtime_error("function return type must be scalar type\n");
+      }
+    }
+    return response;
+
+  } else if (fbf_return_val.is_container_type()) {
     std::cerr << "function return type must be scalar type\n";
     throw std::runtime_error("function return type must be scalar type\n");
-	}
+  }
   Json::Value response(Json::arrayValue);
-  //for (const firebase::Variant &filename : filenames) {
-	if (fbf_return_val.is_string())
-		response.append(fbf_return_val.string_value());
-    else if (fbf_return_val.is_bool())
-        response.append(fbf_return_val.bool_value());
-    else if (fbf_return_val.is_double())
-        response.append(fbf_return_val.double_value());
-    else if (fbf_return_val.is_int64())
-        response.append(fbf_return_val.int64_value());
-    else if (fbf_return_val.is_null())
-      response.append(nullptr);
+  // for (const firebase::Variant &filename : filenames) {
+  if (fbf_return_val.is_string())
+    response.append(fbf_return_val.string_value());
+  else if (fbf_return_val.is_bool())
+    response.append(fbf_return_val.bool_value());
+  else if (fbf_return_val.is_double())
+    response.append(fbf_return_val.double_value());
+  else if (fbf_return_val.is_int64())
+    response.append(fbf_return_val.int64_value());
+  else if (fbf_return_val.is_null())
+    response.append(nullptr);
   return response;
 }
 
@@ -115,7 +143,8 @@ FBFunctionsPlugin::FBFunctionsPlugin(
 FBFunctionsPlugin::~FBFunctionsPlugin() {}
 
 // void OnFBCallback(
-//     const firebase::Future<firebase::functions::HttpsCallableResult>& future, void* result_cb) {
+//     const firebase::Future<firebase::functions::HttpsCallableResult>& future,
+//     void* result_cb) {
 //   if (future.error() != firebase::functions::kErrorNone) {
 //     // Function error code, will be kErrorInternal if the failure was not
 //     // handled properly in the function call.
@@ -128,26 +157,25 @@ FBFunctionsPlugin::~FBFunctionsPlugin() {}
 
 //   const firebase::functions::HttpsCallableResult *result = future.result();
 //   firebase::Variant data = result->data();
-//   // This will assert if the result returned from the function wasn't a string.
-//   std::string message = data.string_value();
-//   std::vector<std::string> return_result;
-//   return_result.push_back(message);
+//   // This will assert if the result returned from the function wasn't a
+//   string. std::string message = data.string_value(); std::vector<std::string>
+//   return_result; return_result.push_back(message);
 
 //   auto result_cb_typed =
 //       static_cast<flutter_desktop_embedding::MethodResult<Json::Value> *>(
 //           result_cb);
 
 //   Json::Value response_object(CreateResponseObject(return_result));
-  
+
 //   result_cb_typed->Success(&response_object);
 //   // Display the result in the UI.
 //   printf(message.c_str());
 // }
 
-// firebase::Future<firebase::functions::HttpsCallableResult> CallFBFunction(const std::string name,
+// firebase::Future<firebase::functions::HttpsCallableResult>
+// CallFBFunction(const std::string name,
 //     const Json::Value &args) {
 
- 
 //   // Create the arguments to the callable function.
 //   firebase::Variant data = firebase::Variant::EmptyMap();
 //   auto members = args.getMemberNames();
@@ -177,47 +205,39 @@ bool signIn(std::string custom_token) {
 void FBFunctionsPlugin::HandleMethodCall(
     const flutter_desktop_embedding::MethodCall<Json::Value> &method_call,
     std::unique_ptr<flutter_desktop_embedding::MethodResult<Json::Value>>
-        result)
-{
+        result) {
   if (!method_call.arguments() || method_call.arguments()->isNull()) {
     result->Error("Bad Arguments", "Null file chooser method args received");
     return;
   }
   firebase::Variant variant_result;
   const Json::Value &args = *method_call.arguments();
-  if(args["methodName"] == "authenticate")
-  {
+  if (args["methodName"] == "authenticate") {
     LogMessage("Trying to auth user!");
-    
-  std::map<std::string, firebase::Variant> data;
-  data["uid"] = firebase::Variant(myuid);
-  data["auth_secret"] = firebase::Variant(mysecret);
+
+    std::map<std::string, firebase::Variant> data;
+    data["uid"] = firebase::Variant(myuid);
+    data["auth_secret"] = firebase::Variant(mysecret);
     std::string customToken;
     customToken = callFBFunctionSync("getCustomToken", &data).string_value();
     variant_result = firebase::Variant(signIn(customToken));
-  }
-  else
-  {
+  } else {
     std::map<std::string, firebase::Variant> data;
     auto members = args.getMemberNames();
-    for(auto it = members.begin(); it!=members.end(); ++it)
+    for (auto it = members.begin(); it != members.end(); ++it)
       data[*it] = firebase::Variant(args[*it].asString());
     variant_result =
         callFBFunctionSync(args["methodName"].asString().c_str(), &data);
   }
 
-  
-  
   Json::Value response_object(CreateResponseObject(variant_result));
   result->Success(&response_object);
 
-  //auto future = CallFBFunction(args["methodName"].asString(), args);
-  //future.OnCompletion(OnFBCallback, result_cb.get());
-    std::cout << "after future call" << std::endl;
-  
+  // auto future = CallFBFunction(args["methodName"].asString(), args);
+  // future.OnCompletion(OnFBCallback, result_cb.get());
 }
 
-}  // namespace plugins_file_chooser
+}  // namespace plugins_fbfunctions
 
 void FBFunctionsRegisterWithRegistrar(
     FlutterEmbedderPluginRegistrarRef registrar) {
