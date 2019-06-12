@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "plugins/fbfunctions/windows/include/fbfunctions/fbfunctions_plugin.h"
+#include "fbfunctions/fbfunctions_plugin.h"
 
 #include <json/json.h>
 #include <exception>
@@ -19,11 +19,9 @@
 #include <memory>
 #include <vector>
 
-#include <flutter_desktop_embedding/json_method_codec.h>
-#include <flutter_desktop_embedding/method_channel.h>
-#include <flutter_desktop_embedding/plugin_registrar.h>
-
-#include "plugins/fbfunctions/common/channel_constants.h"
+#include <flutter/json_method_codec.h>
+#include <flutter/method_channel.h>
+#include <flutter/plugin_registrar.h>
 
 #include "firebase/app.h"
 #include "firebase/functions.h"
@@ -34,29 +32,31 @@
 static constexpr int kCancelResultValue = 0;
 static constexpr int kOkResultValue = 1;
 
+const char kChannelName[] = "flutter/fbfunctions";
+
 namespace plugins_fbfunctions {
 
-class FBFunctionsPlugin : public flutter_desktop_embedding::Plugin {
+class FBFunctionsPlugin : public flutter::Plugin {
  public:
   static void RegisterWithRegistrar(
-      flutter_desktop_embedding::PluginRegistrar *registrar);
+      flutter::PluginRegistrar *registrar);
 
   virtual ~FBFunctionsPlugin();
 
  private:
   // Creates a plugin that communicates on the given channel.
   FBFunctionsPlugin(
-      std::unique_ptr<flutter_desktop_embedding::MethodChannel<Json::Value>>
+      std::unique_ptr<flutter::MethodChannel<Json::Value>>
           channel);
 
   // Called when a method is called on |channel_|;
   void HandleMethodCall(
-      const flutter_desktop_embedding::MethodCall<Json::Value> &method_call,
-      std::unique_ptr<flutter_desktop_embedding::MethodResult<Json::Value>>
+      const flutter::MethodCall<Json::Value> &method_call,
+      std::unique_ptr<flutter::MethodResult<Json::Value>>
           result);
 
   // The MethodChannel used for communication with the Flutter engine.
-  std::unique_ptr<flutter_desktop_embedding::MethodChannel<Json::Value>>
+  std::unique_ptr<flutter::MethodChannel<Json::Value>>
       channel_;
 };
 
@@ -115,11 +115,11 @@ static Json::Value CreateResponseObject(
 
 // static
 void FBFunctionsPlugin::RegisterWithRegistrar(
-    flutter_desktop_embedding::PluginRegistrar *registrar) {
+    flutter::PluginRegistrar *registrar) {
   auto channel =
-      std::make_unique<flutter_desktop_embedding::MethodChannel<Json::Value>>(
+      std::make_unique<flutter::MethodChannel<Json::Value>>(
           registrar->messenger(), kChannelName,
-          &flutter_desktop_embedding::JsonMethodCodec::GetInstance());
+          &flutter::JsonMethodCodec::GetInstance());
   auto *channel_pointer = channel.get();
 
   // Uses new instead of make_unique due to private constructor.
@@ -136,7 +136,7 @@ void FBFunctionsPlugin::RegisterWithRegistrar(
 }
 
 FBFunctionsPlugin::FBFunctionsPlugin(
-    std::unique_ptr<flutter_desktop_embedding::MethodChannel<Json::Value>>
+    std::unique_ptr<flutter::MethodChannel<Json::Value>>
         channel)
     : channel_(std::move(channel)) {}
 
@@ -203,8 +203,8 @@ bool signIn(std::string custom_token) {
 }
 
 void FBFunctionsPlugin::HandleMethodCall(
-    const flutter_desktop_embedding::MethodCall<Json::Value> &method_call,
-    std::unique_ptr<flutter_desktop_embedding::MethodResult<Json::Value>>
+    const flutter::MethodCall<Json::Value> &method_call,
+    std::unique_ptr<flutter::MethodResult<Json::Value>>
         result) {
   if (!method_call.arguments() || method_call.arguments()->isNull()) {
     result->Error("Bad Arguments", "Null file chooser method args received");
@@ -240,11 +240,11 @@ void FBFunctionsPlugin::HandleMethodCall(
 }  // namespace plugins_fbfunctions
 
 void FBFunctionsRegisterWithRegistrar(
-    FlutterEmbedderPluginRegistrarRef registrar) {
+	FlutterDesktopPluginRegistrarRef  registrar) {
   // The plugin registrar owns the plugin, registered callbacks, etc., so must
   // remain valid for the life of the application.
   static auto *plugin_registrar =
-      new flutter_desktop_embedding::PluginRegistrar(registrar);
+      new flutter::PluginRegistrar(registrar);
   plugins_fbfunctions::FBFunctionsPlugin::RegisterWithRegistrar(
       plugin_registrar);
 }

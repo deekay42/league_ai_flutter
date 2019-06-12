@@ -16,7 +16,7 @@
 
 // A plugin to show native save/open file choosers.
 
-#include <flutter_desktop_embedding_core/embedder_plugin_registrar.h>
+#include <flutter_plugin_registrar.h>
 
 #ifdef BTNONCE_PLUGIN_IMPL
 #define BTNONCE_PLUGIN_EXPORT __attribute__((visibility("default")))
@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 BTNONCE_PLUGIN_EXPORT void BTNonceRegisterWithRegistrar(
-    FlutterEmbedderPluginRegistrarRef registrar);
+	FlutterDesktopPluginRegistrarRef registrar);
 
 #if defined(__cplusplus)
 }  // extern "C"
