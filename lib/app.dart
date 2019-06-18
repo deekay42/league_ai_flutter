@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:io' show Platform;
 import 'dart:math';
+import 'package:flutter/services.dart';
 
 import 'pages/home.dart';
 import 'pages/login.dart';
@@ -34,6 +35,13 @@ import 'pages/subscribe.dart';
 import 'resources/Strings.dart';
 import 'widgets/appbar.dart';
 import 'supplemental/utils.dart';
+
+enum DesktopAuthState
+{
+  AUTHENTICATED,
+  WAITING,
+  AUTHERROR
+}
 
 
 class AuthException implements Exception {
@@ -55,10 +63,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   bool paired;
   bool hasSubscription;
   String _remaining;
-  bool desktopAuthenticated = false;
+  DesktopAuthState desktopAuthenticated = DesktopAuthState.WAITING;
   String background;
   bool aiLoaded = false;
-  bool waitingOnIsValid = true;
+  bool waitingOnIsValid = false;
 
   AnimationController mainController;
   AnimationController mainBodyController;
@@ -105,11 +113,26 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       });
     } else
       fbfunctions.fb_call(methodName: 'authenticate').then((result) {
-        if (result == false)
+        if (result=="unsuccessful")
+        {
           throw AuthException("FATAL: Unable to authenticate user");
-        desktopAuthenticated = result;
-        checkIfUserHasSubscription();
+        }
+        else if(result=="files_missing")
+        {
+          setState(() {
+            desktopAuthenticated = DesktopAuthState.AUTHERROR;
+          });
+          print("Unable to authenticate user. Probably because uid and/or secret files are missing.");
+        }
+        else if(result == "successful")
+        {
+          setState(() {
+            desktopAuthenticated = DesktopAuthState.AUTHENTICATED;
+          });
+          checkIfUserHasSubscription();
+        }
       });
+      
 
     if (!Platform.isAndroid && !Platform.isIOS) {
       waitForAIToLoad();
@@ -283,8 +306,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   Future<String> getUIDForDesktop() {
-    String dirPath = ".";
-    String filePath = dirPath + "/uid";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String filePath = dirPath + "\\uid";
+    print("dirPath: $dirPath filePath: $filePath");
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
       return File(filePath).readAsString();
     else {
@@ -294,8 +318,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   Future<String> getUIDDBKeyForDesktop() async {
-    String dirPath = ".";
-    String filePath = dirPath + "/db_key";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String filePath = dirPath + "\\db_key";
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
       return await File(filePath).readAsString();
     else
@@ -372,8 +396,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void waitForAIToLoad() async {
-    String dirPath = ".";
-    String filePath = dirPath + "/ai_loaded";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String filePath = dirPath + "\\ai_loaded";
 
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
@@ -394,9 +418,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Widget buildBody() {
     ThemeData theme = Theme.of(context);
-
+    print("waitingOnIsValid is ${waitingOnIsValid}");
     if (waitingOnIsValid ||
-        (!(Platform.isIOS || Platform.isAndroid) && !desktopAuthenticated)) {
+        (!(Platform.isIOS || Platform.isAndroid) && desktopAuthenticated==DesktopAuthState.WAITING)) {
       print("piared is null");
 
       //return Container();
@@ -426,7 +450,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         return MobilePairingPage();
     }
     if (desktopUID != null) {
-      print("first");
       return HomePage(
           hasSubscription: hasSubscription,
           remaining: _remaining,
@@ -434,14 +457,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     }
     desktopUID = getUIDForDesktop();
     if (desktopUID != null) {
-      print("second");
       _playListAnimation();
       return HomePage(
           hasSubscription: hasSubscription,
           remaining: _remaining,
           mainBodyController: mainBodyController);
     } else {
-      print("third");
       return QRPage(dataString: getUIDDBKeyForDesktop());
     }
   }

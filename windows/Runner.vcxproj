@@ -49,16 +49,16 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
-    <TargetName>Flutter Desktop Example</TargetName>
+    <IncludePath>$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\libs;$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
+    <TargetName>League IQ</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
     <IncludePath>$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\libs;$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
-    <TargetName>Flutter Desktop Example</TargetName>
+    <TargetName>League IQ</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -68,13 +68,18 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;WEBVIEW_WINAPI=1</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>flutter_windows.dll.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_app.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_auth.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_database.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_functions.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_messaging.lib;$(ProjectDir)..\libs\advapi32.lib;$(ProjectDir)..\libs\crypt32.lib;$(ProjectDir)..\libs\iphlpapi.lib;$(ProjectDir)..\libs\psapi.lib;$(ProjectDir)..\libs\userenv.lib;$(ProjectDir)..\libs\ws2_32.lib;flutter_windows.dll.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <SubSystem>
+      </SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)scripts\prepare_dependencies" debug</Command>
+      <Command>"$(ProjectDir)scripts\prepare_dependencies" debug &amp;&amp; COPY "$(ProjectDir)google-services.json" "$(OutDir)"</Command>
       <Message>Sync and build dependencies</Message>
     </PreBuildEvent>
     <PreLinkEvent>
@@ -117,6 +122,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>$(ProjectDir)..\libs\firebase_app.lib;$(ProjectDir)..\libs\firebase_auth.lib;$(ProjectDir)..\libs\firebase_database.lib;$(ProjectDir)..\libs\firebase_functions.lib;$(ProjectDir)..\libs\firebase_messaging.lib;$(ProjectDir)..\libs\advapi32.lib;$(ProjectDir)..\libs\crypt32.lib;$(ProjectDir)..\libs\iphlpapi.lib;$(ProjectDir)..\libs\psapi.lib;$(ProjectDir)..\libs\userenv.lib;$(ProjectDir)..\libs\ws2_32.lib;flutter_windows.dll.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
     <PreBuildEvent>
       <Command>"$(ProjectDir)scripts\prepare_dependencies" release &amp;&amp; COPY "$(ProjectDir)google-services.json" "$(OutDir)"&amp;&amp; cd "$(ProjectDir)..\" &amp;&amp; ..\python\build\embed_py2c.bat ..\python "$(OutDir)"</Command>
@@ -138,8 +146,7 @@
     </PostBuildEvent>
     <CustomBuildStep>
       <Command>
-"$(ProjectDir)scripts\bundle_assets_and_deps" "$(ProjectDir)flutter\" "$(OutputPath)" "$(TargetFileName)"
-</Command>
+"$(ProjectDir)scripts\bundle_assets_and_deps" "$(ProjectDir)flutter\" "$(OutputPath)" "$(TargetFileName)" &amp;&amp; "$(ProjectDir)scripts\postbuild.bat" "$(OutputPath)"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Bundling dependencies</Message>
@@ -163,10 +170,19 @@
     <ClCompile Include="..\src\json_message_codec.cc" />
     <ClCompile Include="..\src\json_method_codec.cc" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Runner2.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\assets\icons\leagueiq.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <PropertyGroup>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

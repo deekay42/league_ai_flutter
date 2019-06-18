@@ -27,10 +27,9 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
                   child: FutureBuilder<String>(
           future: widget.dataString,
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            print("Got the data!:");
-            if (snapshot.hasData) {
-               print("Got the data2!: "+snapshot.data);
-              if (snapshot.data!=null) {
+            print("Got the data!: $snapshot");
+            if (snapshot.hasData && snapshot.data!=null) {
+            
                 return Container(color:Colors.white, child:QrImage(
                     data: snapshot.data,
                     gapless: false,
@@ -39,10 +38,10 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
                       print('[QR] ERROR - $ex');
                     },
                   ));
-              } else {
-                return new CircularProgressIndicator();
-              }
+            } else {
+              return new CircularProgressIndicator();
             }
+            
           }
         )
                   

@@ -214,13 +214,21 @@ void FBFunctionsPlugin::HandleMethodCall(
   const Json::Value &args = *method_call.arguments();
   if (args["methodName"] == "authenticate") {
     LogMessage("Trying to auth user!");
+	if(myuid == "" || mysecret == "")
+	{
+		//ugly, but using result->Error apparently creates uncatchable exceptions.
+		Json::Value response_object(CreateResponseObject(firebase::Variant("files_missing")));
+		result->Success(&response_object);
+		return;
+	}
 
     std::map<std::string, firebase::Variant> data;
     data["uid"] = firebase::Variant(myuid);
     data["auth_secret"] = firebase::Variant(mysecret);
     std::string customToken;
     customToken = callFBFunctionSync("getCustomToken", &data).string_value();
-    variant_result = firebase::Variant(signIn(customToken));
+	bool signInResult = signIn(customToken);
+    variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");
   } else {
     std::map<std::string, firebase::Variant> data;
     auto members = args.getMemberNames();

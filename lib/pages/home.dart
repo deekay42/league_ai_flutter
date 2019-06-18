@@ -98,8 +98,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void initDesktopReadMessage() async {
-    String dirPath = ".";
-    String filePath = dirPath + "/last";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String filePath = dirPath + "\\last";
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound) {
       File file = File.fromUri(Uri.file(filePath));
       file.delete();
