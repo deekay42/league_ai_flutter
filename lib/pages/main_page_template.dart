@@ -57,7 +57,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                             margin:
                                 const EdgeInsets.only(left: 20.0, right: 20.0),
                             child: Column(children: [
-                              SizedBox(height:100),
+                              SizedBox(height:125),
                               Expanded(
 
                                 child:Align(child:body, alignment:Alignment.center)
@@ -74,12 +74,12 @@ class MainPageTemplateAnimator extends StatelessWidget {
                             ])))
                   ,
                 ),
-                Positioned( top:0.0, height:100.0,
+                Positioned( top:0.0, height:125.0,
                     child: Padding(
                           padding: EdgeInsets.only(top: 15),
                           child: PoppingLogoAnimation(
                             child: Image.asset(
-                              'assets/ic_launcher_foreground.png',
+                              'assets/logo.png',
                               fit: BoxFit.fitHeight,
                             ),
                             animation: animationController.logoPop,
@@ -94,7 +94,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
 class MainPageTemplateAnimations {
   MainPageTemplateAnimations(
       {@required this.controller, this.mainBodyController})
-      : backdropOpacity = new Tween(begin: 1.0, end: 0.5).animate(
+      : backdropOpacity = new Tween(begin: 1.0, end: 0.2).animate(
           new CurvedAnimation(
             parent: controller,
             curve: Interval(

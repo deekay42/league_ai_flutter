@@ -184,9 +184,9 @@ class MyItemListItem extends MyListItem {
                   fit: BoxFit.contain,
                 )),
             SizedBox(width: 20),
-            Container(width:100, child:Text(
+            Container(width:150, child:Text(
                   item.name,
-                  style: theme.textTheme.caption
+                  style: theme.textTheme.body1
                 )),
           ]),
           last

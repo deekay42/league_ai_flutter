@@ -79,11 +79,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         duration: Duration(milliseconds: 2500), vsync: this);
 
     var list = [
-      'assets/imgs/lol1.png',
-      'assets/imgs/lol2.png',
-      'assets/imgs/lol3.png',
-      'assets/imgs/lol4.png',
-      'assets/imgs/lol5.png'
+      'assets/imgs/1.png',
+      'assets/imgs/2.png',
+      'assets/imgs/3.png',
+      'assets/imgs/4.png'
     ];
     final _random = new Random();
     background = list[_random.nextInt(list.length)];

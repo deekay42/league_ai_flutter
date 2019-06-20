@@ -30,7 +30,10 @@ class ItemsRepository
     return _singleton;
   }
 
-  ItemsRepository._internal();
+  ItemsRepository._internal()
+  {
+    init();
+  }
 
   Future<String> _loadFile() {
     return rootBundle.loadString('assets/data/item2id.json');
@@ -53,7 +56,7 @@ class ItemsRepository
     if(_id2Item == null)
       await init();
     assert(_id2Item is Map);
-    assert(_id2Item['1'].name == 'Boots of Speed');
+    assert(_id2Item["0"].name == "Empty");
 
     if(_id2Item.containsKey(id))
       return _id2Item[id];

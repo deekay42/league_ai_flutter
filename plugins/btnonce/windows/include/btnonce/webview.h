@@ -1136,6 +1136,44 @@ error:
   return -1;
 }
 
+extern const char* global_client_token;
+
+static HRESULT GetPostData(LPVARIANT pvPostData)
+{
+	HRESULT hr;
+	LPSAFEARRAY psa;
+	printf("Inside GetPostData\n");
+	printf("This is the global client token:\n");
+	printf(global_client_token);
+	printf("\n\n");
+	LPCTSTR cszPostData = global_client_token;
+	UINT cElems;
+	LPSTR pPostData;
+
+	cElems = lstrlen(cszPostData);
+
+	if (!pvPostData)
+	{
+		return E_POINTER;
+	}
+
+	VariantInit(pvPostData);
+
+	psa = SafeArrayCreateVector(VT_UI1, 0, cElems);
+	if (!psa)
+	{
+		return E_OUTOFMEMORY;
+	}
+
+	hr = SafeArrayAccessData(psa, (LPVOID*)&pPostData);
+	memcpy(pPostData, cszPostData, cElems);
+	hr = SafeArrayUnaccessData(psa);
+
+	V_VT(pvPostData) = VT_ARRAY | VT_UI1;
+	V_ARRAY(pvPostData) = psa;
+	return NOERROR;
+}
+
 #define WEBVIEW_DATA_URL_PREFIX "data:text/html,"
 static int DisplayHTMLPage(struct webview *w) {
   IWebBrowser2 *webBrowser2;
@@ -1179,7 +1217,12 @@ static int DisplayHTMLPage(struct webview *w) {
       return (-6);
     }
     webBrowser2->lpVtbl->put_Silent(webBrowser2, TRUE);
-    webBrowser2->lpVtbl->Navigate2(webBrowser2, &myURL, 0, 0, 0, 0);
+	VARIANT vHeaders = { 0 };
+	V_VT(&vHeaders) = VT_BSTR;
+	V_BSTR(&vHeaders) = SysAllocString(L"Content-Type: application/x-www-form-urlencoded");
+	VARIANT vPostData = { 0 };
+	if (GetPostData(&vPostData) == NOERROR)
+		webBrowser2->lpVtbl->Navigate2(webBrowser2, &myURL, 0, 0, &vPostData, &vHeaders);
     VariantClear(&myURL);
     if (!isDataURL) {
       return 0;

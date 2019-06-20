@@ -121,6 +121,17 @@ void ChangeToFileDirectory(const char* file_path) {
   }
 }
 
+bool isAlreadyRunning()
+{
+	HANDLE m_singleInstanceMutex = CreateMutex(NULL, TRUE, "ONLY_ONE_INSTACE_ALLOWED");
+	if (m_singleInstanceMutex == NULL || GetLastError() == ERROR_ALREADY_EXISTS) {
+		HWND existingApp = FindWindow(0, "League IQ");
+		if (existingApp) SetForegroundWindow(existingApp);
+		return true; // Exit the app. For MFC, return false from InitInstance.
+	}
+	return false;
+}
+
 int main(int argc, const char* argv[]) {
   //ChangeToFileDirectory(
    //   FIREBASE_CONFIG_STRING[0] != '\0' ?
@@ -130,7 +141,8 @@ int main(int argc, const char* argv[]) {
 #else
   signal(SIGINT, SignalHandler);
 #endif  // _WIN32
-  return common_main(argc, argv);
+  if(!isAlreadyRunning())
+	return common_main(argc, argv);
 }
 
 #if defined(_WIN32)

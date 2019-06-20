@@ -47,12 +47,14 @@ class _HomePageState extends State<HomePage> {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String _remaining;
   bool hasSubscription;
+  StreamSubscription desktopLastFileStream;
 
   Ads ads;
   BannerAd ad;
 
   void initState() {
     super.initState();
+    print("Homepage initState");
 
     _remaining = widget.remaining;
     hasSubscription = widget.hasSubscription;
@@ -75,6 +77,7 @@ class _HomePageState extends State<HomePage> {
 
   void dispose() {
     ad?.dispose();
+    desktopLastFileStream.cancel();
     super.dispose();
   }
 
@@ -98,8 +101,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void initDesktopReadMessage() async {
+    print("initDesktopReadMessage");
     String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
     String filePath = dirPath + "\\last";
+    
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound) {
       File file = File.fromUri(Uri.file(filePath));
       file.delete();
@@ -107,10 +112,18 @@ class _HomePageState extends State<HomePage> {
     int oldsize = -1;
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var lol in dirStream) {
+
+    desktopLastFileStream = dirStream.listen((foo) async {
+      
+    
+    
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-        //print("New last file detected!");    
+        print("New last file detected!");   
+        print("mounted is $mounted");
+        //apparently creating a new file causes this loop to fire multiple times...
+        //need to make sure only one event is processed
+        
         File file = File.fromUri(Uri.file(filePath));
         await waitForFileToFinishLoading(file);
         var contents = await file.readAsString();
@@ -138,8 +151,9 @@ class _HomePageState extends State<HomePage> {
             setState(() => {});
           }
         });
+        
       }
-    }
+    });
   }
 
   void initFirebaseMessaging() {

@@ -15,9 +15,9 @@ SetCompressor /SOLID lzma
  
 
 
-!define MUI_ICON "..\assets\icons\leagueiq.ico"
+!define MUI_ICON "..\assets\icons\logo.ico"
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "..\assets\icons\leagueiq.bmp"
+!define MUI_HEADERIMAGE_BITMAP "..\assets\icons\logo.bmp"
 !define MUI_HEADERIMAGE_RIGHT
 
 

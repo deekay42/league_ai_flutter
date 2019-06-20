@@ -23,6 +23,7 @@ dependencies:
   http: ^0.12.0+1
   qr_flutter: ^2.0.0+51
   qrcode_reader: ^0.4.4
+  watcher: ^0.9.7+10
   btnonce:
     path: ./plugins/btnonce
   fbfunctions:
@@ -71,12 +72,11 @@ flutter:
     - assets/data/item2id.json
 
     #imgs
-    - assets/imgs/lol1.png
-    - assets/imgs/lol2.png
-    - assets/imgs/lol3.png
-    - assets/imgs/lol4.png
-    - assets/imgs/lol5.png
-    - assets/ic_launcher_foreground.png
+    - assets/imgs/1.png
+    - assets/imgs/2.png
+    - assets/imgs/3.png
+    - assets/imgs/4.png
+    - assets/logo.png
 #item imgs
     - assets/item_imgs/0.png
     - assets/item_imgs/4403.png

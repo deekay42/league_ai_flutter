@@ -172,12 +172,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
+    <ClInclude Include="resource3.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Runner2.rc" />
+    <ResourceCompile Include="Runner3.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\assets\icons\leagueiq.ico" />
+    <Image Include="..\..\assets\icons\logo.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -30,6 +30,9 @@ static constexpr int kOkResultValue = 1;
 
 const char kChannelName[] = "flutter/btnonce";
 
+
+const char* global_client_token = "lol";
+
 namespace plugins_btnonce {
 
 class BTNoncePlugin : public flutter::Plugin {
@@ -251,15 +254,15 @@ void BTNoncePlugin::HandleMethodCall(
     return;
   }
   const Json::Value &args = *method_call.arguments();
-  
   std::string client_token = args["clientToken"].asString();
-  
-  std::string url =
-      "https://us-central1-neuralleague.cloudfunctions.net/pay?client_token=" +
-      urlencode(client_token);
+  client_token = "client_token=" + client_token;
+  global_client_token = client_token.c_str();
 
+  
+  std::string url = "https://us-central1-neuralleague.cloudfunctions.net/pay";
+  std::cout << "This is the client_token: " << global_client_token << std::endl;
   std::cout << "This is the client_token: " << client_token << std::endl;
-  std::cout << "This is the url: " << url << std::endl;
+  
   
 webview("Minimal webview example",
 	  url.c_str(), 800, 600, 1);
