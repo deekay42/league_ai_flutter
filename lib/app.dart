@@ -67,7 +67,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   String background;
   bool aiLoaded = false;
   bool waitingOnIsValid = false;
-
+  bool inviteCodeValid = false;
+  bool waitingOnInviteCodeCheck = false;
+  var  _scaffoldKey = null;
   AnimationController mainController;
   AnimationController mainBodyController;
 
@@ -135,12 +137,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
     if (!Platform.isAndroid && !Platform.isIOS) {
       waitForAIToLoad();
+      hasValidInviteCodeSavedDesktop();
     }
   }
 
   Future<void> _playFullAnimation() async {
     try {
-      print("play full");
+      print("play full animation");
       mainController.reset();
       mainBodyController.reset();
       mainController.forward().orCancel;
@@ -154,6 +157,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Future<void> _playListAnimation() async {
     try {
+      print("play list animation");
       mainBodyController.reset();
       await mainBodyController.forward().orCancel;
     } on TickerCanceled {
@@ -234,7 +238,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void checkIfUserHasSubscription() async {
-    waitingOnIsValid = true;
+    setState(() {waitingOnIsValid = true;});
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
       String deviceID = await _firebaseMessaging.getToken();
@@ -249,7 +253,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     } else
       resp = fbfunctions.fb_call(
           methodName: 'isValid',
-          args: <String, dynamic>{"current_version": Strings.version});
+          args: <String, dynamic>{"current_version": "1.0"});
 
     resp.then((dynamic result) {
       print("Got the result: $result");
@@ -270,21 +274,24 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           //   ad.show();
           // });
         }
+        waitingOnIsValid = false;
       });
       if(!Platform.isIOS && !Platform.isAndroid)
         if (result.containsKey("latest_version"))
           promptUpdate(result["latest_version"]);
+      _playListAnimation();
     }).catchError((e) {
       print("isvalid ERROR $e");
       setState(() {
         _remaining = "10";
+        waitingOnIsValid = false;
+        _playListAnimation();
         // ads.getBannerAd().then((BannerAd newAd) {
         //   ad = newAd;
         //   ad.show();
         // });
       });
     });
-    waitingOnIsValid = false;
   }
 
   Future<void> listenForUIDFile(String dirPath, String filePath) async {
@@ -302,6 +309,27 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         });
       }
     }
+  }
+
+  Future<void> hasValidInviteCodeSavedDesktop() async
+  {
+    setState((){waitingOnInviteCodeCheck = true;});
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String inviteCodeFilePath = dirPath + "\\inviteCode";
+    String uidFilePath = dirPath + "\\uid";
+    if (FileSystemEntity.typeSync(inviteCodeFilePath) != FileSystemEntityType.notFound && 
+        FileSystemEntity.typeSync(uidFilePath) != FileSystemEntityType.notFound)
+    {
+      File inviteCodeFile = File.fromUri(Uri.file(inviteCodeFilePath));
+      File uidFile = File.fromUri(Uri.file(uidFilePath));
+      await waitForFileToFinishLoading(inviteCodeFile);
+      await waitForFileToFinishLoading(uidFile);
+      String inviteCode = await inviteCodeFile.readAsString();
+      String uid = await uidFile.readAsString();
+      await fbfunctions.fb_call(methodName: 'getInviteCode', args: <String, dynamic>{"invite_code": inviteCode, "uid":uid}).then((result){setState((){inviteCodeValid = result;});});
+    }
+    setState((){print("invite check complete"); waitingOnInviteCodeCheck = false;});
+
   }
 
   Future<String> getUIDForDesktop() {
@@ -419,7 +447,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     ThemeData theme = Theme.of(context);
     print("waitingOnIsValid is ${waitingOnIsValid}");
     if (waitingOnIsValid ||
-        (!(Platform.isIOS || Platform.isAndroid) && desktopAuthenticated==DesktopAuthState.WAITING)) {
+        (!(Platform.isIOS || Platform.isAndroid) && (desktopAuthenticated==DesktopAuthState.WAITING || waitingOnInviteCodeCheck))) {
       print("piared is null");
 
       //return Container();
@@ -439,6 +467,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         ),
       );
     }
+    
     if (Platform.isAndroid || Platform.isIOS) {
       if (paired)
         return HomePage(
@@ -448,15 +477,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       else
         return MobilePairingPage();
     }
+    
+    desktopUID ??= getUIDForDesktop();
     if (desktopUID != null) {
-      return HomePage(
-          hasSubscription: hasSubscription,
-          remaining: _remaining,
-          mainBodyController: mainBodyController);
-    }
-    desktopUID = getUIDForDesktop();
-    if (desktopUID != null) {
-      _playListAnimation();
+      if(!inviteCodeValid)
+        return _getInviteCodeWidget(context);
+      
+      
       return HomePage(
           hasSubscription: hasSubscription,
           remaining: _remaining,
@@ -464,6 +491,57 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     } else {
       return QRPage(dataString: getUIDDBKeyForDesktop());
     }
+  }
+
+  Widget _getInviteCodeWidget(BuildContext context)
+  {
+    ThemeData theme = Theme.of(context);
+    var codeController = TextEditingController();
+      return Container(
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("League IQ is invite-only at this time. Please enter your invite code.", style: theme.textTheme.body2),
+            SizedBox(
+              height: 15,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                filled: true,
+                labelText: 'Invite code',
+              ),
+              controller: codeController,
+              autofocus: true
+
+            ),
+            SizedBox(
+              height: 15,
+            ),
+            RaisedButton(
+              child: Text('Submit'),
+              onPressed: () async
+                {
+                  String codeEntered = codeController.text;
+                  if(codeEntered == "")
+                    return;
+                  bool enteredValidInviteCode = await fbfunctions.fb_call(methodName: 'getInviteCode', args: <String, dynamic>{"invite_code": codeEntered, "uid":await desktopUID});
+                  if(enteredValidInviteCode)
+                  {
+                     _scaffoldKey.currentState.showSnackBar(SnackBar(content: Row(mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center, children:[Text("Successful!", textAlign: TextAlign.center)])));
+                    setState((){inviteCodeValid = true;});
+                    String inviteCodeFilePath = Platform.environment['LOCALAPPDATA'] + "\\League IQ" + "\\inviteCode";
+                    File(inviteCodeFilePath).writeAsString(codeEntered);
+                  }
+                  else
+                     _scaffoldKey.currentState.showSnackBar(SnackBar(content: Row(mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center, children:[Text("Invite code invalid", textAlign: TextAlign.center)])));
+                },
+            )
+          ],
+        ),
+      );
   }
 
   Widget _getFooter(BuildContext context) {
@@ -524,7 +602,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     if (user == null && (Platform.isAndroid || Platform.isIOS))
       return LoginPage();
     else {
-      return MainPageTemplateAnimator(
+      print("REBUILD APP WIDGET");
+      var mainWidget = 
+         MainPageTemplateAnimator(
           mainController: mainController,
           appBar: _myAppBar(),
           body: buildBody(),
@@ -533,6 +613,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           backdrop: background,
           bottomSheet:
               Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
+      _scaffoldKey = mainWidget.scaffoldKey;
+      return mainWidget;
     }
   }
 }

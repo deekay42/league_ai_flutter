@@ -166,6 +166,8 @@ class UIDListener : public firebase::database::ValueListener {
     secret_file << secret;
     secret_file.close();
 
+	DeleteFileW((dirPath + L"\\db_key").c_str());
+
     myuid = uid;
     mysecret = secret;
   }
