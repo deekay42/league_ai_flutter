@@ -18,6 +18,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <time.h>
 
 #include <flutter/json_method_codec.h>
 #include <flutter/method_channel.h>
@@ -188,7 +189,47 @@ FBFunctionsPlugin::~FBFunctionsPlugin() {}
 //   return doSomething.Call(data);
 // }
 
+void printTime()
+{
+	// Declaring argument for time() 
+	time_t tt;
+
+	// Declaring variable to store return value of 
+	// localtime() 
+	struct tm * ti;
+
+	// Applying time() 
+	time(&tt);
+
+	// Using localtime() 
+	ti = localtime(&tt);
+
+	::std::cout << "Current Day, Date and Time is = "
+		<< asctime(ti);
+}
+
+class MyAuthStateListener : public ::firebase::auth::AuthStateListener {
+public:
+	
+	virtual void OnAuthStateChanged(::firebase::auth::Auth* auth)
+	{
+		printf("\nauth state changed!: ");
+		printTime();
+	}
+};
+
+class MyIdTokenListener : public ::firebase::auth::IdTokenListener {
+public:
+	virtual void OnIdTokenChanged(::firebase::auth::Auth* auth)
+	{
+		printf("\id token changed!: ");
+		printTime();
+	}
+};
+
 bool signIn(std::string custom_token) {
+	auth->AddAuthStateListener(new MyAuthStateListener());
+	auth->AddIdTokenListener(new MyIdTokenListener());
   firebase::Future<firebase::auth::User *> sign_in_future =
       auth->SignInWithCustomToken(custom_token.c_str());
   WaitForCompletion(sign_in_future, "SignIn");
@@ -230,6 +271,19 @@ void FBFunctionsPlugin::HandleMethodCall(
 	bool signInResult = signIn(customToken);
     variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");
   } else {
+	  firebase::auth::User* user = auth->current_user();
+	  if (user != nullptr) {
+		  firebase::Future<std::string> idToken = user->GetToken(true);
+		  WaitForCompletion(idToken, "idToken");
+		  printf("Here is the id token: ");
+		  printf(idToken.result()->data());
+		  // Send token to your backend via HTTPS
+		  // ...
+	  }
+	  else
+	  {
+		  printf("User is NULL\n");
+	  }
     std::map<std::string, firebase::Variant> data;
     auto members = args.getMemberNames();
     for (auto it = members.begin(); it != members.end(); ++it)

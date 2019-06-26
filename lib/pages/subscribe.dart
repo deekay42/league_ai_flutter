@@ -262,7 +262,7 @@ class _SubscribePageState extends State<SubscribePage>
           context, MyDialog(modalText: "Success!", spinner: false));
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.pop(context);
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       });
     }
   }

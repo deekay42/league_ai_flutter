@@ -253,7 +253,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     } else
       resp = fbfunctions.fb_call(
           methodName: 'isValid',
-          args: <String, dynamic>{"current_version": "1.0"});
+          args: <String, dynamic>{"current_version": Strings.version});
 
     resp.then((dynamic result) {
       print("Got the result: $result");
@@ -570,11 +570,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
                   onPressed: () async {
                     //print("Here's the ad we're disposing: $ad");
 
-                    await Navigator.of(context).push(
+                    if(await Navigator.of(context).push(
                       MaterialPageRoute(builder: (context) => SubscribePage()),
-                    );
-                    checkIfUserHasSubscription();
-                    _playFullAnimation();
+                    ))
+                    {
+                      checkIfUserHasSubscription();
+                      _playFullAnimation();
+                    }
                   },
                 )
               ]),
