@@ -6,20 +6,20 @@ environment:
   # The example interacts with build scripts on the Flutter side that are not
   # yet stable, so it requires a very recent version of Flutter.
   # This version will increase regularly as the build scripts change.
-  flutter: '>=1.7.4-pre.77' 
+  flutter: '>=1.7.10-pre.23'
 
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^0.3.1+1
-  cloud_firestore: ^0.9.5+2
-  cloud_functions: ^0.1.1+1
-  firebase_auth: ^0.8.1+4
-  firebase_messaging: ^4.0.0+1
-  intl: ^0.15.6
-  firebase_admob: ^0.8.0+3
-  flutter_launcher_icons: ^0.7.0
-  cupertino_icons: ^0.1.0
+  firebase_core: ^0.4.0+6
+  cloud_firestore: ^0.12.5+2
+  cloud_functions: ^0.4.0+2
+  firebase_auth: ^0.11.1+7
+  firebase_messaging: ^5.0.4
+  intl: ^0.15.8
+  firebase_admob: ^0.9.0+1
+  flutter_launcher_icons: ^0.7.2
+  cupertino_icons: ^0.1.2
   http: ^0.12.0+1
   qr_flutter: ^2.0.0+51
   qrcode_reader: ^0.4.4
@@ -36,9 +36,11 @@ dependencies:
       path: flutter_firebase_ui
 
 flutter_icons:
-  image_path: "assets/icon/ic_launcher_foreground.png"
+  image_path: "assets/icons/logo_head_only.png"
   android: true
   ios: true
+  adaptive_icon_background: "assets/icons/background.png"
+  adaptive_icon_foreground: "assets/icons/logo_head_small.png"
 
 dev_dependencies:
   flutter_test:
@@ -71,12 +73,17 @@ flutter:
     #json
     - assets/data/item2id.json
 
+    #icons
+    - assets/icons/logo_head_only.png
+    - assets/icons/logo_head_small.png
+    - assets/icons/logo.png
+
     #imgs
     - assets/imgs/1.png
     - assets/imgs/2.png
     - assets/imgs/3.png
     - assets/imgs/4.png
-    - assets/logo.png
+
 #item imgs
     - assets/item_imgs/0.png
     - assets/item_imgs/4403.png

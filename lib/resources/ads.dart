@@ -1,5 +1,6 @@
 import 'package:firebase_admob/firebase_admob.dart';
 import '../resources/Strings.dart';
+import 'dart:async';
 
 class Ads {
   final MobileAdTargetingInfo targetingInfo;

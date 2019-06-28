@@ -79,7 +79,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                           padding: EdgeInsets.only(top: 15),
                           child: PoppingLogoAnimation(
                             child: Image.asset(
-                              'assets/logo.png',
+                              'assets/icons/logo.png',
                               fit: BoxFit.fitHeight,
                             ),
                             animation: animationController.logoPop,

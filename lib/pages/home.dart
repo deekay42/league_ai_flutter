@@ -77,7 +77,8 @@ class _HomePageState extends State<HomePage> {
 
   void dispose() {
     ad?.dispose();
-    desktopLastFileStream.cancel();
+    if(!Platform.isIOS && !Platform.isAndroid)
+      desktopLastFileStream.cancel();
     super.dispose();
   }
 
@@ -109,7 +110,6 @@ class _HomePageState extends State<HomePage> {
       File file = File.fromUri(Uri.file(filePath));
       file.delete();
     }
-    int oldsize = -1;
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
 
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
         fbfunctions.fb_call(
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
-          print("Response status: ${response}");
+          print("Response status: $response");
 
           if (response.startsWith("SUCCESSFUL")) {
             _remaining = response.split(',')[1];

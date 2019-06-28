@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io' show Platform;
 import 'dart:math';
+import 'dart:async';
 
 import 'package:btnonce/btnonce.dart' as btnonce;
 import 'package:cloud_functions/cloud_functions.dart';
@@ -68,7 +69,7 @@ class _SubscribePageState extends State<SubscribePage>
     background = list[_random.nextInt(list.length)];
 
     if (Platform.isAndroid || Platform.isIOS)
-      _clientToken = CloudFunctions.instance.call(functionName: 'client_token');
+      _clientToken = CloudFunctions.instance.getHttpsCallable(functionName: 'client_token').call();
     else {
       _clientToken = fbfunctions.fb_call(methodName: 'client_token');
     }
@@ -110,8 +111,11 @@ class _SubscribePageState extends State<SubscribePage>
 
   Future<List<String>> _getPaymentNonce() async {
     print("now getting the nonce");
+    var clientTokenResult = await _clientToken;
+    if (Platform.isAndroid || Platform.isIOS)
+      clientTokenResult = clientTokenResult.data;
     dynamic result = await platform
-        .invokeMethod('getPaymentNonce', {"clientToken": await _clientToken});
+        .invokeMethod('getPaymentNonce', {"clientToken": clientTokenResult});
     print("now got the the nonce");
     print(result.toString());
     if (result == null) return null;
@@ -125,9 +129,8 @@ class _SubscribePageState extends State<SubscribePage>
     print("now attempting checkout");
     var myFuture;
     if (Platform.isAndroid || Platform.isIOS)
-      myFuture = CloudFunctions.instance.call(
-        functionName: 'subscribe',
-        parameters: <String, dynamic>{
+      myFuture = CloudFunctions.instance.getHttpsCallable(
+        functionName: 'subscribe').call(<String, dynamic>{
           'payment_method_nonce': nonce,
         },
       );
@@ -140,6 +143,7 @@ class _SubscribePageState extends State<SubscribePage>
       );
 
     dynamic resp = await myFuture;
+    resp = resp.data;
     if (resp == "SUCCESS") {
       print("SUCCESS");
       return ConfirmResult.SUCCESS;
@@ -216,6 +220,7 @@ class _SubscribePageState extends State<SubscribePage>
   Future<void> runPaymentProcess(BuildContext context) async {
     try {
       await _clientToken;
+
     } catch (e) {
       throw ClientTokenException(e.toString());
     }

@@ -16,7 +16,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:io' show Platform;
 import 'dart:math';
-import 'package:flutter/services.dart';
 
 import 'pages/home.dart';
 import 'pages/login.dart';
@@ -69,7 +68,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   bool waitingOnIsValid = false;
   bool inviteCodeValid = false;
   bool waitingOnInviteCodeCheck = false;
-  var  _scaffoldKey = null;
+  var  _scaffoldKey;
   AnimationController mainController;
   AnimationController mainBodyController;
 
@@ -244,9 +243,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       String deviceID = await _firebaseMessaging.getToken();
       print("Got device_id: $deviceID");
       assert(deviceID != null);
-      resp = CloudFunctions.instance.call(
-          functionName: 'isValid',
-          parameters: <String, dynamic>{
+      resp = CloudFunctions.instance.getHttpsCallable(
+          functionName: 'isValid').call(
+          <String, dynamic>{
             "device_id": deviceID,
             "current_version": Strings.version
           });
@@ -256,6 +255,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           args: <String, dynamic>{"current_version": Strings.version});
 
     resp.then((dynamic result) {
+      result = result.data;
       print("Got the result: $result");
       setState(() {
         if (result["paired"] == "true")
@@ -376,11 +376,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     print('unsubscribe');
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
-      resp = CloudFunctions.instance.call(functionName: 'cancelSub');
+      resp = CloudFunctions.instance.getHttpsCallable(functionName: 'cancelSub');
     } else
       resp = fbfunctions.fb_call(methodName: 'cancelSub');
 
     resp.then((dynamic result) {
+      result = result.data;
       setState(() {
         print("Unsubscribe done: $result");
         if (result is bool) print("It is a bool");
@@ -445,7 +446,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Widget buildBody() {
     ThemeData theme = Theme.of(context);
-    print("waitingOnIsValid is ${waitingOnIsValid}");
+    print("waitingOnIsValid is $waitingOnIsValid");
     if (waitingOnIsValid ||
         (!(Platform.isIOS || Platform.isAndroid) && (desktopAuthenticated==DesktopAuthState.WAITING || waitingOnInviteCodeCheck))) {
       print("piared is null");

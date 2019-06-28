@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_ui/l10n/localization.dart';
 
-void waitForFileToFinishLoading(File file) async
+Future<void> waitForFileToFinishLoading(File file) async
 {
   int oldsize = -1;
   while(true)

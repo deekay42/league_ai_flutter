@@ -39,32 +39,24 @@ void main() {
 }
 
 
-// TODO: Build a Shrine Theme (103)
 final ThemeData _myTheme = _buildMyTheme();
 
 ThemeData _buildMyTheme() {
   final ThemeData base = ThemeData.dark();
   return base.copyWith(
-//    accentColor: kShrineBrown900,
-//    primaryColor: bgDark,
     buttonTheme: base.buttonTheme.copyWith(
       buttonColor: buttonDark,
       textTheme: ButtonTextTheme.normal,
     ),
-//    scaffoldBackgroundColor: kShrineBackgroundWhite,
-    textSelectionColor: kShrinePink100,
-    errorColor: kShrineErrorRed,
-    textTheme: _buildShrineTextTheme(base.textTheme),
-    primaryTextTheme: _buildShrineTextTheme(base.primaryTextTheme),
-    accentTextTheme: _buildShrineTextTheme(base.accentTextTheme),
-//    primaryIconTheme: base.iconTheme.copyWith(
-//        color: kShrineBrown900
-//    ),
+    textSelectionColor: kPink100,
+    errorColor: kErrorRed,
+    textTheme: _buildTextTheme(base.textTheme),
+    primaryTextTheme: _buildTextTheme(base.primaryTextTheme),
+    accentTextTheme: _buildTextTheme(base.accentTextTheme),
   );
 }
 
-// TODO: Build a Shrine Text Theme (103)
-TextTheme _buildShrineTextTheme(TextTheme base) {
+TextTheme _buildTextTheme(TextTheme base) {
   return base
       .copyWith(
         headline: base.headline
@@ -98,6 +90,5 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
             fontWeight: FontWeight.w300, fontSize: 13.0, color: secondaryText),
       )
       .apply(fontFamily: 'Roboto'
-//    bodyColor: kShrineBrown900,
           );
 }

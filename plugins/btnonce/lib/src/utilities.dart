@@ -11,8 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import 'callbacks.dart';
 import 'channel_controller.dart';
+import 'dart:async';
 
 Future<String> finishPayment({String clientToken}) {
   return BTNonceChannelController.instance

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'channel_controller.dart';
+import 'dart:async';
 
 Future<dynamic> launchbrowser({String url}) {
   return LaunchBrowserChannelController.instance

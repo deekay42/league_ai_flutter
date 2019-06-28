@@ -13,7 +13,6 @@
 // limitations under the License.
 import 'package:flutter/services.dart';
 import 'dart:async';
-import 'callbacks.dart';
 
 // Plugin channel constants. See common/channel_constants.h for details.
 const String _kChannelName = 'flutter/btnonce';

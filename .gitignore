@@ -5,3 +5,9 @@ windows\ -\ Copy/
 windows/flutter/
 windows/.vs
 install/Install League IQ.exe
+.DS_Store
+.dart_tool/
+.idea/
+.metadata
+android/.idea/
+*.iml
