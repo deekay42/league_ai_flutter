@@ -74,6 +74,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   void initState() {
     super.initState();
+    
     mainController = AnimationController(
         duration: Duration(milliseconds: 3500), vsync: this);
     mainBodyController = AnimationController(
@@ -112,26 +113,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         checkIfUserHasSubscription();
       });
     } else
-      fbfunctions.fb_call(methodName: 'authenticate').then((result) {
-        if (result=="unsuccessful")
-        {
-          throw AuthException("FATAL: Unable to authenticate user");
-        }
-        else if(result=="files_missing")
-        {
-          setState(() {
-            desktopAuthenticated = DesktopAuthState.AUTHERROR;
-          });
-          print("Unable to authenticate user. Probably because uid and/or secret files are missing.");
-        }
-        else if(result == "successful")
-        {
-          setState(() {
-            desktopAuthenticated = DesktopAuthState.AUTHENTICATED;
-          });
-          checkIfUserHasSubscription();
-        }
-      });
+        desktopAuthenticate();
       
 
     if (!Platform.isAndroid && !Platform.isIOS) {
@@ -139,6 +121,30 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       hasValidInviteCodeSavedDesktop();
     }
   }
+
+  Future<void> desktopAuthenticate() async
+  {
+    var result = await fbfunctions.fb_call(methodName: 'authenticate');
+    if (result=="unsuccessful")
+    {
+      throw AuthException("FATAL: Unable to authenticate user");
+    }
+    else if(result=="files_missing")
+    {
+      setState(() {
+        desktopAuthenticated = DesktopAuthState.AUTHERROR;
+      });
+      print("Unable to authenticate user. Probably because uid and/or secret files are missing.");
+    }
+    else if(result == "successful")
+    {
+      setState(() {
+        desktopAuthenticated = DesktopAuthState.AUTHENTICATED;
+      });
+      checkIfUserHasSubscription();
+    }
+  }
+
 
   Future<void> _playFullAnimation() async {
     try {
@@ -220,6 +226,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.pop(context);
+                      _playListAnimation();
                     },
                   ),
                 ],
@@ -255,7 +262,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           args: <String, dynamic>{"current_version": Strings.version});
 
     resp.then((dynamic result) {
-      result = result.data;
+      if (Platform.isIOS || Platform.isAndroid)
+        result = result.data;
       print("Got the result: $result");
       setState(() {
         if (result["paired"] == "true")
@@ -294,21 +302,36 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     });
   }
 
-  Future<void> listenForUIDFile(String dirPath, String filePath) async {
+  void listenForUIDFile(String dirPath, String filePath) async {
     //UID not present. need to wait until file appears which contains it.
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var _ in dirStream) {
-      print("Some event!!");
-      if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-      {
+    StreamSubscription desktopUIDListener;
+
+    desktopUIDListener = dirStream.listen((event) async {
+      
+      if (FileSystemEntity.typeSync(filePath) !=
+          FileSystemEntityType.notFound) {
+        print("Some event!!: $filePath ${event.path}");
+        if(desktopUID != null || filePath != event.path)
+          return;
+      
         File file = File.fromUri(Uri.file(filePath));
         await waitForFileToFinishLoading(file);
+        print("Now");
+        await desktopAuthenticate();
+        if(desktopAuthenticated == DesktopAuthState.AUTHENTICATED)
+          fbfunctions.fb_call(methodName: 'completePairing');
+        else
+          throw AuthException("FATAL: Unable to authenticate user. files are still missing");
         setState(() {
           desktopUID = file.readAsString();
+          desktopUIDListener.cancel();
         });
+        
       }
-    }
+    });
+
   }
 
   Future<void> hasValidInviteCodeSavedDesktop() async
@@ -429,7 +452,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    await for (var _ in dirStream) {
+
+    StreamSubscription aiListener;
+    
+    aiListener = dirStream.listen((event) async {
+      
+      if(aiLoaded || event.path != filePath)
+        return;
       print("Ai Loaded?!");
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
@@ -438,10 +467,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         file.delete();
         setState(() {
           aiLoaded = true;
+          aiListener.cancel();
         });
-        break;
       }
-    }
+    });
+
+    
   }
 
   Widget buildBody() {

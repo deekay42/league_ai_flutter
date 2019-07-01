@@ -28,11 +28,11 @@ packages:
       name: boolean_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   btnonce:
     dependency: "direct main"
     description:
-      path: "plugins/btnonce"
+      path: "plugins\\btnonce"
       relative: true
     source: path
     version: "0.0.0"
@@ -88,7 +88,7 @@ packages:
   fbfunctions:
     dependency: "direct main"
     description:
-      path: "plugins/fbfunctions"
+      path: "plugins\\fbfunctions"
       relative: true
     source: path
     version: "0.0.0"
@@ -196,7 +196,7 @@ packages:
   launchbrowser:
     dependency: "direct main"
     description:
-      path: "plugins/launchbrowser"
+      path: "plugins\\launchbrowser"
       relative: true
     source: path
     version: "0.0.0"

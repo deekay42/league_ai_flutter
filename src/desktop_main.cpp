@@ -83,6 +83,67 @@ void LogMessage(const char* format, ...) {
   fflush(stdout);
 }
 
+
+class MyAuthStateListener : public ::firebase::auth::AuthStateListener {
+public:
+
+	virtual void OnAuthStateChanged(::firebase::auth::Auth* auth)
+	{
+		printf("\nauth state changed!: ");
+		
+	}
+};
+
+class MyIdTokenListener : public ::firebase::auth::IdTokenListener {
+public:
+	virtual void OnIdTokenChanged(::firebase::auth::Auth* auth)
+	{
+		printf("\nid token changed!: ");
+		
+	}
+};
+
+bool signIn(std::string custom_token) {
+	auth->AddAuthStateListener(new MyAuthStateListener());
+	auth->AddIdTokenListener(new MyIdTokenListener());
+	firebase::Future<firebase::auth::User *> sign_in_future =
+		auth->SignInWithCustomToken(custom_token.c_str());
+	WaitForCompletion(sign_in_future, "SignIn");
+	if (sign_in_future.error() == firebase::auth::kAuthErrorNone) {
+		LogMessage("Auth: Signed in as user!");
+		return true;
+	}
+	else {
+		LogMessage("ERROR: Could not sign in anonymously. Error %d: %s",
+			sign_in_future.error(), sign_in_future.error_message());
+		return false;
+	}
+}
+
+bool authenticate(std::string uid, std::string secret)
+{
+	firebase::auth::User* user = auth->current_user();
+	if (user != nullptr) {
+		return true;
+	}
+	LogMessage("Trying to auth user!");
+	if (uid == "" || secret == "")
+	{
+		LogMessage("ERROR: uid or secret are empty");
+		throw std::invalid_argument("uid or secret are empty");
+	}
+	
+	std::map<std::string, firebase::Variant> data;
+	data["uid"] = firebase::Variant(uid);
+	data["auth_secret"] = firebase::Variant(secret);
+	std::string customToken;
+	customToken = callFBFunctionSync("getCustomToken", &data).string_value();
+	return signIn(customToken);
+}
+
+
+
+
 firebase::Variant callFBFunctionSync(
     const char *functionName,
     std::map<std::string, firebase::Variant> *data) {

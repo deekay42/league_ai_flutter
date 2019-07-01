@@ -151,7 +151,7 @@ class UIDListener : public firebase::database::ValueListener {
     auto it = mymap.begin();
     std::string uid = (mymap["uid"]).AsString().string_value();
     ++it;
-    std::string secret = mymap["secret"].AsString().string_value();
+    std::string secret = mymap["auth_secret"].AsString().string_value();
 
     std::cout << "Here's the data: " << uid << "\n" << secret << std::endl;
     if (uid == "waiting" || secret == "waiting") return;
@@ -173,7 +173,8 @@ class UIDListener : public firebase::database::ValueListener {
   }
   void OnCancelled(const firebase::database::Error &error_code,
                    const char *error_message) override {
-    std::cout << "LOL" << std::endl;
+	  LogMessage("ERROR: Listener canceled: %d: %s", error_code,
+		  error_message);
   }
 
 
@@ -257,7 +258,6 @@ UIDListener* listenForUIDUpdate() {
   std::cout << "Data is now set" << std::endl;
 
   UIDListener *listener = new UIDListener(myRef.Child(key));
-  // firebase::Future<firebase::database::DataSnapshot> result =
   myRef.Child(key).AddValueListener(listener);
   return listener;
 }
@@ -415,9 +415,9 @@ extern "C" int common_main(int argc, const char *argv[]) {
   std::wstring dirPath = getLocalAppDataFolder();
   DeleteFileW((dirPath + L"\\ai_loaded").c_str());
   std::remove("ai_loaded");
-  printf("Now running python code");
+  printf("Now running python code\n");
   std::thread pythonThread(runCythonCode);
-  printf("Python code kickced off");
+  printf("Python code kickced off\n");
   initializeFirebase();
   
   std::ifstream file_uid(dirPath + L"\\uid");
@@ -425,6 +425,7 @@ extern "C" int common_main(int argc, const char *argv[]) {
   UIDListener *listener = nullptr;
   if (!file_uid || !file_secret) {
 	  listener = listenForUIDUpdate();
+	  
   } else {
     std::getline(file_uid, myuid);
     std::getline(file_secret, mysecret);

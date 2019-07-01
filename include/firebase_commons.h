@@ -27,3 +27,6 @@ void WaitForCompletion(const firebase::FutureBase &future, const char *name);
 firebase::Variant callFBFunctionSync(
     const char *functionName,
     std::map<std::string, firebase::Variant> *data = nullptr);
+
+
+bool authenticate(std::string uid, std::string secret);

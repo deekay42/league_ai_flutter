@@ -19,6 +19,7 @@
 #include <memory>
 #include <vector>
 #include <time.h>
+#include <stdexcept> 
 
 #include <flutter/json_method_codec.h>
 #include <flutter/method_channel.h>
@@ -189,64 +190,11 @@ FBFunctionsPlugin::~FBFunctionsPlugin() {}
 //   return doSomething.Call(data);
 // }
 
-void printTime()
-{
-	// Declaring argument for time() 
-	time_t tt;
 
-	// Declaring variable to store return value of 
-	// localtime() 
-	struct tm * ti;
-
-	// Applying time() 
-	time(&tt);
-
-	// Using localtime() 
-	ti = localtime(&tt);
-
-	::std::cout << "Current Day, Date and Time is = "
-		<< asctime(ti);
-}
-
-class MyAuthStateListener : public ::firebase::auth::AuthStateListener {
-public:
-	
-	virtual void OnAuthStateChanged(::firebase::auth::Auth* auth)
-	{
-		printf("\nauth state changed!: ");
-		printTime();
-	}
-};
-
-class MyIdTokenListener : public ::firebase::auth::IdTokenListener {
-public:
-	virtual void OnIdTokenChanged(::firebase::auth::Auth* auth)
-	{
-		printf("\id token changed!: ");
-		printTime();
-	}
-};
-
-bool signIn(std::string custom_token) {
-	auth->AddAuthStateListener(new MyAuthStateListener());
-	auth->AddIdTokenListener(new MyIdTokenListener());
-  firebase::Future<firebase::auth::User *> sign_in_future =
-      auth->SignInWithCustomToken(custom_token.c_str());
-  WaitForCompletion(sign_in_future, "SignIn");
-  if (sign_in_future.error() == firebase::auth::kAuthErrorNone) {
-    LogMessage("Auth: Signed in as user!");
-    return true;
-  } else {
-    LogMessage("ERROR: Could not sign in anonymously. Error %d: %s",
-               sign_in_future.error(), sign_in_future.error_message());
-    return false;
-  }
-}
 
 void FBFunctionsPlugin::HandleMethodCall(
     const flutter::MethodCall<Json::Value> &method_call,
-    std::unique_ptr<flutter::MethodResult<Json::Value>>
-        result) {
+    std::unique_ptr<flutter::MethodResult<Json::Value>> result) {
   if (!method_call.arguments() || method_call.arguments()->isNull()) {
     result->Error("Bad Arguments", "Null file chooser method args received");
     return;
@@ -254,29 +202,21 @@ void FBFunctionsPlugin::HandleMethodCall(
   firebase::Variant variant_result;
   const Json::Value &args = *method_call.arguments();
   if (args["methodName"] == "authenticate") {
-    LogMessage("Trying to auth user!");
-	if(myuid == "" || mysecret == "")
-	{
-		//ugly, but using result->Error apparently creates uncatchable exceptions.
-		Json::Value response_object(CreateResponseObject(firebase::Variant("files_missing")));
-		result->Success(&response_object);
-		return;
-	}
-
-    std::map<std::string, firebase::Variant> data;
-    data["uid"] = firebase::Variant(myuid);
-    data["auth_secret"] = firebase::Variant(mysecret);
-    std::string customToken;
-    customToken = callFBFunctionSync("getCustomToken", &data).string_value();
-	bool signInResult = signIn(customToken);
-    variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");
+	  if (myuid == "" || mysecret == "")
+	  {
+		  //ugly, but using result->Error apparently creates uncatchable exceptions.
+		  Json::Value response_object(CreateResponseObject(firebase::Variant("files_missing")));
+		  result->Success(&response_object);
+		  return;
+	  }
+	  
+	  bool signInResult = authenticate(myuid, mysecret);
+	  variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");;
   } else {
 	  firebase::auth::User* user = auth->current_user();
 	  if (user != nullptr) {
 		  firebase::Future<std::string> idToken = user->GetToken(true);
 		  WaitForCompletion(idToken, "idToken");
-		  printf("Here is the id token: ");
-		  printf(idToken.result()->data());
 		  // Send token to your backend via HTTPS
 		  // ...
 	  }
