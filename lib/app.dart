@@ -105,7 +105,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           print(result?.metadata?.lastSignInTimestamp);
           newlyCreatedUser = true;
         }
-        print('This is hte user: ');
+        print('This is the user: ');
         print(result.toString());
         setState(() {
           user = result;
@@ -244,6 +244,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void checkIfUserHasSubscription() async {
+    if(waitingOnIsValid) return;
     setState(() {waitingOnIsValid = true;});
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
