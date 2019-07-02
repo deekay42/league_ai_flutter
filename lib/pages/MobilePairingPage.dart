@@ -36,11 +36,12 @@ class MobilePairingPage extends StatelessWidget
       },
     ).then((dynamic result) {
       result = result.data;
-      Navigator.pop(context);
+      
       if (result != "SUCCESS")
+      {
+        Navigator.pop(context);
         displayErrorDialog(context, "Pairing unsuccessful. Please try again");
-      else
-        displayWaitingModal(context, "Trying to reach desktop app now...");
+      }
     }).catchError((e) {
       Navigator.pop(context);
       print("ERROR " + e.message);

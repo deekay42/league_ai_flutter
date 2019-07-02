@@ -71,6 +71,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   var  _scaffoldKey;
   AnimationController mainController;
   AnimationController mainBodyController;
+  StreamSubscription desktopUIDListener;
+   StreamSubscription aiListener;
 
   void initState() {
     super.initState();
@@ -178,6 +180,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   @override
   void dispose() {
     _listener?.cancel();
+    aiListener?.cancel();
+    desktopUIDListener?.cancel();
     mainBodyController.dispose();
     mainController.dispose();
     super.dispose();
@@ -305,9 +309,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   void listenForUIDFile(String dirPath, String filePath) async {
     //UID not present. need to wait until file appears which contains it.
+
+    if(desktopUIDListener != null)
+      return;
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
-    StreamSubscription desktopUIDListener;
+    
 
     desktopUIDListener = dirStream.listen((event) async {
       
@@ -454,7 +461,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
 
-    StreamSubscription aiListener;
+    if(aiListener != null)
+      return;
     
     aiListener = dirStream.listen((event) async {
       
