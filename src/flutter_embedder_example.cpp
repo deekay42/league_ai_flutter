@@ -393,22 +393,6 @@ void shutdownFirebase() {
 	delete app;
 }
 
-// void runPythonCode() {
-//   Py_Initialize();
-//   PyRun_SimpleString(
-//       "import "
-//       "sys\nsys.path.append(r\"C:\\Users\\Dom\\code\\flutter-desktop-"
-//       "embedding\\example\\windows_fde\python\")\n");
-
-//   PyRun_SimpleString("print('Python search path %s' % sys.path)");
-//   PyObject *obj = Py_BuildValue("s", "screenshot.py");
-//   FILE *file = _Py_fopen_obj(obj, "r+");
-//   if (file != NULL) {
-//     PyRun_SimpleFile(file, "screenshot.py");
-//   }
-//   Py_FinalizeEx();
-// }
-
 extern "C" int common_main(int argc, const char *argv[]) {
 
 
