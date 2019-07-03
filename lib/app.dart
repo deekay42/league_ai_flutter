@@ -112,7 +112,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         setState(() {
           user = result;
         });
-        checkIfUserHasSubscription();
+        if(user != null) {
+          initFirebaseMessaging();
+          checkIfUserHasSubscription();
+        }
       });
     } else
         desktopAuthenticate();
@@ -211,8 +214,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
+    print("pairing succcessful now");
     //its the pairing confirmation message
-    if (message['notification']['title'] == "PAIRING SUCCESSFUL") {
+    if (message['data']['title'] == "PAIRING SUCCESSFUL") {
       showDialog<Null>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -237,7 +241,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
               ),
             ),
       );
-
+      print("whoop whoop");
       setState(() {
         paired = true;
       });
@@ -248,7 +252,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void checkIfUserHasSubscription() async {
-    if(waitingOnIsValid) return;
+    if(waitingOnIsValid || user == null) return;
     setState(() {waitingOnIsValid = true;});
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
@@ -295,6 +299,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       _playListAnimation();
     }).catchError((e) {
       print("isvalid ERROR $e");
+      print(e.message);
       setState(() {
         _remaining = "10";
         waitingOnIsValid = false;

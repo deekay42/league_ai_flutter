@@ -84,7 +84,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
     print("Received new message: $message");
-    String content = message['aps']['alert']['body'];
+    if(!message.containsKey('data') || !message['data'].containsKey('body'))
+      return;
+    String content = message['data']['body'];
     //its a new build recommendation
     List<String> itemsS = content.split(",");
 

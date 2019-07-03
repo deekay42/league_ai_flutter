@@ -24,8 +24,9 @@ class MobilePairingPage extends StatelessWidget
         .setHandlePermissions(true)
         .setExecuteAfterPermissionGranted(true)
         .scan();
-
-    print("Obtained the realtimeDBID: " + realtimeDBID);
+    if(realtimeDBID == null)
+      return;
+    print("Obtained the realtimeDBID: $realtimeDBID");
     displayFullScreenModal(
         context, MyDialog(modalText: "", spinner: true));
 
