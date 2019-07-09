@@ -127,12 +127,16 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> desktopAuthenticate() async
+  Future<void> desktopAuthenticate({int timeout = 0}) async
   {
     var result = await fbfunctions.fb_call(methodName: 'authenticate');
     if (result=="unsuccessful")
     {
-      throw AuthException("FATAL: Unable to authenticate user");
+      print("Auth unsuccessful. Trying again in $timeout seconds");
+      //retry
+       Future.delayed(Duration(seconds: timeout), () {
+        desktopAuthenticate(timeout:8);
+      });
     }
     else if(result=="files_missing")
     {
@@ -140,6 +144,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         desktopAuthenticated = DesktopAuthState.AUTHERROR;
       });
       print("Unable to authenticate user. Probably because uid and/or secret files are missing.");
+      
     }
     else if(result == "successful")
     {
@@ -397,6 +402,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
       //         action: _myaccount)
       //     : null,
+      //Choice(title: 'Pair new', action: pushPairingPage),
       Choice(title: 'Version '+Strings.version),
       (Platform.isIOS || Platform.isAndroid)
           ? Choice(title: 'Logout', action: signOutProviders)
@@ -406,6 +412,21 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       
     ].where(notNull).toList();
     return BasicAppBar(false, choices, false);
+  }
+
+  void pushPairingPage()
+  {
+    Widget mainPairingPage = MainPageTemplateAnimator(
+          mainController: mainController,
+          appBar: null,
+          body: Platform.isAndroid || Platform.isIOS ? MobilePairingPage() : QRPage(dataString: getUIDDBKeyForDesktop()),
+          mainBodyController: mainBodyController,
+          footer: null,
+          backdrop: background,
+          bottomSheet:
+              Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
+
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) =>  mainPairingPage));
   }
 
   void _unsubscribe() {
@@ -491,7 +512,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Widget buildBody() {
     ThemeData theme = Theme.of(context);
-    print("waitingOnIsValid is $waitingOnIsValid");
+    print("waitingOnIsValid is $waitingOnIsValid, desktopauth is $desktopAuthenticated, waitingOnInviteCodeCheck is $waitingOnInviteCodeCheck");
     if (waitingOnIsValid ||
         (!(Platform.isIOS || Platform.isAndroid) && (desktopAuthenticated==DesktopAuthState.WAITING || waitingOnInviteCodeCheck))) {
       print("piared is null");

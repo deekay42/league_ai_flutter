@@ -133,26 +133,35 @@ class _HomePageState extends State<HomePage> {
         file.delete();
 
         print("Contents: " + contents);
-
         fbfunctions.fb_call(
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
           print("Response status: $response");
-
+          if(response == null)
+          {
+            print("relayMessage ERROR");
+            var mySnack = SnackBar(duration:const Duration(seconds:10), content: Row(mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center, children:[Text("Connection problem", textAlign: TextAlign.center)]));
+            Scaffold.of(context).showSnackBar(mySnack);
+            return;
+          }
           if (response.startsWith("SUCCESSFUL")) {
             _remaining = response.split(',')[1];
             // means that somebody is subscribed
             if (_remaining == "1337") hasSubscription = true;
             Map<String, dynamic> arg = {
-              'aps': <String, dynamic>{
-                'alert': <String, dynamic>{'body': contents}
-              }
+              'data': <String, dynamic>
+                  {'body': contents}
             };
             _handleNewMessageIncoming(arg);
           } else if (response == "UID DOES NOT EXIST") {
             setState(() => {});
           }
-        });
+        })
+        .catchError((e) {
+          print("relayMessage catchError ERROR $e");
+          
+    });
         
       }
     });

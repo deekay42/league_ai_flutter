@@ -21,7 +21,7 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
   {
     return Column(children: [
       SizedBox(height:15),
-      Text("Please scan the QR Code using your League IQ app on your phone to complete the pairing."),
+      Text("Welcome to League IQ! Please pair your phone by scanning the QR Code below with your League IQ app"),
       Expanded(
               child: Center(
                 child: Padding(

@@ -136,9 +136,11 @@ bool authenticate(std::string uid, std::string secret)
 	std::map<std::string, firebase::Variant> data;
 	data["uid"] = firebase::Variant(uid);
 	data["auth_secret"] = firebase::Variant(secret);
-	std::string customToken;
-	customToken = callFBFunctionSync("getCustomToken", &data).string_value();
-	return signIn(customToken);
+	firebase::Variant customToken;
+	customToken = callFBFunctionSync("getCustomToken", &data);;
+	if (customToken.is_null())
+		return false;
+	return signIn(customToken.string_value());
 }
 
 
@@ -158,7 +160,7 @@ firebase::Variant callFBFunctionSync(
   if (future.error() != firebase::functions::kErrorNone) {
     LogMessage("FAILED!");
     LogMessage("  Error %d: %s", future.error(), future.error_message());
-    result = firebase::Variant();
+	result = firebase::Variant::Null();
   } else {
     result = future.result()->data();
 

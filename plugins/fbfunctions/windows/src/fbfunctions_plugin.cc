@@ -209,9 +209,9 @@ void FBFunctionsPlugin::HandleMethodCall(
 		  result->Success(&response_object);
 		  return;
 	  }
-	  
+
 	  bool signInResult = authenticate(myuid, mysecret);
-	  variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");;
+	  variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");
   } else {
 	  firebase::auth::User* user = auth->current_user();
 	  if (user != nullptr) {
