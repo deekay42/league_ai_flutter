@@ -141,6 +141,7 @@ class _SignUpViewState extends State<SignUpView> {
 
     FirebaseAuth _auth = FirebaseAuth.instance;
     try {
+      print("Trying to create new user now");
       FirebaseUser user = await _auth.createUserWithEmailAndPassword(
         email: _controllerEmail.text,
         password: _controllerPassword.text,
@@ -156,10 +157,12 @@ class _SignUpViewState extends State<SignUpView> {
         alreadySubmitted = false;
       }
     } on PlatformException catch (e) {
-      print(e.details);
+
+      //String msg = FFULocalizations.of(context).passwordLengthMessage;
+      showErrorDialog(context, e.message);
+      print(e.toString());
       //TODO improve errors catching
-//      String msg = FFULocalizations.of(context).passwordLengthMessage;
-      showErrorDialog(context, e.toString());
+
       alreadySubmitted = false;
     }
   }

@@ -5,6 +5,7 @@ import 'l10n/localization.dart';
 import 'password_view.dart';
 import 'sign_up_view.dart';
 import 'utils.dart';
+import 'package:flutter/services.dart';
 
 class EmailView extends StatefulWidget {
   final bool passwordCheck;
@@ -18,15 +19,16 @@ class EmailView extends StatefulWidget {
 class _EmailViewState extends State<EmailView> {
   final TextEditingController _controllerEmail = new TextEditingController();
   bool alreadySubmitted;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void initState() {
     super.initState();
     alreadySubmitted = false;
-    print("initstate!!");
+    print("emailviewstate initstate!!");
   }
 
   @override
-  Widget build(BuildContext context) => new Scaffold(
+  Widget build(BuildContext context) => new Scaffold(key:_scaffoldKey,
         appBar: new AppBar(
           title: new Text(FFULocalizations.of(context).welcome),
           elevation: 4.0,
@@ -76,12 +78,14 @@ class _EmailViewState extends State<EmailView> {
   }
 
   _connexion(BuildContext context) async {
+    print("alreadysyubi: $alreadySubmitted");
     if (!alreadySubmitted) {
       alreadySubmitted = true;
     } else
       return;
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
+      print("trying to fetch email providers");
       List<String> providers =
           await auth.fetchSignInMethodsForEmail(email: _controllerEmail.text);
       print(providers);
@@ -123,7 +127,17 @@ class _EmailViewState extends State<EmailView> {
           Navigator.pop(context, provider);
         }
       }
-    } catch (exception) {
+    }
+    on PlatformException catch (e)
+    {
+      alreadySubmitted = false;
+      var mySnack = SnackBar(duration:const Duration(seconds:5), content: Row(mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center, children:[Text(e.message, textAlign: TextAlign.center)]));
+      _scaffoldKey.currentState.showSnackBar(mySnack);
+
+    }
+    catch (exception) {
+      alreadySubmitted = false;
       print(exception);
     }
   }

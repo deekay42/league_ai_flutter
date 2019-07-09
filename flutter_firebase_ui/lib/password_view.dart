@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'l10n/localization.dart';
 import 'trouble_signin.dart';
 import 'utils.dart';
+import 'package:flutter/services.dart';
 
 class PasswordView extends StatefulWidget {
   final String email;
@@ -106,10 +107,11 @@ class _PasswordViewState extends State<PasswordView> {
       user = await _auth.signInWithEmailAndPassword(
           email: _controllerEmail.text, password: _controllerPassword.text);
       print(user);
-    } catch (exception) {
+    } on PlatformException catch (exception) {
       //TODO improve errors catching
-      String msg = FFULocalizations.of(context).passwordInvalidMessage;
-      showErrorDialog(context, msg);
+      print("there was an error");
+      //String msg = FFULocalizations.of(context).passwordInvalidMessage;
+      showErrorDialog(context, exception.message);
     }
 
     if (user != null) {
