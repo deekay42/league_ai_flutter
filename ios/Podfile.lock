@@ -324,7 +324,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 0ac5310133e6ada4cdd44d42e92038855214a5e9
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   flutter_facebook_login: be61e24a4b7d621515353c6b4583d1981bdaa3d6
-  flutter_twitter_login: f63f17958d98ed2e09cbed6f3806ffe65e822fb2
+  flutter_twitter_login: ec2f2719fc6a2944326ac92db69012342b78d308
   Google-Mobile-Ads-SDK: 4bff3a7d621555f2317813e495fecce745681f7e
   google_sign_in: 27e70a98b529f0b076d4b19f231b81da28b1750b
   GoogleAppMeasurement: a35a645835bae31b6bdc0576396bc23908f12a22

@@ -11,7 +11,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
   final String backdrop;
   final MainPageTemplateAnimations animationController;
   final Widget bottomSheet;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+  static final scaffoldKey = GlobalKey<ScaffoldState>();
 
   MainPageTemplateAnimator(
       {@required AnimationController mainController,
@@ -57,7 +57,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                             margin:
                                 const EdgeInsets.only(left: 20.0, right: 20.0),
                             child: Column(children: [
-                              SizedBox(height:125),
+                              SizedBox(height:135),
                               Expanded(
 
                                 child:Align(child:body, alignment:Alignment.center)

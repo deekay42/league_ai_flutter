@@ -33,11 +33,10 @@ void _setTargetPlatformForDesktop() {
   }
 }
 
-void main() {  
+void main() {
   _setTargetPlatformForDesktop();
-  runApp(MaterialApp(title: Strings.name, home: MainApp(), theme: _myTheme) );
+  runApp(MaterialApp(title: Strings.name, home: MainApp(), theme: _myTheme));
 }
-
 
 final ThemeData _myTheme = _buildMyTheme();
 
@@ -73,22 +72,126 @@ TextTheme _buildTextTheme(TextTheme base) {
           color: primaryText,
         ),
         body1: base.body1.copyWith(
-          fontWeight: FontWeight.w300,
-          fontSize: 16.0,
-          color: primaryText,
-          letterSpacing: 1.1
-        ),
+            fontWeight: FontWeight.w300,
+            fontSize: 16.0,
+            color: primaryText,
+            letterSpacing: 1.1),
         body2: base.body2.copyWith(
-          fontWeight: FontWeight.w300,
-          fontSize: 14.0,
-          color: secondaryText,
-          letterSpacing: 1.1
-        ),
+            fontWeight: FontWeight.w300,
+            fontSize: 14.0,
+            color: secondaryText,
+            letterSpacing: 1.1),
         subtitle: base.subtitle.copyWith(
-            fontWeight: FontWeight.w500, fontSize: 14.0, color: secondaryText, letterSpacing: 1.3),
+            fontWeight: FontWeight.w500,
+            fontSize: 14.0,
+            color: secondaryText,
+            letterSpacing: 1.3),
         overline: base.overline.copyWith(
             fontWeight: FontWeight.w300, fontSize: 13.0, color: secondaryText),
       )
-      .apply(fontFamily: 'Roboto'
-          );
+      .apply(fontFamily: 'Roboto');
+}
+
+class Parent extends StatefulWidget {
+  @override
+  _ParentState createState() => _ParentState();
+}
+
+class _ParentState extends State<Parent> {
+  int counter = 0;
+
+  void inc() {
+    setState(() => ++counter);
+  }
+
+  void initState() {
+    super.initState();
+    print("Parent in initState");
+  }
+
+  void dispose() {
+    print("Parent in dispose");
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget lol = Center(
+      child: Column(
+        children: <Widget>[
+          Text(counter.toString()),
+          SizedBox(height: 55),
+          Child(updateParent: inc)
+        ],
+      ),
+    );
+
+    if (counter % 2 == 0) return lol;
+    return Container(child: lol);
+  }
+}
+
+class Child extends StatefulWidget {
+  final updateParent;
+
+  Child({this.updateParent});
+
+  @override
+  _ChildState createState() => _ChildState();
+}
+
+class _ChildState extends State<Child> {
+  void initState() {
+    super.initState();
+    print("Child in initState");
+  }
+
+  void dispose() {
+    print("Child in dispose");
+    super.dispose();
+  }
+
+  void didUpdateWidget(Child oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print("In child didUpdateWidget");
+    print("oldWidget,key is : ${oldWidget.key}");
+    print("newWidget.key is : ${widget.key}");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+        children: [RaisedButton(onPressed: widget.updateParent), Child2()]);
+  }
+}
+
+class Child2 extends StatefulWidget {
+  Child2();
+
+  @override
+  _Child2State createState() => _Child2State();
+}
+
+class _Child2State extends State<Child2> {
+  void initState() {
+    super.initState();
+    print("Child2 in initState");
+  }
+
+  void dispose() {
+    print("Child2 in dispose");
+    super.dispose();
+  }
+
+  void didUpdateWidget(Child2 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print("In child2 didUpdateWidget");
+    print("oldWidget,key is : ${oldWidget.key}");
+    print("newWidget.key is : ${widget.key}");
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text("Child2");
+  }
 }

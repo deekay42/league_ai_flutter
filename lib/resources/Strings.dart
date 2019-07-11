@@ -13,10 +13,16 @@ class Strings {
   ];
   static const String pairingInstructions = "It looks like your phone hasn't been paired with your desktop client yet. Please scan the QR code on your desktop app to complete the pairing.";
 
-  static const String adMobAppId = "ca-app-pub-4748256700093905~2059247399";
+  static const String IOS_adMobAppId = "ca-app-pub-4748256700093905~2059247399";
+  static const String ANDROID_adMobAppId = "ca-app-pub-4748256700093905~1589341358";
+
+  static const String IOS_adMobAdUnitId = "ca-app-pub-4748256700093905/4823520849";
+  static const String ANDROID_adMobAdUnitId = "ca-app-pub-4748256700093905/4643660356";
 
 
   static const String remaining = "You have N recommendations remaining today";
+
+  static const String outOfPredictions = "You used all your recommendations for today :(\n Buy me a cup of coffee for unlimited recommendations :)";
 
 
   static const List<List<String>> pitch = [

@@ -1,6 +1,7 @@
 import 'package:firebase_admob/firebase_admob.dart';
 import '../resources/Strings.dart';
 import 'dart:async';
+import 'dart:io';
 
 class Ads {
   final MobileAdTargetingInfo targetingInfo;
@@ -12,7 +13,7 @@ class Ads {
           testDevices: <
               String>[], // Android emulators are considered test devices
         ) {
-    FirebaseAdMob.instance.initialize(appId: Strings.adMobAppId);
+    FirebaseAdMob.instance.initialize(appId: Platform.isIOS ? Strings.IOS_adMobAppId : Strings.ANDROID_adMobAppId);
   }
 
   Future<BannerAd> getBannerAd() async {
@@ -20,7 +21,7 @@ class Ads {
       // Replace the testAdUnitId with an ad unit id from the AdMob dash.
       // https://developers.google.com/admob/android/test-ads
       // https://developers.google.com/admob/ios/test-ads
-      adUnitId: "ca-app-pub-4748256700093905/4823520849",
+      adUnitId: Platform.isIOS ? Strings.IOS_adMobAdUnitId : Strings.ANDROID_adMobAdUnitId,
       size: AdSize.smartBanner,
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {

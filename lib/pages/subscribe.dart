@@ -325,7 +325,7 @@ class _SubscribePageState extends State<SubscribePage>
       footer: _buildFooter(context),
       backdrop: background,
     );
-    scaffoldKey = mainPage.scaffoldKey;
+    scaffoldKey = MainPageTemplateAnimator.scaffoldKey;
     return mainPage;
   }
 }
