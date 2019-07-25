@@ -429,7 +429,18 @@ extern "C" int common_main(int argc, const char *argv[]) {
 	  delete listener;
 	  listener = nullptr;
   }	
+
+  std::ofstream outfile(getLocalAppDataFolder() + L"\\terminate");
+  outfile << "terminate" << std::endl;
+  outfile.close();
+
   shutdownFirebase();
+
+  
+
+  std::cout << "Waiting for join" << std::endl;
+  pythonThread.join();
+  std::cout << "join complete" << std::endl;
 
 #ifdef _DEBUG
   // Wait until the user wants to quit the app.
