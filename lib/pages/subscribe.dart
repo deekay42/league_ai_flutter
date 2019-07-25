@@ -48,7 +48,7 @@ class _SubscribePageState extends State<SubscribePage>
     with TickerProviderStateMixin {
   static const platform = const MethodChannel('getPaymentNonce');
   Future<dynamic> _clientToken;
-  var scaffoldKey;
+  GlobalKey<ScaffoldState> subscribePageScaffoldKey = GlobalKey<ScaffoldState>();
   bool subButtonPressed = false;
   MyDialog myDialog;
   String background;
@@ -143,7 +143,8 @@ class _SubscribePageState extends State<SubscribePage>
       );
 
     dynamic resp = await myFuture;
-    resp = resp.data;
+    if(Platform.isIOS || Platform.isAndroid)
+      resp = resp.data;
     if (resp == "SUCCESS") {
       print("SUCCESS");
       return ConfirmResult.SUCCESS;
@@ -256,7 +257,10 @@ class _SubscribePageState extends State<SubscribePage>
 
         result = await checkout(nonceDesc[0]);
         print("Got the result: $result");
+        print("all good");
       } catch (e) {
+        print("NO!!");
+        print(e);
         throw CheckoutException(e.toString());
       }
     } while (result == ConfirmResult.CHANGING);
@@ -294,18 +298,18 @@ class _SubscribePageState extends State<SubscribePage>
           } on NonceException catch (e) {
             print("NonceException");
             showErrorSnackBar(
-                scaffoldKey, Strings.nonceError + " '${e.toString()}'");
+                subscribePageScaffoldKey, Strings.nonceError + " '${e.toString()}'");
           } on ClientTokenException catch (e) {
             print("ClientTokenException");
             showErrorSnackBar(
-                scaffoldKey, Strings.clientTokenError + " '${e.toString()}'");
+                subscribePageScaffoldKey, Strings.clientTokenError + " '${e.toString()}'");
           } on CheckoutException catch (e) {
             print("CheckoutException");
             showErrorSnackBar(
-                scaffoldKey, Strings.checkoutError + " '${e.toString()}'");
+                subscribePageScaffoldKey, Strings.checkoutError + " '${e.toString()}'");
           } on Exception catch (e) {
             print("Exception");
-            showErrorSnackBar(scaffoldKey,
+            showErrorSnackBar(subscribePageScaffoldKey,
                 Strings.generalPaymentsError + " '${e.toString()}'");
           } finally {
             subButtonPressed = false;
@@ -324,8 +328,9 @@ class _SubscribePageState extends State<SubscribePage>
       mainBodyController: mainBodyController,
       footer: _buildFooter(context),
       backdrop: background,
+      scaffoldKey: subscribePageScaffoldKey
     );
-    scaffoldKey = MainPageTemplateAnimator.scaffoldKey;
+
     return mainPage;
   }
 }

@@ -6,7 +6,7 @@ environment:
   # The example interacts with build scripts on the Flutter side that are not
   # yet stable, so it requires a very recent version of Flutter.
   # This version will increase regularly as the build scripts change.
-  flutter: '>=1.7.10-pre.23'
+  flutter: '>=1.8.1-pre.78'
 
 dependencies:
   flutter:
@@ -24,6 +24,7 @@ dependencies:
   qr_flutter: ^2.0.0+51
   qrcode_reader: ^0.4.4
   watcher: ^0.9.7+10
+  wakelock: ^0.1.2+7
   btnonce:
     path: ./plugins/btnonce
   fbfunctions:

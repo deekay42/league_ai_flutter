@@ -28,11 +28,11 @@ packages:
       name: boolean_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   btnonce:
     dependency: "direct main"
     description:
-      path: "plugins/btnonce"
+      path: "plugins\\btnonce"
       relative: true
     source: path
     version: "0.0.0"
@@ -88,7 +88,7 @@ packages:
   fbfunctions:
     dependency: "direct main"
     description:
-      path: "plugins/fbfunctions"
+      path: "plugins\\fbfunctions"
       relative: true
     source: path
     version: "0.0.0"
@@ -196,7 +196,7 @@ packages:
   launchbrowser:
     dependency: "direct main"
     description:
-      path: "plugins/launchbrowser"
+      path: "plugins\\launchbrowser"
       relative: true
     source: path
     version: "0.0.0"
@@ -227,7 +227,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.0"
+    version: "1.8.0+1"
   petitparser:
     dependency: transitive
     description:
@@ -331,6 +331,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.8"
+  wakelock:
+    dependency: "direct main"
+    description:
+      name: wakelock
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.2+7"
   watcher:
     dependency: "direct main"
     description:
@@ -354,4 +361,4 @@ packages:
     version: "2.1.16"
 sdks:
   dart: ">=2.3.0 <3.0.0"
-  flutter: ">=1.7.10-pre.23 <2.0.0"
+  flutter: ">=1.8.1-pre.78 <2.0.0"

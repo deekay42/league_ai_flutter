@@ -20,6 +20,7 @@ import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:wakelock/wakelock.dart';
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
@@ -69,6 +70,7 @@ class _HomePageState extends State<HomePage> {
         ad = newAd;
         ad.show();
       });
+      Wakelock.enable();
     } else
       initDesktopReadMessage();
   }
@@ -93,7 +95,14 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     print("Disposing of old home state now");
     ad?.dispose();
-    if (!Platform.isIOS && !Platform.isAndroid) desktopLastFileStream.cancel();
+    if (!Platform.isIOS && !Platform.isAndroid) 
+    {
+      desktopLastFileStream.cancel();
+    }
+    else
+    {
+      Wakelock.disable();
+    }
     super.dispose();
   }
 
@@ -161,9 +170,13 @@ class _HomePageState extends State<HomePage> {
         file.delete();
 
         print("Contents: " + contents);
+        final stopwatch = Stopwatch()..start();
+
         fbfunctions.fb_call(
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
+            
+print('relayMessage executed in ${stopwatch.elapsed}');
           print("Response status: $response");
           if (response == null) {
             print("relayMessage ERROR");

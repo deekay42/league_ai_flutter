@@ -62,17 +62,14 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="resource3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Runner3.rc">
+    <ResourceCompile Include="Runner.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\assets\icons\logo.ico">
+    <Image Include="..\..\assets\icons\logo_head_only.ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

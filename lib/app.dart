@@ -64,7 +64,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   bool inviteCodeValid = false;
   bool waitingOnInviteCodeCheck = false;
   bool outOfPredictions = false;
-  var _scaffoldKey;
+  GlobalKey<ScaffoldState> homePageScaffoldKey = GlobalKey<ScaffoldState>();
   AnimationController mainController;
   AnimationController mainBodyController;
   StreamSubscription desktopUIDListener;
@@ -253,7 +253,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   void checkIfUserHasSubscription({int timeout = 0}) async {
     print("Starting isValid");
-    if (waitingOnIsValid || user == null) return;
+    if (waitingOnIsValid || ((Platform.isIOS || Platform.isAndroid) && user == null)) {print("canceling"); ;return;}
     setState(() {
       waitingOnIsValid = true;
     });
@@ -283,10 +283,14 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           paired = false;
 
         if (result["subscribed"] == "true")
+        {
           hasSubscription = true;
+          outOfPredictions = false;
+        }
         else {
           hasSubscription = false;
           _remaining = result["remaining"];
+          outOfPredictions = _remaining == "0";
         }
         waitingOnIsValid = false;
       });
@@ -436,7 +440,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       resp = fbfunctions.fb_call(methodName: 'cancelSub');
 
     resp.then((dynamic result) {
-      result = result.data;
+      if (Platform.isIOS || Platform.isAndroid)
+        result = result.data;
       setState(() {
         print("Unsubscribe done: $result");
         if (result is bool) print("It is a bool");
@@ -508,7 +513,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     print(
         "waitingOnIsValid is $waitingOnIsValid, desktopauth is $desktopAuthenticated, waitingOnInviteCodeCheck is $waitingOnInviteCodeCheck");
     if (waitingOnIsValid ||
-        paired == null ||
         (!(Platform.isIOS || Platform.isAndroid) &&
             (desktopAuthenticated == DesktopAuthState.WAITING ||
                 waitingOnInviteCodeCheck))) {
@@ -595,7 +599,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
                     "uid": await desktopUID
                   });
               if (enteredValidInviteCode) {
-                _scaffoldKey.currentState.showSnackBar(SnackBar(
+                homePageScaffoldKey.currentState.showSnackBar(SnackBar(
                     content: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -611,7 +615,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
                         "\\inviteCode";
                 File(inviteCodeFilePath).writeAsString(codeEntered);
               } else
-                _scaffoldKey.currentState.showSnackBar(SnackBar(
+                homePageScaffoldKey.currentState.showSnackBar(SnackBar(
                     content: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -628,7 +632,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   Widget _getFooter(BuildContext context) {
     ThemeData theme = Theme.of(context);
     if ((hasSubscription != null && hasSubscription))
-      return null;
+      return Container();
     else
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 20),
@@ -695,8 +699,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           footer: _getFooter(context),
           backdrop: background,
           bottomSheet:
-              Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
-      _scaffoldKey = MainPageTemplateAnimator.scaffoldKey;
+              Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget(),
+          scaffoldKey: homePageScaffoldKey);
       return mainWidget;
     }
   }

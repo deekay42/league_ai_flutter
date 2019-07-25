@@ -1,5 +1,5 @@
 !include "MUI2.nsh"
-
+!define MUI_ICON "..\assets\icons\logo.ico"
 !define MUI_PRODUCT "League IQ"
 !define MUI_COMPONENTSPAGE_NODESC
 SetCompressor /SOLID lzma
@@ -15,7 +15,7 @@ SetCompressor /SOLID lzma
  
 
 
-!define MUI_ICON "..\assets\icons\logo.ico"
+
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_BITMAP "..\assets\icons\logo.bmp"
 !define MUI_HEADERIMAGE_RIGHT

@@ -49,14 +49,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\libs;$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
     <TargetName>League IQ</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\libs;$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
     <TargetName>League IQ</TargetName>
   </PropertyGroup>
@@ -172,13 +172,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="resource3.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Runner3.rc" />
+    <ResourceCompile Include="Runner.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\assets\icons\logo.ico" />
+    <Image Include="..\..\assets\icons\logo_head_only.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

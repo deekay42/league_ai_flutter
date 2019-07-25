@@ -11,7 +11,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
   final String backdrop;
   final MainPageTemplateAnimations animationController;
   final Widget bottomSheet;
-  static final scaffoldKey = GlobalKey<ScaffoldState>();
+  final scaffoldKey;
 
   MainPageTemplateAnimator(
       {@required AnimationController mainController,
@@ -20,7 +20,8 @@ class MainPageTemplateAnimator extends StatelessWidget {
       AnimationController mainBodyController,
       this.footer,
       @required this.backdrop,
-      this.bottomSheet})
+      this.bottomSheet,
+      this.scaffoldKey})
       : animationController = MainPageTemplateAnimations(
             controller: mainController,
             mainBodyController: mainBodyController);

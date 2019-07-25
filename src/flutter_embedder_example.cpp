@@ -48,6 +48,7 @@
 #include "flutter/flutter_window_controller.h"
 #include <shlwapi.h>
 #include "shlobj.h"
+#include "resource.h"
 
 using ::firebase::Variant;
 
@@ -294,6 +295,10 @@ int runFlutterCode() {
     ::SetWindowPos(flutterWindow, 0, 0, 0, 500, 800,
                    SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
 
+  HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+  SendMessage(flutterWindow, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+  SendMessage(flutterWindow, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+
   BTNonceRegisterWithRegistrar(
       flutter_controller.GetRegistrarForPlugin("BTNonce"));
   FBFunctionsRegisterWithRegistrar(
@@ -426,10 +431,13 @@ extern "C" int common_main(int argc, const char *argv[]) {
   }	
   shutdownFirebase();
 
+#ifdef _DEBUG
   // Wait until the user wants to quit the app.
   while (!ProcessEvents(1000)) {
   }
 
+#endif
+  
   return 0;
 }
 
