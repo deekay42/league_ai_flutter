@@ -260,8 +260,8 @@ void BTNoncePlugin::HandleMethodCall(
 
   
   std::string url = "https://us-central1-neuralleague.cloudfunctions.net/pay";
-  std::cout << "This is the client_token: " << global_client_token << std::endl;
-  std::cout << "This is the client_token: " << client_token << std::endl;
+  //std::cout << "This is the client_token: " << global_client_token << std::endl;
+  //std::cout << "This is the client_token: " << client_token << std::endl;
   
   
 webview("Minimal webview example",

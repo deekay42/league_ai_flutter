@@ -2,7 +2,7 @@
 !define MUI_ICON "..\assets\icons\logo.ico"
 !define MUI_PRODUCT "League IQ"
 !define MUI_COMPONENTSPAGE_NODESC
-SetCompressor /SOLID lzma
+SetCompressor /SOLID bzip2
  
  
 ;---------------------------------
@@ -42,6 +42,8 @@ Section
 
   SetOutPath "$INSTDIR"
   File /nonfatal /a /r "..\build\windows\x64\Release\Runner\"
+  ;CreateShortCut "$INSTDIR\data\flutter_assets\assets.lnk" "$INSTDIR\assets"
+
 
  
 SectionEnd

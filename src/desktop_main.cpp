@@ -190,8 +190,10 @@ bool isAlreadyRunning()
 	if (m_singleInstanceMutex == NULL || GetLastError() == ERROR_ALREADY_EXISTS) {
 		HWND existingApp = FindWindow(0, "League IQ");
 		if (existingApp) SetForegroundWindow(existingApp);
+		ReleaseMutex(m_singleInstanceMutex);
 		return true; // Exit the app. For MFC, return false from InitInstance.
 	}
+	ReleaseMutex(m_singleInstanceMutex);
 	return false;
 }
 
