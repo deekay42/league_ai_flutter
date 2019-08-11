@@ -186,6 +186,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   void updateRemaining(String remaining) {
     setState((){
       if(_remaining == "0" && remaining =="0") outOfPredictions = true;
+      else outOfPredictions = false;
       _remaining = remaining;
     });
   }

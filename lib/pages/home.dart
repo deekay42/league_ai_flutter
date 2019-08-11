@@ -125,6 +125,8 @@ class _HomePageState extends State<HomePage> {
       print("building new list1  ");
       setState(() {
         _items = items;
+        //updateremaining does this
+        //outOfPredictions = false;
         print("building new list2");
 
         if (message['data'].containsKey('remaining'))
