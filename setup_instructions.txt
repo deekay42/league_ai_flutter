@@ -1,0 +1,6 @@
+setup instructions
+1. mklink assets ..\assets
+2. mklink /D Python37 "C:\Program Files\Python37\"
+4. mklink /D firebase_cpp ..\..\firebase_cpp_sdk
+5. ..\flutter\bin\flutter.bat run
+3. 
