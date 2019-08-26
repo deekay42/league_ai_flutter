@@ -405,6 +405,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       //     : null,
       //Choice(title: 'Pair new', action: pushPairingPage),
       Choice(title: 'Version ' + Strings.version),
+      Choice(title: 'Test Connection', action: _testConnection),
       (Platform.isIOS || Platform.isAndroid)
           ? Choice(title: 'Logout', action: signOutProviders)
           : hasSubscription != null && hasSubscription
@@ -429,6 +430,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
     Navigator.of(context)
         .push(MaterialPageRoute(builder: (context) => mainPairingPage));
+  }
+
+  void _testConnection()
+  {
+    if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection');
+    else fbfunctions.fb_call(methodName: 'testConnection');
   }
 
   void _unsubscribe() {

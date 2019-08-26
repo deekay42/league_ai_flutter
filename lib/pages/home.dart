@@ -113,7 +113,19 @@ class _HomePageState extends State<HomePage> {
     String content = message['data']['body'];
 
     print("building new list0: content: $content");
-
+    if(content == "success")
+    {
+      var mySnack = SnackBar(
+                duration: const Duration(seconds: 10),
+                content: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Connectivity test successful!", textAlign: TextAlign.center)
+                    ]));
+      Scaffold.of(context).showSnackBar(mySnack);
+      return;
+    }
     if(content != "-1") {
       List<String> itemsS = content.split(",");
 
