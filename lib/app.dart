@@ -434,7 +434,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   void _testConnection()
   {
-    if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection');
+    if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection').call();
     else fbfunctions.fb_call(methodName: 'testConnection');
   }
 
@@ -443,7 +443,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
       resp =
-          CloudFunctions.instance.getHttpsCallable(functionName: 'cancelSub');
+          CloudFunctions.instance.getHttpsCallable(functionName: 'cancelSub').call();
     } else
       resp = fbfunctions.fb_call(methodName: 'cancelSub');
 
@@ -545,7 +545,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     }
 
     if (Platform.isAndroid || Platform.isIOS) {
-      if (paired != null && paired) {
+      if (paired == null || paired) {
         print("rebuilding regular homepage now");
         return HomePage(
             hasSubscription: hasSubscription,
