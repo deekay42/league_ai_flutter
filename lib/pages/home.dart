@@ -36,10 +36,12 @@ class HomePage extends StatefulWidget {
   final bool outOfPredictions;
   final AnimationController mainBodyController;
   final Function updateRemaining;
+  final Function updateSubscription;
   HomePage(
       {this.hasSubscription = false,
         this.outOfPredictions = false,
       this.updateRemaining,
+      this.updateSubscription,
       this.mainBodyController});
 
   @override
@@ -50,7 +52,6 @@ class _HomePageState extends State<HomePage> {
   final ItemsRepository itemsRepo = new ItemsRepository();
   List<Item> _items;
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  bool hasSubscription;
   bool outOfPredictions;
   StreamSubscription desktopLastFileStream;
 
@@ -61,7 +62,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     print("Homepage initState");
 
-    hasSubscription = widget.hasSubscription;
     outOfPredictions = widget.outOfPredictions;
     if (Platform.isAndroid || Platform.isIOS) {
       initFirebaseMessaging();
@@ -78,7 +78,6 @@ class _HomePageState extends State<HomePage> {
   void didUpdateWidget(HomePage oldWidget)
   {
     super.didUpdateWidget(oldWidget);
-    hasSubscription = widget.hasSubscription;
     outOfPredictions = widget.outOfPredictions;
     print("In homepage didUpdateWidget");
   }
@@ -113,6 +112,9 @@ class _HomePageState extends State<HomePage> {
     String content = message['data']['body'];
 
     print("building new list0: content: $content");
+    if(content == "subscribe_success")
+      widget.updateSubscription();
+    //connectivity test successful
     if(content == "success")
     {
       var mySnack = SnackBar(
@@ -208,9 +210,7 @@ print('relayMessage executed in ${stopwatch.elapsed}');
           if (response.startsWith("SUCCESSFUL")) {
             String tmp = response.split(',')[1];
             // means that somebody is subscribed
-            if (tmp == "1337")
-              hasSubscription = true;
-            else
+            if (tmp != "1337")
               widget.updateRemaining(tmp);
             Map<String, dynamic> arg = {
               'data': <String, dynamic>{'body': contents}

@@ -551,6 +551,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
             hasSubscription: hasSubscription,
             outOfPredictions: outOfPredictions,
             updateRemaining: updateRemaining,
+            updateSubscription: checkIfUserHasSubscription,
             mainBodyController: mainBodyController);
       }
       else
@@ -565,6 +566,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           hasSubscription: hasSubscription,
           outOfPredictions: outOfPredictions,
           updateRemaining: updateRemaining,
+          updateSubscription: checkIfUserHasSubscription,
           mainBodyController: mainBodyController);
     } else {
       return QRPage(dataString: getUIDDBKeyForDesktop());

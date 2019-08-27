@@ -266,6 +266,8 @@ class _SubscribePageState extends State<SubscribePage>
     } while (result == ConfirmResult.CHANGING);
 
     if (result == ConfirmResult.SUCCESS) {
+      fbfunctions.fb_call(methodName: 'subscribeSuccessful');
+      
       Navigator.pop(context);
       displayFullScreenModal(
           context, MyDialog(modalText: "Success!", spinner: false));
