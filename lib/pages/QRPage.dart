@@ -36,9 +36,9 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
                     data: snapshot.data,
                     gapless: false,
                     //foregroundColor: const Color(0xFF111111),
-                    onError: (dynamic ex) {
-                      print('[QR] ERROR - $ex');
-                    },
+                    // onError: (dynamic ex) {
+                    //   print('[QR] ERROR - $ex');
+                    // },
                   ));
             } else {
               return new CircularProgressIndicator();

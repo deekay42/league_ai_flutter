@@ -20,7 +20,7 @@ import 'dart:math';
 import 'pages/home.dart';
 import 'pages/login.dart';
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import 'package:fbfunctions/fbfunctions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -97,10 +97,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         print("AUTHCHANGE!!");
         if (result != null &&
             DateTime.now().millisecondsSinceEpoch -
-                    result.metadata.creationTimestamp <
+                    result.metadata.creationTime.millisecondsSinceEpoch <
                 15000) {
           print("User was JUST created");
-          print(result?.metadata?.lastSignInTimestamp);
+          print(result?.metadata?.lastSignInTime.millisecondsSinceEpoch);
           newlyCreatedUser = true;
         }
         print('This is the user: ');
@@ -123,7 +123,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   Future<void> desktopAuthenticate({int timeout = 0}) async {
-    var result = await fbfunctions.fb_call(methodName: 'authenticate');
+    var result = await Fbfunctions.fb_call(methodName: 'authenticate');
     if (result == "unsuccessful") {
       print("Auth unsuccessful. Trying again in $timeout seconds");
       //retry
@@ -270,7 +270,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         "current_version": Strings.version
       });
     } else
-      resp = fbfunctions.fb_call(
+      resp = Fbfunctions.fb_call(
           methodName: 'isValid',
           args: <String, dynamic>{"current_version": Strings.version});
 
@@ -328,7 +328,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
         print("Now");
         await desktopAuthenticate();
         if (desktopAuthenticated == DesktopAuthState.AUTHENTICATED)
-          fbfunctions.fb_call(methodName: 'completePairing');
+          Fbfunctions.fb_call(methodName: 'completePairing');
         else
           throw AuthException(
               "FATAL: Unable to authenticate user. files are still missing");
@@ -357,7 +357,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       await waitForFileToFinishLoading(uidFile);
       String inviteCode = await inviteCodeFile.readAsString();
       String uid = await uidFile.readAsString();
-      await fbfunctions.fb_call(
+      await Fbfunctions.fb_call(
           methodName: 'getInviteCode',
           args: <String, dynamic>{
             "invite_code": inviteCode,
@@ -435,7 +435,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   void _testConnection()
   {
     if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection').call();
-    else fbfunctions.fb_call(methodName: 'testConnection');
+    else Fbfunctions.fb_call(methodName: 'testConnection');
   }
 
   void _unsubscribe() {
@@ -445,7 +445,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       resp =
           CloudFunctions.instance.getHttpsCallable(functionName: 'cancelSub').call();
     } else
-      resp = fbfunctions.fb_call(methodName: 'cancelSub');
+      resp = Fbfunctions.fb_call(methodName: 'cancelSub');
 
     resp.then((dynamic result) {
       if (Platform.isIOS || Platform.isAndroid)
@@ -561,7 +561,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     desktopUID ??= getUIDForDesktop();
     if (desktopUID != null) {
       if (!inviteCodeValid) return _getInviteCodeWidget(context);
-
+      print("rendering homepage");
       return HomePage(
           hasSubscription: hasSubscription,
           outOfPredictions: outOfPredictions,
@@ -569,6 +569,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           updateSubscription: checkIfUserHasSubscription,
           mainBodyController: mainBodyController);
     } else {
+      print("returnin qrpage ");
       return QRPage(dataString: getUIDDBKeyForDesktop());
     }
   }
@@ -602,7 +603,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
             onPressed: () async {
               String codeEntered = codeController.text;
               if (codeEntered == "") return;
-              bool enteredValidInviteCode = await fbfunctions.fb_call(
+              bool enteredValidInviteCode = await Fbfunctions.fb_call(
                   methodName: 'getInviteCode',
                   args: <String, dynamic>{
                     "invite_code": codeEntered,

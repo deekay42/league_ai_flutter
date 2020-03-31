@@ -5,7 +5,7 @@ import 'dart:async';
 
 import 'package:btnonce/btnonce.dart' as btnonce;
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import 'package:fbfunctions/fbfunctions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -71,7 +71,7 @@ class _SubscribePageState extends State<SubscribePage>
     if (Platform.isAndroid || Platform.isIOS)
       _clientToken = CloudFunctions.instance.getHttpsCallable(functionName: 'client_token').call();
     else {
-      _clientToken = fbfunctions.fb_call(methodName: 'client_token');
+      _clientToken = Fbfunctions.fb_call(methodName: 'client_token');
     }
 
     mainController = AnimationController(
@@ -135,7 +135,7 @@ class _SubscribePageState extends State<SubscribePage>
         },
       );
     else
-      myFuture = fbfunctions.fb_call(
+      myFuture = Fbfunctions.fb_call(
         methodName: 'subscribe',
         args: <String, dynamic>{
           'payment_method_nonce': nonce,
@@ -266,7 +266,7 @@ class _SubscribePageState extends State<SubscribePage>
     } while (result == ConfirmResult.CHANGING);
 
     if (result == ConfirmResult.SUCCESS) {
-      fbfunctions.fb_call(methodName: 'subscribeSuccessful');
+      Fbfunctions.fb_call(methodName: 'subscribeSuccessful');
       
       Navigator.pop(context);
       displayFullScreenModal(

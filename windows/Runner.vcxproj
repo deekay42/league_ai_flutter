@@ -5,6 +5,10 @@
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Profile|x64">
+      <Configuration>Profile</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
@@ -13,8 +17,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{5A827760-CF8B-408A-99A3-B6C0AD2271E7}</ProjectGuid>
-    <RootNamespace>GLFWExample</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <RootNamespace>testbed</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -22,7 +26,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -30,7 +34,15 @@
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
     <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '15.0'">v141</PlatformToolset>
+    <PlatformToolset Condition="'$(VisualStudioVersion)' == '16.0'">v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,48 +51,59 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="flutter\Generated.props" />
+    <Import Project="flutter\ephemeral\Generated.props" />
+    <Import Project="AppConfiguration.props" />
+    <Import Project="flutter\GeneratedPlugins.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="flutter\Generated.props" />
+    <Import Project="flutter\ephemeral\Generated.props" />
+    <Import Project="AppConfiguration.props" />
+    <Import Project="flutter\GeneratedPlugins.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="flutter\ephemeral\Generated.props" />
+    <Import Project="AppConfiguration.props" />
+    <Import Project="flutter\GeneratedPlugins.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir);$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\libs;$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
-    <TargetName>League IQ</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <IncludePath>$(ProjectDir);$(ProjectDir)..\include\json;$(ProjectDir)..\plugins\fbfunctions\windows\include;$(ProjectDir)..\plugins\launchbrowser\windows\include;$(ProjectDir)..\plugins\btnonce\windows\include;$(ProjectDir)..\include;$(ProjectDir)..\include\jsoncpp\src\include;$(ProjectDir)..\include\firebase_cpp\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)flutter\;$(ProjectDir)flutter\cpp_client_wrapper\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\libs;$(ProjectDir)flutter;$(LibraryPath)</LibraryPath>
-    <TargetName>League IQ</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
+    <OutDir>$(ProjectDir)..\build\windows\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(ProjectDir)..\build\windows\intermediates\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;WEBVIEW_WINAPI=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)..\include\firebase_cpp;$(ProjectDir);$(FLUTTER_EPHEMERAL_DIR);$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WEBVIEW_WINAPI=1;_CRT_SECURE_NO_WARNINGS;_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_app.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_auth.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_database.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_functions.lib;C:\Users\Dom\code\firebase_cpp_sdk\libs\windows\VS2015\MD\x64\Debug\firebase_messaging.lib;$(ProjectDir)..\libs\advapi32.lib;$(ProjectDir)..\libs\crypt32.lib;$(ProjectDir)..\libs\iphlpapi.lib;$(ProjectDir)..\libs\psapi.lib;$(ProjectDir)..\libs\userenv.lib;$(ProjectDir)..\libs\ws2_32.lib;flutter_windows.dll.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>firebase_app_d.lib;firebase_auth_d.lib;firebase_database_d.lib;firebase_functions_d.lib;firebase_messaging_d.lib;advapi32.lib;crypt32.lib;iphlpapi.lib;psapi.lib;userenv.lib;ws2_32.lib;python37.lib;flutter_windows.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\libs;$(FLUTTER_EPHEMERAL_DIR);$(OutDir)..\Plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <SubSystem>
-      </SubSystem>
-      <EntryPointSymbol>
-      </EntryPointSymbol>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)scripts\prepare_dependencies" debug &amp;&amp; COPY "$(ProjectDir)google-services.json" "$(OutDir)"</Command>
-      <Message>Sync and build dependencies</Message>
+    
+      <Command>
+      COPY "$(ProjectDir)google-services.json" "$(OutDir)
+      </Command>
+      <Message>
+      copy google.services
+      </Message>
     </PreBuildEvent>
     <PreLinkEvent>
       <Command>
@@ -97,7 +120,7 @@
       </Message>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>"$(ProjectDir)scripts\bundle_assets_and_deps" "$(ProjectDir)flutter\" "$(OutputPath)" "$(TargetFileName)"</Command>
+      <Command>"$(ProjectDir)scripts\bundle_assets_and_deps" "$(FLUTTER_EPHEMERAL_DIR)\" "$(OutputPath)" "$(OutputPath)..\Plugins\" "$(TargetFileName)"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Bundling dependencies</Message>
@@ -108,27 +131,30 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>
-      </AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;WEBVIEW_WINAPI=1</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)..\include\firebase_cpp;$(ProjectDir);$(FLUTTER_EPHEMERAL_DIR);$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WEBVIEW_WINAPI=1;_CRT_SECURE_NO_WARNINGS;_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>$(ProjectDir)..\libs\firebase_app.lib;$(ProjectDir)..\libs\firebase_auth.lib;$(ProjectDir)..\libs\firebase_database.lib;$(ProjectDir)..\libs\firebase_functions.lib;$(ProjectDir)..\libs\firebase_messaging.lib;$(ProjectDir)..\libs\advapi32.lib;$(ProjectDir)..\libs\crypt32.lib;$(ProjectDir)..\libs\iphlpapi.lib;$(ProjectDir)..\libs\psapi.lib;$(ProjectDir)..\libs\userenv.lib;$(ProjectDir)..\libs\ws2_32.lib;flutter_windows.dll.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <SubSystem>Windows</SubSystem>
-      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalDependencies>firebase_app.lib;firebase_auth.lib;firebase_database.lib;firebase_functions.lib;firebase_messaging.lib;advapi32.lib;crypt32.lib;iphlpapi.lib;psapi.lib;userenv.lib;ws2_32.lib;python37.lib;flutter_windows.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\libs;$(FLUTTER_EPHEMERAL_DIR);$(OutDir)..\Plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)scripts\prepare_dependencies" release &amp;&amp; COPY "$(ProjectDir)google-services.json" "$(OutDir)"&amp;&amp; cd "$(ProjectDir)..\" &amp;&amp; ..\python\build\embed_py2c.bat ..\python "$(OutDir)"</Command>
-      <Message>Sync and build dependencies</Message>
+      <Command>
+        COPY "$(ProjectDir)google-services.json" "$(OutDir)"&amp;&amp; cd "$(ProjectDir)..\" &amp;&amp; ..\python\build\embed_py2c.bat ..\python "$(OutDir)"
+      </Command>
+      <Message>
+      building cython executable
+      </Message>
     </PreBuildEvent>
     <PreLinkEvent>
       <Command>
@@ -145,8 +171,56 @@
       </Message>
     </PostBuildEvent>
     <CustomBuildStep>
+      <Command>"$(ProjectDir)scripts\bundle_assets_and_deps" "$(FLUTTER_EPHEMERAL_DIR)\" "$(OutputPath)" "$(OutputPath)..\Plugins\" "$(TargetFileName)" &amp;&amp; "$(ProjectDir)scripts\postbuild.bat" "$(OutputPath)"</Command>
+    </CustomBuildStep>
+    <CustomBuildStep>
+      <Message>Bundling dependencies</Message>
+      <Outputs>Dummy_Run_Always</Outputs>
+      <Inputs>
+      </Inputs>
+    </CustomBuildStep>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Profile|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(FLUTTER_EPHEMERAL_DIR);$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <DisableSpecificWarnings>4100</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>flutter_windows.dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(FLUTTER_EPHEMERAL_DIR);$(OutDir)..\Plugins;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
       <Command>
-"$(ProjectDir)scripts\bundle_assets_and_deps" "$(ProjectDir)flutter\" "$(OutputPath)" "$(TargetFileName)" &amp;&amp; "$(ProjectDir)scripts\postbuild.bat" "$(OutputPath)"</Command>
+      </Command>
+      <Message>
+      </Message>
+    </PreBuildEvent>
+    <PreLinkEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PreLinkEvent>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+    <CustomBuildStep>
+      <Command>"$(ProjectDir)scripts\bundle_assets_and_deps" "$(FLUTTER_EPHEMERAL_DIR)\" "$(OutputPath)" "$(OutputPath)..\Plugins\" "$(TargetFileName)"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Message>Bundling dependencies</Message>
@@ -156,22 +230,23 @@
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="$(ProjectDir)flutter\cpp_client_wrapper\engine_method_result.cc" />
-    <ClCompile Include="$(ProjectDir)flutter\cpp_client_wrapper\flutter_window_controller.cc" />
-    <ClCompile Include="$(ProjectDir)flutter\cpp_client_wrapper\plugin_registrar.cc" />
-    <ClCompile Include="..\include\jsoncpp\src\src\lib_json\json_reader.cpp" />
-    <ClCompile Include="..\include\jsoncpp\src\src\lib_json\json_value.cpp" />
-    <ClCompile Include="..\include\jsoncpp\src\src\lib_json\json_writer.cpp" />
-    <ClCompile Include="..\plugins\btnonce\windows\src\btnonce_plugin.cc" />
-    <ClCompile Include="..\plugins\fbfunctions\windows\src\fbfunctions_plugin.cc" />
-    <ClCompile Include="..\plugins\launchbrowser\windows\src\launchbrowser_plugin.cc" />
-    <ClCompile Include="..\src\desktop_main.cpp" />
-    <ClCompile Include="..\src\flutter_embedder_example.cpp" />
-    <ClCompile Include="..\src\json_message_codec.cc" />
-    <ClCompile Include="..\src\json_method_codec.cc" />
+    <ClCompile Include="$(ProjectDir)..\src\desktop_main.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="flutter\generated_plugin_registrant.cc" />
+    <ClCompile Include="window_configuration.cpp" />
+    <ClCompile Include="win32_window.cc" />
+    <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\engine_method_result.cc" />
+    <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\flutter_view_controller.cc" />
+    <ClCompile Include="$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\plugin_registrar.cc" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="flutter\generated_plugin_registrant.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="win32_window.h" />
+    <ClInclude Include="window_configuration.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="runner.exe.manifest" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Runner.rc" />

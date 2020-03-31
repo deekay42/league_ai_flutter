@@ -15,6 +15,25 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdexcept>
+#include <sstream>
+
+
+#include "firebase/app.h"
+#include "firebase/auth.h"
+#include "firebase/database.h"
+#include "firebase/functions.h"
+#include "firebase/future.h"
+#include "firebase/log.h"
+#include "firebase/util.h"
+#include "firebase_commons.h"
+
+#include <shlwapi.h>
+#include "shlobj.h"
+#include <iostream>
+#include <fstream>
+
+#include <windows.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -44,12 +63,14 @@
 #define FIREBASE_CONFIG_STRING ""
 #endif  // FIREBASE_CONFIG
 
-extern "C" int common_main(int argc, const char* argv[]);
+//extern "C" int common_main();
 
 static bool quit = false;
 
+
+
 #ifdef _WIN32
-static BOOL WINAPI SignalHandler(DWORD event) {
+BOOL WINAPI SignalHandler(DWORD event) {
 	printf("in signalhandler1");
   if (!(event == CTRL_C_EVENT || event == CTRL_BREAK_EVENT)) {
     return FALSE;
@@ -58,7 +79,7 @@ static BOOL WINAPI SignalHandler(DWORD event) {
   return TRUE;
 }
 #else
-static void SignalHandler(int /* ignored */) { printf("in signalhandler2");  quit = true; }
+void SignalHandler(int /* ignored */) { printf("in signalhandler2");  quit = true; }
 #endif  // _WIN32
 
 bool ProcessEvents(int msec) {
@@ -69,6 +90,25 @@ bool ProcessEvents(int msec) {
 #endif  // _WIN32
   return quit;
 }
+
+using ::firebase::Variant;
+
+::firebase::App *app = nullptr;
+::firebase::database::Database *database = nullptr;
+::firebase::functions::Functions *functions = nullptr;
+::firebase::auth::Auth *auth = nullptr;
+::firebase::auth::User* user = nullptr;
+
+std::string myuid = "";
+std::string mysecret = "";
+
+firebase::Future<firebase::functions::HttpsCallableResult> GetCustomToken(
+    const std::string &uid, const std::string &secret);
+
+
+static void LogVariantMap(const std::map<Variant, Variant>& variant_map,
+    int indent);
+
 
 std::string PathForResource() {
   return std::string();
@@ -83,20 +123,89 @@ void LogMessage(const char* format, ...) {
   fflush(stdout);
 }
 
-
-class MyAuthStateListener : public ::firebase::auth::AuthStateListener {
-public:
-
-	virtual void OnAuthStateChanged(::firebase::auth::Auth* auth)
-	{
-		printf("\nauth state changed!: ");
-		
-	}
+class MyAuthStateListener : public firebase::auth::AuthStateListener {
+ public:
+  void OnAuthStateChanged(firebase::auth::Auth *auth_state) override {
+    ::user = auth_state->current_user();
+    if (user != nullptr) {
+      // User is signed in
+      printf("OnAuthStateChanged: signed_in %s\n", user->uid().c_str());
+    } else {
+      // User is signed out
+      printf("OnAuthStateChanged: signed_out\n");
+    }
+    // ...
+  }
 };
+
+
+std::wstring getLocalAppDataFolder()
+{
+    wchar_t* localAppData = 0;
+    SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &localAppData);
+
+    std::wstringstream base, tess;
+    base << localAppData << "\\League IQ";
+    CreateDirectoryW(base.str().c_str(), NULL);
+    tess << localAppData << "\\League IQ" << "\\tesseract";
+    CreateDirectoryW(tess.str().c_str(), NULL);
+    CoTaskMemFree(static_cast<void*>(localAppData));
+    return base.str();
+}
+
+
+
+
+
+// Log a vector of variants.
+static void LogVariantVector(const std::vector<Variant> &variants, int indent) {
+  std::string indent_string(indent * 2, ' ');
+  printf("%s[", indent_string.c_str());
+  for (auto it = variants.begin(); it != variants.end(); ++it) {
+    const Variant &item = *it;
+    if (item.is_fundamental_type()) {
+      const Variant &string_value = item.AsString();
+      printf("%s  %s,", indent_string.c_str(), string_value.string_value());
+    } else if (item.is_vector()) {
+      LogVariantVector(item.vector(), indent + 2);
+    } else if (item.is_map()) {
+      LogVariantMap(item.map(), indent + 2);
+    } else {
+      printf("%s  ERROR: unknown type %d", indent_string.c_str(),
+             static_cast<int>(item.type()));
+    }
+  }
+  printf("%s]", indent_string.c_str());
+}
+
+// Log a map of variants.
+static void LogVariantMap(const std::map<Variant, Variant> &variant_map,
+                          int indent) {
+  std::string indent_string(indent * 2, ' ');
+  for (auto it = variant_map.begin(); it != variant_map.end(); ++it) {
+    const Variant &key_string = it->first.AsString();
+    const Variant &value = it->second;
+    if (value.is_fundamental_type()) {
+      const Variant &string_value = value.AsString();
+      printf("%s%s: %s,", indent_string.c_str(), key_string.string_value(),
+             string_value.string_value());
+    } else {
+      printf("%s%s:", indent_string.c_str(), key_string.string_value());
+      if (value.is_vector()) {
+        LogVariantVector(value.vector(), indent + 1);
+      } else if (value.is_map()) {
+        LogVariantMap(value.map(), indent + 1);
+      } else {
+        printf("%s  ERROR: unknown type %d", indent_string.c_str(),
+               static_cast<int>(value.type()));
+      }
+    }
+  }
+}
 
 class MyIdTokenListener : public ::firebase::auth::IdTokenListener {
 public:
-	virtual void OnIdTokenChanged(::firebase::auth::Auth* auth)
+	virtual void OnIdTokenChanged(::firebase::auth::Auth* authstate)
 	{
 		printf("\nid token changed!: ");
 		
@@ -122,8 +231,8 @@ bool signIn(std::string custom_token) {
 
 bool authenticate(std::string uid, std::string secret)
 {
-	firebase::auth::User* user = auth->current_user();
-	if (user != nullptr) {
+	firebase::auth::User* currentuser = auth->current_user();
+	if (currentuser != nullptr) {
 		return true;
 	}
 	LogMessage("Trying to auth user!");
@@ -186,9 +295,9 @@ void ChangeToFileDirectory(const char* file_path) {
 
 bool isAlreadyRunning()
 {
-	HANDLE m_singleInstanceMutex = CreateMutex(NULL, TRUE, "ONLY_ONE_INSTACE_ALLOWED");
+	HANDLE m_singleInstanceMutex = CreateMutex(NULL, TRUE, L"ONLY_ONE_INSTACE_ALLOWED");
 	if (m_singleInstanceMutex == NULL || GetLastError() == ERROR_ALREADY_EXISTS) {
-		HWND existingApp = FindWindow(0, "League IQ");
+		HWND existingApp = FindWindow(0, L"League IQ");
 		if (existingApp) SetForegroundWindow(existingApp);
 		ReleaseMutex(m_singleInstanceMutex);
 		return true; // Exit the app. For MFC, return false from InitInstance.
@@ -197,18 +306,6 @@ bool isAlreadyRunning()
 	return false;
 }
 
-int main(int argc, const char* argv[]) {
-  //ChangeToFileDirectory(
-   //   FIREBASE_CONFIG_STRING[0] != '\0' ?
-   //     FIREBASE_CONFIG_STRING : argv[0]);  // NOLINT
-#ifdef _WIN32
-  SetConsoleCtrlHandler((PHANDLER_ROUTINE)SignalHandler, TRUE);
-#else
-  signal(SIGINT, SignalHandler);
-#endif  // _WIN32
-  if(!isAlreadyRunning())
-	return common_main(argc, argv);
-}
 
 #if defined(_WIN32)
 // Returns the number of microseconds since the epoch.
@@ -225,3 +322,132 @@ int64_t WinGetCurrentTimeInMicroseconds() {
   return now.QuadPart * 10LL;
 }
 #endif
+
+
+
+void WaitForCompletion(const firebase::FutureBase &future, const char *name) {
+  while (future.status() == firebase::kFutureStatusPending) {
+    ProcessEvents(100);
+  }
+}
+
+
+UIDListener* listenForUIDUpdate() {
+  std::cout << "Hello1" << std::endl;
+
+  firebase::database::DatabaseReference myRef =
+      database->GetReference().Child("uids");
+  
+  std::string key =
+      myRef.PushChild()
+          .key();  // this returns the unique key generated by firebase
+  std::cout << "key is " << key << std::endl;
+  std::ofstream myfile;
+  std::wstring dirPath = getLocalAppDataFolder();
+  myfile.open(dirPath + L"\\db_key");
+  myfile << key;
+  myfile.close();
+  std::cout << "Now setting data" << std::endl;
+  myRef.Child(key).Child("uid").SetValue(
+      "waiting");  // this creates the reqs key-value pair
+  std::cout << "Data is now set" << std::endl;
+
+  UIDListener *listener = new UIDListener(myRef.Child(key));
+  myRef.Child(key).AddValueListener(listener);
+  return listener;
+}
+
+std::string readFile(std::string filename) {
+    std::ifstream file(filename);
+    std::string str;
+    std::string file_contents;
+    while (std::getline(file, str)) {
+        file_contents += str;
+        file_contents.push_back('\n');
+    }
+    return file_contents;
+}
+
+
+
+
+void initializeFirebase() {
+  std::string init_file_contents = readFile("google-services.json");
+  firebase::AppOptions *appOptions =
+      firebase::AppOptions::LoadFromJsonConfig(init_file_contents.c_str());
+  app = firebase::App::Create(*appOptions);
+
+  LogMessage("Initialized Firebase App.");
+
+  LogMessage("Initializing Firebase Auth and Cloud Functions.");
+
+  // Use ModuleInitializer to initialize both Auth and Functions, ensuring no
+  // dependencies are missing.
+  void *initialize_targets[] = {&auth, &functions, &database};
+
+  const firebase::ModuleInitializer::InitializerFn initializers[] = {
+      [](::firebase::App *myapp, void *data) {
+        LogMessage("Attempt to initialize Firebase Auth.");
+        void **targets = reinterpret_cast<void **>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<::firebase::auth::Auth **>(targets[0]) =
+            ::firebase::auth::Auth::GetAuth(myapp, &result);
+        return result;
+      },
+      [](::firebase::App * myapp, void *data) {
+        LogMessage("Attempt to initialize Cloud Functions.");
+        void **targets = reinterpret_cast<void **>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<::firebase::functions::Functions **>(targets[1]) =
+            ::firebase::functions::Functions::GetInstance(myapp, &result);
+        return result;
+      },
+      [](::firebase::App * myapp, void *data) {
+        LogMessage("Attempt to initialize Realtime Database");
+        void **targets = reinterpret_cast<void **>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<::firebase::database::Database **>(targets[2]) =
+            ::firebase::database::Database::GetInstance(myapp, &result);
+        return result;
+      }};
+
+  ::firebase::ModuleInitializer initializer;
+  initializer.Initialize(app, initialize_targets, initializers,
+                         sizeof(initializers) / sizeof(initializers[0]));
+
+  WaitForCompletion(initializer.InitializeLastResult(), "Initialize");
+
+  if (initializer.InitializeLastResult().error() != 0) {
+    LogMessage("Failed to initialize Firebase libraries: %s",
+               initializer.InitializeLastResult().error_message());
+    ProcessEvents(2000);
+  }
+  LogMessage(
+      "Successfully initialized Firebase Auth, Cloud Functions and Realtime "
+      "Database.");
+
+  // To test against a local emulator, uncomment this line:
+  //   functions->UseFunctionsEmulator("http://localhost:5005");
+  // Or when running in an Android emulator:
+  //   functions->UseFunctionsEmulator("http://10.0.2.2:5005");
+}
+
+void shutdownFirebase() {
+
+	LogMessage("Shutting down the Functions library.");
+	delete functions;
+	functions = nullptr;
+
+	LogMessage("Shutting down the DB library.");
+	delete database;
+	database = nullptr;
+
+	LogMessage("Signing out from account.");
+	auth->SignOut();
+	LogMessage("Shutting down the Auth library.");
+	delete auth;
+	auth = nullptr;
+
+	LogMessage("Shutting down Firebase App.");
+	delete app;
+}

@@ -16,7 +16,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:io';
 
-import 'package:fbfunctions/fbfunctions.dart' as fbfunctions;
+import 'package:fbfunctions/fbfunctions.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -188,7 +188,7 @@ class _HomePageState extends State<HomePage> {
         print("Contents: " + contents);
         final stopwatch = Stopwatch()..start();
 
-        fbfunctions.fb_call(
+        Fbfunctions.fb_call(
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
             

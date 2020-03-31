@@ -56,7 +56,7 @@ class _LoginViewState extends State<LoginView> {
             idToken: googleAuth.idToken,
           );
 
-          final FirebaseUser user = await _auth.signInWithCredential(credential);
+          final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
           print(user);
         } catch (e) {
           showErrorDialog(context, e.details);
@@ -99,7 +99,7 @@ class _LoginViewState extends State<LoginView> {
         print("got fb token");
         AuthCredential credential= FacebookAuthProvider.getCredential(accessToken: myToken.token);
         print("got creds");
-        FirebaseUser user = await FirebaseAuth.instance.signInWithCredential(credential);
+        FirebaseUser user = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
         print("got user");
         print(user);
       } catch (e) {
@@ -147,7 +147,7 @@ class _LoginViewState extends State<LoginView> {
         final AuthCredential credential = TwitterAuthProvider.getCredential(
             authToken: result.session.token,
             authTokenSecret: result.session.secret);
-        final FirebaseUser user = await _auth.signInWithCredential(credential);
+        final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
         print("Twitter: $user");
 
         break;
