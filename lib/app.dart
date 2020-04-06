@@ -74,15 +74,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     super.initState();
 
     mainController = AnimationController(
-        duration: Duration(milliseconds: 3500), vsync: this);
+        duration: Duration(milliseconds: 5500), vsync: this);
     mainBodyController = AnimationController(
         duration: Duration(milliseconds: 2500), vsync: this);
 
     var list = [
-      'assets/imgs/1.png',
-      'assets/imgs/2.png',
-      'assets/imgs/3.png',
-      'assets/imgs/4.png'
+      'assets/imgs/1.png'
     ];
     final _random = new Random();
     background = list[_random.nextInt(list.length)];
@@ -434,6 +431,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   void _testConnection()
   {
+    CloudFunctions.instance.getHttpsCallable(functionName: 'completePairing').call();
+
     if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection').call();
     else Fbfunctions.fb_call(methodName: 'testConnection');
   }

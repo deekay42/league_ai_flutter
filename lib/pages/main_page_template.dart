@@ -53,7 +53,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                     sigmaY: animationController.backdropBlur.value,
                   ),
                   child: Container(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withOpacity(0.3),
                         child: Container(
                             margin:
                                 const EdgeInsets.only(left: 20.0, right: 20.0),
@@ -95,7 +95,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
 class MainPageTemplateAnimations {
   MainPageTemplateAnimations(
       {@required this.controller, this.mainBodyController})
-      : backdropOpacity = new Tween(begin: 1.0, end: 0.2).animate(
+      : backdropOpacity = new Tween(begin: 1.0, end: 0.9).animate(
           new CurvedAnimation(
             parent: controller,
             curve: Interval(
@@ -105,7 +105,7 @@ class MainPageTemplateAnimations {
             ),
           ),
         ),
-        backdropBlur = new Tween(begin: 0.0, end: 5.0).animate(
+        backdropBlur = new Tween(begin: 0.0, end: 2.0).animate(
           new CurvedAnimation(
             parent: controller,
             curve: Interval(

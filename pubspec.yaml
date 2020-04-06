@@ -14,7 +14,7 @@ dependencies:
   firebase_core: ^0.4.4+3
   cloud_firestore: ^0.13.4+2
   cloud_functions: ^0.4.2+3
-  firebase_auth: ^0.15.5+2
+  firebase_auth: ^0.15.5+3
   firebase_messaging: ^6.0.12
   intl: ^0.16.1
   firebase_admob: ^0.9.3
@@ -81,9 +81,6 @@ flutter:
 
     #imgs
     - assets/imgs/1.png
-    - assets/imgs/2.png
-    - assets/imgs/3.png
-    - assets/imgs/4.png
 
 #item imgs
     - assets/item_imgs/0.png
