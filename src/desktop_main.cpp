@@ -231,7 +231,7 @@ bool signIn(std::string custom_token) {
 
 bool authenticate(std::string uid, std::string secret)
 {
-	firebase::auth::User* currentuser = auth->current_user();
+    firebase::auth::User* currentuser = auth->current_user();
 	if (currentuser != nullptr) {
 		return true;
 	}

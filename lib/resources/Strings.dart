@@ -1,19 +1,22 @@
 class Strings {
   static const String name = "League IQ";
-  static const String buildRec = "You should build these items:";
+  static const String buildRec = "The best item buy is:";
   static const String sub = "Subscribe";
-  static const List<String> instructions = ["1. Start your League IQ Desktop client",
-  "2. While in-game, sort your scoreboard (Press <Tab>) into this order: Top, Jg, Mid, Bot, Sup",
-  "3. Press Tab + F12 while in-game for the next recommendation, typically while channeling Back.",
-  "4. Remember: Recommendations change frequently as the game progresses. Check at least once before every back to avoid building outdated recommendations"
-  ];
+  // static const List<String> instructions = ["1. Start your League IQ Desktop client",
+  // "2. While in-game, sort your scoreboard (Press <Tab>) into this order: Top, Jg, Mid, Bot, Sup",
+  // "3. Press Tab + F12 while in-game for the next recommendation, typically while channeling Back.",
+  // "4. Remember: Recommendations change frequently as the game progresses. Check at least once before every back to avoid building outdated recommendations"
+  // ];
 
-  static const List<String> instructionsDesktop = ["1. Start the League IQ Desktop App, then the mobile app, then a new game of League of Legends.",
-  "2. If you have a second monitor drag the League IQ Desktop App window on your second screen so the game does not cover it",
-  "3. While in-game, sort your scoreboard (Press <Tab>) into this order: Top, Jg, Mid, Bot, Sup",
-  "4. Press Tab + F12 while in-game for the next recommendation, typically while backing.",
-  "5. Remember: Recommendations change frequently as the game progresses. Check at least once before every back to avoid building outdated recommendations"
-  ];
+static const List<String> instructions = ["1. Start your League IQ Desktop client", "2. Press Tab + F12 while in game"];
+static const List<String> instructionsDesktop = ["Press Tab + F12 while in game"];
+
+  // static const List<String> instructionsDesktop = ["1. Start the League IQ Desktop App, then the mobile app, then a new game of League of Legends.",
+  // "2. If you have a second monitor drag the League IQ Desktop App window on your second screen so the game does not cover it",
+  // "3. While in-game, sort your scoreboard (Press <Tab>) into this order: Top, Jg, Mid, Bot, Sup",
+  // "4. Press Tab + F12 while in-game for the next recommendation, typically while backing.",
+  // "5. Remember: Recommendations change frequently as the game progresses. Check at least once before every back to avoid building outdated recommendations"
+  // ];
   static const String pairingInstructions = "It looks like your phone hasn't been paired with your desktop client yet. Please scan the QR code on your desktop app to complete the pairing.";
 
   static const String IOS_adMobAppId = "ca-app-pub-4748256700093905~2059247399";

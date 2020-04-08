@@ -246,10 +246,15 @@ print('relayMessage executed in ${stopwatch.elapsed}');
   Widget _buildInstructions(BuildContext context) {
     int counter = 0;
     ThemeData theme = Theme.of(context);
+    List<String> instr;
+    if (Platform.isAndroid || Platform.isIOS)
+      instr = Strings.instructions;
+    else
+      instr = Strings.instructionsDesktop;
 
     return SlidingList(
         title: "INSTRUCTIONS",
-        children: Strings.instructions
+        children: instr
             .map((p) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -258,7 +263,7 @@ print('relayMessage executed in ${stopwatch.elapsed}');
                     textAlign: TextAlign.start,
                     style: theme.textTheme.body1,
                   ),
-                  ++counter == Strings.instructions.length
+                  ++counter == instr.length
                       ? null
                       : SizedBox(
                           height: 72,

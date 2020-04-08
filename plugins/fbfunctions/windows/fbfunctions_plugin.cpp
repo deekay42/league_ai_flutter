@@ -60,6 +60,7 @@ FbfunctionsPlugin::FbfunctionsPlugin()
     std::ifstream file_secret(dirPath + L"\\secret");
     
     if (!file_uid || !file_secret) {
+        auth->SignOut();
         listener = listenForUIDUpdate();
 
     }
@@ -136,6 +137,7 @@ static flutter::EncodableValue CreateResponseObject(
 void FbfunctionsPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue> &method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+    
   if (method_call.method_name().compare("fbfunctions") == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error("Bad Arguments", "Null file chooser method args received");
