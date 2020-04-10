@@ -246,7 +246,7 @@ bool authenticate(std::string uid, std::string secret)
 	data["uid"] = firebase::Variant(uid);
 	data["auth_secret"] = firebase::Variant(secret);
 	firebase::Variant customToken;
-	customToken = callFBFunctionSync("getCustomToken", &data);;
+	customToken = callFBFunctionSync("getCustomToken", &data);
 	if (customToken.is_null())
 		return false;
 	return signIn(customToken.string_value());

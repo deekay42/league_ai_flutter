@@ -1,10 +1,10 @@
 set INIT_DIR=%cd%
 set OUT_DIR=%~1
 cd %OUT_DIR%
-REM cd data\flutter_assets
-REM rmdir /s /q assets
-REM mklink /d assets ..\..\assets
-REM cd ..\..
+cd data\flutter_assets
+rmdir /s /q assets
+mklink /d assets ..\..\assets
+cd ..\..
 del /Q /S *.pdb
 del /Q /S *.exp
 del /Q /S *.lib
