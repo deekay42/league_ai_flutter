@@ -21,6 +21,7 @@ import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
@@ -39,7 +40,7 @@ class HomePage extends StatefulWidget {
   final Function updateSubscription;
   HomePage(
       {this.hasSubscription = false,
-        this.outOfPredictions = false,
+      this.outOfPredictions = false,
       this.updateRemaining,
       this.updateSubscription,
       this.mainBodyController});
@@ -71,8 +72,19 @@ class _HomePageState extends State<HomePage> {
         ad.show();
       });
       Wakelock.enable();
-    } else
-      initDesktopReadMessage();
+      CloudFunctions.instance
+          .getHttpsCallable(functionName: 'relayMessage')
+          .call(<String, dynamic>{"items": "-100"});
+    } 
+    else
+    {
+        initDesktopReadMessage();
+        Fbfunctions.fb_call(
+            methodName: 'relayMessage',
+            args: <String, dynamic>{"items": "-100"});
+    }
+
+    
   }
 
   void didUpdateWidget(HomePage oldWidget)
@@ -127,6 +139,11 @@ class _HomePageState extends State<HomePage> {
                     ]));
       Scaffold.of(context).showSnackBar(mySnack);
       return;
+    }
+    if(content == "-100")
+    {
+        print("initial message test successful");
+        return;
     }
     if(content != "-1") {
       List<String> itemsS = content.split(",");
@@ -192,7 +209,7 @@ class _HomePageState extends State<HomePage> {
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
             
-print('relayMessage executed in ${stopwatch.elapsed}');
+        print('relayMessage executed in ${stopwatch.elapsed}');
           print("Response status: $response");
           if (response == null) {
             print("relayMessage ERROR");

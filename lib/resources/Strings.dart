@@ -9,7 +9,7 @@ class Strings {
   // ];
 
 static const List<String> instructions = ["1. Start your League IQ Desktop client", "2. Press Tab + F12 while in game"];
-static const List<String> instructionsDesktop = ["Press Tab + F12 while in game"];
+static const List<String> instructionsDesktop = ["1. Start your League IQ app on your phone", "2. Press Tab + F12 while in game"];
 
   // static const List<String> instructionsDesktop = ["1. Start the League IQ Desktop App, then the mobile app, then a new game of League of Legends.",
   // "2. If you have a second monitor drag the League IQ Desktop App window on your second screen so the game does not cover it",
