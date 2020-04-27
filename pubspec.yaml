@@ -1,5 +1,7 @@
 name: LeagueIQ
-description: Pure awesomesauce
+version: 1.0.0
+description: League IQ is the \#1 League of Legends build recommendation AI
+homepage: http://leagueiq.gg/
 
 environment:
   sdk: '>=2.0.0 <3.0.0'
@@ -14,8 +16,8 @@ dependencies:
   firebase_core: ^0.4.4+3
   cloud_firestore: ^0.13.4+2
   cloud_functions: ^0.4.2+3
-  firebase_auth: ^0.15.5+3
-  firebase_messaging: ^6.0.12
+  firebase_auth: ^0.16.0
+  firebase_messaging: ^6.0.13
   intl: ^0.16.1
   firebase_admob: ^0.9.3
   flutter_launcher_icons: ^0.7.2
@@ -25,6 +27,8 @@ dependencies:
   qrcode_reader: ^0.4.4
   watcher: ^0.9.7+14
   wakelock: ^0.1.3+4
+  notification_permissions: ^0.4.4
+  permission_handler: ^5.0.0+hotfix.3
   btnonce:
     path: ./plugins/btnonce
   fbfunctions:

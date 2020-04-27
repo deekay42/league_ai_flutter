@@ -26,6 +26,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
 import 'package:launchbrowser/launchbrowser.dart' as launchbrowser;
+import 'package:notification_permissions/notification_permissions.dart';
 
 import 'pages/MobilePairingPage.dart';
 import 'pages/QRPage.dart';
@@ -48,7 +49,7 @@ class MainApp extends StatefulWidget {
   _MainAppState createState() => _MainAppState();
 }
 
-class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
+class _MainAppState extends State<MainApp> with TickerProviderStateMixin, WidgetsBindingObserver {
   FirebaseUser user;
   StreamSubscription<FirebaseUser> _listener;
   Future<String> desktopUID;
@@ -69,6 +70,11 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   AnimationController mainBodyController;
   StreamSubscription desktopUIDListener;
   StreamSubscription aiListener;
+  String permissionStatus;
+
+  var permGranted = "granted";
+  var permDenied = "denied";
+  var permUnknown = "unknown";
 
   void initState() {
     super.initState();
@@ -89,19 +95,20 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       checkIfUserHasSubscription();
       initFirebaseMessaging();
 
+
       _listener = FirebaseAuth.instance.onAuthStateChanged
           .listen((FirebaseUser result) {
-        print("AUTHCHANGE!!");
+//        print("AUTHCHANGE!!");
         if (result != null &&
             DateTime.now().millisecondsSinceEpoch -
                     result.metadata.creationTime.millisecondsSinceEpoch <
                 15000) {
-          print("User was JUST created");
-          print(result?.metadata?.lastSignInTime.millisecondsSinceEpoch);
+//          print("User was JUST created");
+//          print(result?.metadata?.lastSignInTime.millisecondsSinceEpoch);
           newlyCreatedUser = true;
         }
-        print('This is the user: ');
-        print(result.toString());
+//        print('This is the user: ');
+//        print(result.toString());
         setState(() {
           user = result;
         });
@@ -122,7 +129,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   Future<void> desktopAuthenticate({int timeout = 0}) async {
     var result = await Fbfunctions.fb_call(methodName: 'authenticate');
     if (result == "unsuccessful") {
-      print("Auth unsuccessful. Trying again in $timeout seconds");
+//      print("Auth unsuccessful. Trying again in $timeout seconds");
       //retry
       Future.delayed(Duration(seconds: timeout), () {
         desktopAuthenticate(timeout: 8);
@@ -131,8 +138,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       setState(() {
         desktopAuthenticated = DesktopAuthState.AUTHERROR;
       });
-      print(
-          "Unable to authenticate user. Probably because uid and/or secret files are missing.");
+//      print(
+//          "Unable to authenticate user. Probably because uid and/or secret files are missing.");
     } else if (result == "successful") {
       setState(() {
         desktopAuthenticated = DesktopAuthState.AUTHENTICATED;
@@ -143,7 +150,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Future<void> _playFullAnimation() async {
     try {
-      print("play full animation");
+//      print("play full animation");
       mainController.reset();
       mainBodyController.reset();
       mainController.forward().orCancel;
@@ -157,7 +164,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Future<void> _playListAnimation() async {
     try {
-      print("play list animation");
+//      print("play list animation");
       mainBodyController.reset();
       await mainBodyController.forward().orCancel;
     } on TickerCanceled {
@@ -189,32 +196,78 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void initFirebaseMessaging() {
+//    print("init fb messaging in app");
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
+//        print("onMessage: $message");
         _handleNewMessageIncoming(message);
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
+//        print("onLaunch: $message");
         _handleNewMessageIncoming(message);
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
+//        print("onResume: $message");
         _handleNewMessageIncoming(message);
       },
     );
+    getCheckNotificationPermStatus();
+    WidgetsBinding.instance.addObserver(this);
     _firebaseMessaging.requestNotificationPermissions(
         const IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
+//    _firebaseMessaging.onIosSettingsRegistered
+//        .listen((IosNotificationSettings settings) {
+////      print("Settings registered: $settings");
+//    });
+  }
+
+  /// When the application has a resumed status, check for the permission
+  /// status
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        getCheckNotificationPermStatus();
+      });
+    }
+  }
+
+  /// Checks the notification permission status
+  Future<void> getCheckNotificationPermStatus() {
+    return NotificationPermissions.getNotificationPermissionStatus()
+        .then((status) {
+      setState(() {
+        switch (status) {
+          case PermissionStatus.denied:
+            permissionStatus = permDenied;
+            break;
+          case PermissionStatus.granted:
+            permissionStatus = permGranted;
+            break;
+          case PermissionStatus.unknown:
+          default:
+            permissionStatus = permUnknown;
+        }
+
+      });
+
     });
   }
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-    print("pairing succcessful now");
+//    print("got a message whoop whoop");
+//    print(message);
+    String content;
+    if(Platform.isIOS) {
+      content = message['aps']['alert']['title'];
+    }
+    else if(Platform.isAndroid)
+    {
+      content = message['notification']['title'];
+    }
+//    print(message);
     //its the pairing confirmation message
-    if (message['data']['title'] == "PAIRING SUCCESSFUL") {
+    if (content == "PAIRING SUCCESSFUL") {
       showDialog<Null>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -239,7 +292,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           ),
         ),
       );
-      print("whoop whoop");
+
       setState(() {
         paired = true;
       });
@@ -250,16 +303,16 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void checkIfUserHasSubscription({int timeout = 0}) async {
-    print("Starting isValid");
-    if (waitingOnIsValid || ((Platform.isIOS || Platform.isAndroid) && user == null)) {print("canceling"); ;return;}
+//    print("Starting isValid");
+    if (waitingOnIsValid || ((Platform.isIOS || Platform.isAndroid) && user == null)) {return;}
     setState(() {
       waitingOnIsValid = true;
     });
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
       String deviceID = await _firebaseMessaging.getToken();
-      print("Got device_id: $deviceID");
-      assert(deviceID != null);
+//      print("Got device_id: $deviceID");
+//      assert(deviceID != null);
       resp = CloudFunctions.instance
           .getHttpsCallable(functionName: 'isValid')
           .call(<String, dynamic>{
@@ -273,7 +326,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
     resp.then((dynamic result) {
       if (Platform.isIOS || Platform.isAndroid) result = result.data;
-      print("Got the result: $result");
+//      print("Got the result: $result");
       setState(() {
         if (result["paired"] == "true")
           paired = true;
@@ -317,12 +370,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     desktopUIDListener = dirStream.listen((event) async {
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-        print("Some event!!: $filePath ${event.path}");
+//        print("Some event!!: $filePath ${event.path}");
         if (desktopUID != null || filePath != event.path) return;
 
         File file = File.fromUri(Uri.file(filePath));
         await waitForFileToFinishLoading(file);
-        print("Now");
+
         await desktopAuthenticate();
         if (desktopAuthenticated == DesktopAuthState.AUTHENTICATED)
           Fbfunctions.fb_call(methodName: 'completePairing');
@@ -366,7 +419,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       });
     }
     setState(() {
-      print("invite check complete");
+//      print("invite check complete");
       waitingOnInviteCodeCheck = false;
     });
   }
@@ -374,7 +427,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   Future<String> getUIDForDesktop() {
     String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
     String filePath = dirPath + "\\uid";
-    print("dirPath: $dirPath filePath: $filePath");
+//    print("dirPath: $dirPath filePath: $filePath");
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
       return File(filePath).readAsString();
     else {
@@ -402,7 +455,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       //     : null,
       //Choice(title: 'Pair new', action: pushPairingPage),
       Choice(title: 'Version ' + Strings.version),
-      Choice(title: 'Test Connection', action: _testConnection),
+//      Choice(title: 'Test Connection', action: _testConnection),
       (Platform.isIOS || Platform.isAndroid)
           ? Choice(title: 'Logout', action: signOutProviders)
           : hasSubscription != null && hasSubscription
@@ -438,7 +491,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
   }
 
   void _unsubscribe() {
-    print('unsubscribe');
+//    print('unsubscribe');
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
       resp =
@@ -450,8 +503,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
       if (Platform.isIOS || Platform.isAndroid)
         result = result.data;
       setState(() {
-        print("Unsubscribe done: $result");
-        if (result is bool) print("It is a bool");
+//        print("Unsubscribe done: $result");
+//        if (result is bool) print("It is a bool");
         hasSubscription = false;
       });
       checkIfUserHasSubscription();
@@ -501,10 +554,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
     aiListener = dirStream.listen((event) async {
       if (aiLoaded || event.path != filePath) return;
-      print("Ai Loaded?!");
+//      print("Ai Loaded?!");
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-        print("Ai Loaded!!");
+//        print("Ai Loaded!!");
         File file = File.fromUri(Uri.file(filePath));
         file.delete();
         setState(() {
@@ -517,16 +570,18 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
 
   Widget buildBody() {
     ThemeData theme = Theme.of(context);
-    print(
-        "waitingOnIsValid is $waitingOnIsValid, desktopauth is $desktopAuthenticated, waitingOnInviteCodeCheck is $waitingOnInviteCodeCheck");
+//    print(
+//        "waitingOnIsValid is $waitingOnIsValid, desktopauth is $desktopAuthenticated, waitingOnInviteCodeCheck is $waitingOnInviteCodeCheck");
     if (waitingOnIsValid ||
         (!(Platform.isIOS || Platform.isAndroid) &&
             (desktopAuthenticated == DesktopAuthState.WAITING ||
                 waitingOnInviteCodeCheck))) {
-      print("piared is null");
+//      print("piared is null");
 
       //return Container();
       //return MyDialog(modalText:"Loading...", spinner: true);
+
+
 
       return Container(
         child: new Column(
@@ -544,8 +599,36 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     }
 
     if (Platform.isAndroid || Platform.isIOS) {
+      if(permissionStatus == permDenied || permissionStatus == permUnknown)
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+        Text("League IQ sends recommendations as notifications. Please grant permission or the app won't work."),
+          SizedBox(
+            height: 20,
+          ),
+          RaisedButton(
+            child:
+            Text("OK"),
+            onPressed: () {
+              // show the dialog/open settings screen
+              NotificationPermissions
+                  .requestNotificationPermissions(
+                  iosSettings:
+                  const NotificationSettingsIos(
+                      sound: true,
+                      badge: true,
+                      alert: true))
+                  .then((_) {
+                // when finished, check the permission status
+                      getCheckNotificationPermStatus();
+              });
+            },
+          )
+        ],
+      );
       if (paired == null || paired) {
-        print("rebuilding regular homepage now");
+//        print("rebuilding regular homepage now");
         return HomePage(
             hasSubscription: hasSubscription,
             outOfPredictions: outOfPredictions,
@@ -560,7 +643,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     desktopUID ??= getUIDForDesktop();
     if (desktopUID != null) {
       if (!inviteCodeValid) return _getInviteCodeWidget(context);
-      print("rendering homepage");
+//      print("rendering homepage");
       return HomePage(
           hasSubscription: hasSubscription,
           outOfPredictions: outOfPredictions,
@@ -568,7 +651,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
           updateSubscription: checkIfUserHasSubscription,
           mainBodyController: mainBodyController);
     } else {
-      print("returnin qrpage ");
+//      print("returnin qrpage ");
       return QRPage(dataString: getUIDDBKeyForDesktop());
     }
   }
@@ -659,22 +742,22 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
                       )
                     : Container(),
                 SizedBox(height: 8),
-                !(Platform.isIOS || Platform.isAndroid)
-                    ? RaisedButton(
-                        child: Text(Strings.sub),
-                        onPressed: () async {
-                          //print("Here's the ad we're disposing: $ad");
-
-                          if (await Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) => SubscribePage()),
-                          )) {
-                            checkIfUserHasSubscription();
-                            _playFullAnimation();
-                          }
-                        },
-                      )
-                    : Container()
+//                !(Platform.isIOS || Platform.isAndroid)
+//                    ? RaisedButton(
+//                        child: Text(Strings.sub),
+//                        onPressed: () async {
+//                          //print("Here's the ad we're disposing: $ad");
+//
+//                          if (await Navigator.of(context).push(
+//                            MaterialPageRoute(
+//                                builder: (context) => SubscribePage()),
+//                          )) {
+//                            checkIfUserHasSubscription();
+//                            _playFullAnimation();
+//                          }
+//                        },
+//                      )
+//                    : Container()
               ]),
             )),
       );
@@ -700,7 +783,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin {
     if (user == null && (Platform.isAndroid || Platform.isIOS))
       return LoginPage();
     else {
-      print("REBUILD APP WIDGET");
+//      print("REBUILD APP WIDGET");
       var mainWidget = MainPageTemplateAnimator(
           mainController: mainController,
           appBar: _myAppBar(),

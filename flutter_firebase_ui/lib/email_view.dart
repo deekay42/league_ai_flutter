@@ -24,7 +24,7 @@ class _EmailViewState extends State<EmailView> {
   void initState() {
     super.initState();
     alreadySubmitted = false;
-    print("emailviewstate initstate!!");
+
   }
 
   @override
@@ -60,7 +60,7 @@ class _EmailViewState extends State<EmailView> {
             children: <Widget>[
               new FlatButton(
                   onPressed: () {
-                    print("BUTTON PRESSED");
+
                     return _connexion(context);
                   },
                   child: new Row(
@@ -78,17 +78,17 @@ class _EmailViewState extends State<EmailView> {
   }
 
   _connexion(BuildContext context) async {
-    print("alreadysyubi: $alreadySubmitted");
+
     if (!alreadySubmitted) {
       alreadySubmitted = true;
     } else
       return;
     try {
       final FirebaseAuth auth = FirebaseAuth.instance;
-      print("trying to fetch email providers");
+
       List<String> providers =
           await auth.fetchSignInMethodsForEmail(email: _controllerEmail.text);
-      print(providers);
+
 
       if (providers == null || providers.isEmpty) {
         bool connected = await Navigator.of(context)

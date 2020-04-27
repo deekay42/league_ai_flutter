@@ -8,37 +8,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1056292748920:android:91eecf4730fc920b",
-        "android_client_info": {
-          "package_name": "com.firebase.uidemo"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "1056292748920-oe6p5h902jvcdhm0behbg4v9617k4ubs.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDWSt76aw3q53EDt_jIZJpq-SnwldSA7a0"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:1056292748920:android:fed62a7b62dfccac",
         "android_client_info": {
           "package_name": "com.leagueiq.app"
@@ -64,22 +33,23 @@
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "1056292748920-oe6p5h902jvcdhm0behbg4v9617k4ubs.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1056292748920-j0ltt6q4ohlqt8895lkigv23dieqi0r9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.deekay.leagueIqFlutter"
+              }
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-4748256700093905~1589341358"
     }
   ],
   "configuration_version": "1"

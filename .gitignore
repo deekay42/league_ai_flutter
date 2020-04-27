@@ -11,3 +11,5 @@ install/Install League IQ.exe
 .metadata
 android/.idea/
 *.iml
+android/key.properties
+

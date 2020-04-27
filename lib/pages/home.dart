@@ -56,42 +56,48 @@ class _HomePageState extends State<HomePage> {
   bool outOfPredictions;
   StreamSubscription desktopLastFileStream;
 
-  Ads ads;
-  BannerAd ad;
+//  Ads ads;
+//  BannerAd ad;
 
   void initState() {
     super.initState();
-    print("Homepage initState");
+//    print("Homepage initState");
 
     outOfPredictions = widget.outOfPredictions;
     if (Platform.isAndroid || Platform.isIOS) {
       initFirebaseMessaging();
-      ads = Ads();
-      ads.getBannerAd().then((BannerAd newAd) {
-        ad = newAd;
-        ad.show();
-      });
+//      ads = Ads();
+//      ads.getBannerAd().then((BannerAd newAd) {
+//        ad = newAd;
+//        ad.show();
+//      });
       Wakelock.enable();
       CloudFunctions.instance
           .getHttpsCallable(functionName: 'relayMessage')
           .call(<String, dynamic>{"items": "-100"});
     } 
-    else
-    {
-        initDesktopReadMessage();
-        Fbfunctions.fb_call(
-            methodName: 'relayMessage',
-            args: <String, dynamic>{"items": "-100"});
+    else {
+      initDesktopReadMessage();
+      Fbfunctions.fb_call(
+          methodName: 'relayMessage',
+          args: <String, dynamic>{"items": "-100"});
     }
-
-    
+//    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
+//
+//    Future.delayed(Duration(seconds: 10), () {
+//      print("Now sending relaymessage");
+//      CloudFunctions.instance
+//          .getHttpsCallable(functionName: 'relayMessage')
+//          .call(<String, dynamic>{"items": "1001,1001,1001,1001"});
+//////      _handleNewMessageIncoming({'data':{'body':"1001,1001,1001,1001"}});
+//    });
   }
 
   void didUpdateWidget(HomePage oldWidget)
   {
     super.didUpdateWidget(oldWidget);
     outOfPredictions = widget.outOfPredictions;
-    print("In homepage didUpdateWidget");
+//    print("In homepage didUpdateWidget");
   }
 
   Future<void> _playListAnimation() async {
@@ -104,8 +110,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void dispose() {
-    print("Disposing of old home state now");
-    ad?.dispose();
+//    print("Disposing of old home state now");
+//    ad?.dispose();
     if (!Platform.isIOS && !Platform.isAndroid) 
     {
       desktopLastFileStream.cancel();
@@ -117,13 +123,30 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-    print("Received new message: $message");
-    if (!message.containsKey('data') || !message['data'].containsKey('body'))
-      return;
-    String content = message['data']['body'];
 
-    print("building new list0: content: $content");
+
+  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
+//    print("Received new message: $message");
+    String content;
+    String remaining;
+    if(Platform.isIOS) {
+      if (!message.containsKey('aps') || !message['aps'].containsKey('alert') ||
+          !message['aps']['alert'].containsKey('body'))
+        return;
+      content = message['aps']['alert']['body'];
+      if (message['aps']['alert'].containsKey('tag'))
+        remaining = message['aps']['alert']['tag'];
+    }
+    else if(Platform.isAndroid)
+    {
+      if (!message.containsKey('notification') || !message['notification'].containsKey('body'))
+        return;
+      content = message['notification']['body'];
+      if (message['notification'].containsKey('tag'))
+        remaining = message['notification']['tag'];
+    }
+
+//    print("building new list0: content: $content");
     if(content == "subscribe_success")
       widget.updateSubscription();
     //connectivity test successful
@@ -142,7 +165,7 @@ class _HomePageState extends State<HomePage> {
     }
     if(content == "-100")
     {
-        print("initial message test successful");
+//        print("initial message test successful");
         return;
     }
     if(content != "-1") {
@@ -153,15 +176,15 @@ class _HomePageState extends State<HomePage> {
       Future<List<Item>> futureList = Future.wait(mappedList);
       List<Item> items = await futureList;
 
-      print("building new list1  ");
+//      print("building new list1  ");
       setState(() {
         _items = items;
         //updateremaining does this
         //outOfPredictions = false;
-        print("building new list2");
+//        print("building new list2");
 
-        if (message['data'].containsKey('remaining'))
-          widget.updateRemaining(message['data']['remaining']);
+        if (remaining!=null)
+          widget.updateRemaining(remaining);
       });
       if (mounted) {
         _playListAnimation();
@@ -170,14 +193,13 @@ class _HomePageState extends State<HomePage> {
     else
       setState(() {
         _items = List<Item>();
-        if (message['data'].containsKey('remaining'))
-          widget.updateRemaining(message['data']['remaining']);
+        if (message['aps']['alert'].containsKey('tag'))
+          widget.updateRemaining(message['aps']['alert']['tag']);
       });
-
   }
 
   void initDesktopReadMessage() async {
-    print("initDesktopReadMessage");
+//    print("initDesktopReadMessage");
     String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
     String filePath = dirPath + "\\last";
 
@@ -191,8 +213,8 @@ class _HomePageState extends State<HomePage> {
     desktopLastFileStream = dirStream.listen((foo) async {
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-        print("New last file detected!");
-        print("mounted is $mounted");
+//        print("New last file detected!");
+//        print("mounted is $mounted");
         //apparently creating a new file causes this loop to fire multiple times...
         //need to make sure only one event is processed
 
@@ -202,17 +224,17 @@ class _HomePageState extends State<HomePage> {
 
         file.delete();
 
-        print("Contents: " + contents);
+//        print("Contents: " + contents);
         final stopwatch = Stopwatch()..start();
 
         Fbfunctions.fb_call(
             methodName: 'relayMessage',
             args: <String, dynamic>{"items": contents}).then((response) {
             
-        print('relayMessage executed in ${stopwatch.elapsed}');
-          print("Response status: $response");
+//        print('relayMessage executed in ${stopwatch.elapsed}');
+//          print("Response status: $response");
           if (response == null) {
-            print("relayMessage ERROR");
+//            print("relayMessage ERROR");
             var mySnack = SnackBar(
                 duration: const Duration(seconds: 10),
                 content: Row(
@@ -244,17 +266,18 @@ class _HomePageState extends State<HomePage> {
   }
 
   void initFirebaseMessaging() {
+//    print("init firebase messaging in home");
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
+//        print("onMessage: $message");
         _handleNewMessageIncoming(message);
       },
       onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
+//        print("onLaunch: $message");
         _handleNewMessageIncoming(message);
       },
       onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
+//        print("onResume: $message");
         _handleNewMessageIncoming(message);
       },
     );
@@ -330,12 +353,12 @@ class _HomePageState extends State<HomePage> {
     //       );
     //     },
     //   );
-    print("Building home.dart");
+//    print("Building home.dart");
     var mainContent;
     if(outOfPredictions)
       return _buildOutOfPredictions(context);
     if (_items == null) {
-      print("items are null");
+//      print("items are null");
       mainContent = _buildInstructions(context);
     } else {
       int counter = 0;

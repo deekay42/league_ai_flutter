@@ -61,6 +61,6 @@ class ItemsRepository
     if(_id2Item.containsKey(id))
       return _id2Item[id];
     else
-      return Item(id: "unknown", name: "Unknown");
+      return Item(id: "0", name: "No good recommendation available.");
   }
 }

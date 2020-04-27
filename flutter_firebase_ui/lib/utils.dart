@@ -143,12 +143,9 @@ Future<Null> showErrorDialog(BuildContext context, String message,
 
 Future<void> signOutProviders() async {
   var currentUser = await FirebaseAuth.instance.currentUser();
-  print('AFTER1 ');
   if (currentUser != null) {
-    print('AFTER2');
     await signOut(currentUser.providerData);
   }
-  print('AFTER3');
   return await FirebaseAuth.instance.signOut();
 }
 

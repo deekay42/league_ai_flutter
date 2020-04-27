@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:async';
+import '../resources/Strings.dart';
 
 class QRPage extends StatefulWidget {
   final Future<String> dataString;
@@ -21,7 +22,7 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
   {
     return Column(children: [
       SizedBox(height:15),
-      Text("Welcome to League IQ! Please pair your phone by scanning the QR Code below with your League IQ app"),
+      Text( Strings.desktopWelcome),
       Expanded(
               child: Center(
                 child: Padding(

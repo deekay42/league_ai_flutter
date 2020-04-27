@@ -64,17 +64,17 @@ class _SignUpViewState extends State<SignUpView> {
                   decoration: new InputDecoration(
                       labelText: FFULocalizations.of(context).emailLabel),
                 ),
-                const SizedBox(height: 8.0),
-                new TextField(
-                  controller: _controllerDisplayName,
-                  autofocus: true,
-                  keyboardType: TextInputType.text,
-                  autocorrect: false,
-                  onChanged: _checkValid,
-                  onSubmitted: _submitDisplayName,
-                  decoration: new InputDecoration(
-                      labelText: FFULocalizations.of(context).nameLabel),
-                ),
+//                const SizedBox(height: 8.0),
+//                new TextField(
+//                  controller: _controllerDisplayName,
+//                  autofocus: true,
+//                  keyboardType: TextInputType.text,
+//                  autocorrect: false,
+//                  onChanged: _checkValid,
+//                  onSubmitted: _submitDisplayName,
+//                  decoration: new InputDecoration(
+//                      labelText: FFULocalizations.of(context).nameLabel),
+//                ),
                 const SizedBox(height: 8.0),
                 new TextField(
                   controller: _controllerPassword,
@@ -127,12 +127,12 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   _connexion(BuildContext context) async {
-    print("trying to connect");
+
     if (!alreadySubmitted) {
       alreadySubmitted = true;
     } else
       return;
-    print("not already");
+
     if (widget.passwordCheck &&
         _controllerPassword.text != _controllerCheckPassword.text) {
       showErrorDialog(context, FFULocalizations.of(context).passwordCheckError);
@@ -141,13 +141,13 @@ class _SignUpViewState extends State<SignUpView> {
 
     FirebaseAuth _auth = FirebaseAuth.instance;
     try {
-      print("Trying to create new user now");
+
       FirebaseUser user = (await _auth.createUserWithEmailAndPassword(
         email: _controllerEmail.text,
         password: _controllerPassword.text,
       )).user;
       try {
-        print("Successful auth!");
+
         var userUpdateInfo = new UserUpdateInfo();
         userUpdateInfo.displayName = _controllerDisplayName.text;
         await user.updateProfile(userUpdateInfo);

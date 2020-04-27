@@ -106,7 +106,7 @@ class _PasswordViewState extends State<PasswordView> {
     try {
       user = (await _auth.signInWithEmailAndPassword(
           email: _controllerEmail.text, password: _controllerPassword.text)).user;
-      print(user);
+
     } on PlatformException catch (exception) {
       //TODO improve errors catching
       print("there was an error");

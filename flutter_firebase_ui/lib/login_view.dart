@@ -88,20 +88,16 @@ class _LoginViewState extends State<LoginView> {
 
 
   _handleFacebookSignin() async {
-    print("trying to get fb token");
-    FacebookLoginResult facebookLoginResult =
-        await facebookLogin.logInWithReadPermissions(['email']);
-    print("got the result: $facebookLoginResult");
+
+    final facebookLogin = FacebookLogin();
+    final facebookLoginResult = await facebookLogin.logIn(['email']);
+
+
     if (facebookLoginResult.accessToken != null) {
       try {
-        print("getting fb token");
         FacebookAccessToken myToken = facebookLoginResult.accessToken;
-        print("got fb token");
         AuthCredential credential= FacebookAuthProvider.getCredential(accessToken: myToken.token);
-        print("got creds");
         FirebaseUser user = (await FirebaseAuth.instance.signInWithCredential(credential)).user;
-        print("got user");
-        print(user);
       } catch (e) {
         showErrorDialog(context, e.details);
       }
@@ -148,7 +144,6 @@ class _LoginViewState extends State<LoginView> {
             authToken: result.session.token,
             authTokenSecret: result.session.secret);
         final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-        print("Twitter: $user");
 
         break;
       case TwitterLoginStatus.cancelledByUser:

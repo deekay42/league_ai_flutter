@@ -17,8 +17,8 @@ static const List<String> instructionsDesktop = ["1. Start your League IQ app on
   // "4. Press Tab + F12 while in-game for the next recommendation, typically while backing.",
   // "5. Remember: Recommendations change frequently as the game progresses. Check at least once before every back to avoid building outdated recommendations"
   // ];
-  static const String pairingInstructions = "It looks like your phone hasn't been paired with your desktop client yet. Please scan the QR code on your desktop app to complete the pairing.";
-
+  static const String mobileWelcome = "Welcome to League IQ! Download the windows app at http://leagueiq.gg and scan the QR code to complete the pairing.";
+  static const String desktopWelcome = "Welcome to League IQ! Please download the League IQ mobile app at http://leagueiq.gg or in the App Store or Play Store. Then pair your phone by scanning the QR Code below with your League IQ app.";
   static const String IOS_adMobAppId = "ca-app-pub-4748256700093905~2059247399";
   static const String ANDROID_adMobAppId = "ca-app-pub-4748256700093905~1589341358";
 
