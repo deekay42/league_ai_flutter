@@ -15,7 +15,6 @@ class Fbfunctions {
       _channel
           .invokeMethod("fbfunctions", args)
           .then((response) {
-        print("Got the fbfunctions result: $response");
         callResult.complete(response != null ? (response is List ? response[0] : response) : null);
       });
     } on PlatformException catch (e) {

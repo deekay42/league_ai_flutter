@@ -28,7 +28,6 @@ class MainPageTemplateAnimator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("Rebuild main page template");
     return Scaffold(
         key: scaffoldKey, appBar: appBar, body: _buildAnimation(context), bottomSheet:bottomSheet);
   }

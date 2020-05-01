@@ -1083,6 +1083,7 @@ static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_name[] = "__name__";
 static const char __pyx_k_path[] = "path";
 static const char __pyx_k_test[] = "__test__";
+static const char __pyx_k_debug[] = "debug";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_main_2[] = "main";
 static const char __pyx_k_environ[] = "environ";
@@ -1100,6 +1101,7 @@ static PyObject *__pyx_n_u_TK_LIBRARY;
 static PyObject *__pyx_n_s_argv;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_kp_u_cython_main_pyx;
+static PyObject *__pyx_n_s_debug;
 static PyObject *__pyx_n_s_environ;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_m;
@@ -1169,6 +1171,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_argv, __pyx_k_argv, sizeof(__pyx_k_argv), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_kp_u_cython_main_pyx, __pyx_k_cython_main_pyx, sizeof(__pyx_k_cython_main_pyx), 0, 1, 0, 0},
+  {&__pyx_n_s_debug, __pyx_k_debug, sizeof(__pyx_k_debug), 0, 0, 1, 1},
   {&__pyx_n_s_environ, __pyx_k_environ, sizeof(__pyx_k_environ), 0, 0, 1, 1},
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_m, __pyx_k_m, sizeof(__pyx_k_m), 0, 0, 1, 1},
@@ -1468,7 +1471,7 @@ if (!__Pyx_RefNanny) {
 
   /* "cython_main.pyx":2
  * #cython: language_level=3
- * import os; os.environ["TCL_LIBRARY"]="py_libs\\tcl"; os.environ["TK_LIBRARY"]="py_libs\\tk"; import sys; sys.path = ["py_libs/base_library.zip", "py_libs"]; sys.argv = ["cython_main.pyx"]; import main; m = main.Main(); m.run()             # <<<<<<<<<<<<<<
+ * import os; os.environ["TCL_LIBRARY"]="py_libs\\tcl"; os.environ["TK_LIBRARY"]="py_libs\\tk"; import sys; sys.path = ["py_libs/base_library.zip", "py_libs"]; sys.argv = ["cython_main.pyx"]; import main; main.debug = False; m = main.Main(); m.run()             # <<<<<<<<<<<<<<
  */
   __pyx_t_1 = __Pyx_Import(__pyx_n_s_os, 0, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -1521,6 +1524,10 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_main_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
+  if (__Pyx_PyObject_SetAttrStr(__pyx_t_1, __pyx_n_s_debug, Py_False) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_GetModuleGlobalName(__pyx_t_1, __pyx_n_s_main_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Main); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -1541,7 +1548,7 @@ if (!__Pyx_RefNanny) {
 
   /* "cython_main.pyx":1
  * #cython: language_level=3             # <<<<<<<<<<<<<<
- * import os; os.environ["TCL_LIBRARY"]="py_libs\\tcl"; os.environ["TK_LIBRARY"]="py_libs\\tk"; import sys; sys.path = ["py_libs/base_library.zip", "py_libs"]; sys.argv = ["cython_main.pyx"]; import main; m = main.Main(); m.run()
+ * import os; os.environ["TCL_LIBRARY"]="py_libs\\tcl"; os.environ["TK_LIBRARY"]="py_libs\\tk"; import sys; sys.path = ["py_libs/base_library.zip", "py_libs"]; sys.argv = ["cython_main.pyx"]; import main; main.debug = False; m = main.Main(); m.run()
  */
   __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);

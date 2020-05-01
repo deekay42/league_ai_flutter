@@ -107,11 +107,9 @@ class _ParentState extends State<Parent> {
 
   void initState() {
     super.initState();
-    print("Parent in initState");
   }
 
   void dispose() {
-    print("Parent in dispose");
     super.dispose();
   }
 

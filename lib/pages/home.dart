@@ -126,7 +126,7 @@ class _HomePageState extends State<HomePage> {
 
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-//    print("Received new message: $message");
+  //  print("Received new message: $message");
     String content;
     String remaining;
     if(Platform.isIOS) {
@@ -137,7 +137,7 @@ class _HomePageState extends State<HomePage> {
       if (message['aps']['alert'].containsKey('tag'))
         remaining = message['aps']['alert']['tag'];
     }
-    else if(Platform.isAndroid)
+    else// if(Platform.isAndroid || Platform.isWindows)
     {
       if (!message.containsKey('notification') || !message['notification'].containsKey('body'))
         return;
@@ -252,7 +252,7 @@ class _HomePageState extends State<HomePage> {
             if (tmp != "1337")
               widget.updateRemaining(tmp);
             Map<String, dynamic> arg = {
-              'data': <String, dynamic>{'body': contents}
+              'notification': <String, dynamic>{'body': contents}
             };
             _handleNewMessageIncoming(arg);
           } else if (response == "UID DOES NOT EXIST") {
