@@ -74,13 +74,13 @@ class _HomePageState extends State<HomePage> {
       Wakelock.enable();
       CloudFunctions.instance
           .getHttpsCallable(functionName: 'relayMessage')
-          .call(<String, dynamic>{"items": Strings.probePing});
+          .call(<String, dynamic>{"items": "-1"});
     } 
     else {
       initDesktopReadMessage();
       Fbfunctions.fb_call(
           methodName: 'relayMessage',
-          args: <String, dynamic>{"items": Strings.probePing});
+          args: <String, dynamic>{"items": "-1"});
     }
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
@@ -126,24 +126,23 @@ class _HomePageState extends State<HomePage> {
 
 
   Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-  //  print("Received new message: $message");
+    print("Received new message: $message");
     String content;
     String remaining;
     if(Platform.isIOS) {
-      if (!message.containsKey('aps') || !message['aps'].containsKey('alert') ||
-          !message['aps']['alert'].containsKey('body'))
+      if (!message.containsKey('body'))
         return;
-      content = message['aps']['alert']['body'];
-      if (message['aps']['alert'].containsKey('tag'))
-        remaining = message['aps']['alert']['tag'];
+      content = message['body'];
+//      if (message['aps']['alert'].containsKey('tag'))
+//        remaining = message['aps']['alert']['tag'];
     }
     else// if(Platform.isAndroid || Platform.isWindows)
     {
-      if (!message.containsKey('notification') || !message['notification'].containsKey('body'))
+      if (!message.containsKey('data') || !message['data'].containsKey('body'))
         return;
-      content = message['notification']['body'];
-      if (message['notification'].containsKey('tag'))
-        remaining = message['notification']['tag'];
+      content = message['data']['body'];
+//      if (message['notification'].containsKey('tag'))
+//        remaining = message['notification']['tag'];
     }
 
 //    print("building new list0: content: $content");
@@ -162,11 +161,6 @@ class _HomePageState extends State<HomePage> {
                     ]));
       Scaffold.of(context).showSnackBar(mySnack);
       return;
-    }
-    if(content == Strings.probePing)
-    {
-       print("initial message test successful");
-        return;
     }
     if(content != "-1") {
       List<String> itemsS = content.split(",");
@@ -193,8 +187,8 @@ class _HomePageState extends State<HomePage> {
     else
       setState(() {
         _items = List<Item>();
-        if (message['aps']['alert'].containsKey('tag'))
-          widget.updateRemaining(message['aps']['alert']['tag']);
+//        if (message['aps']['alert'].containsKey('tag'))
+//          widget.updateRemaining(message['aps']['alert']['tag']);
       });
   }
 
