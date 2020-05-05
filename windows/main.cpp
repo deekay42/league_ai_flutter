@@ -152,6 +152,7 @@ int runFlutterCode() {
   // Arguments for the Flutter Engine.
   std::vector<std::string> arguments;
 #ifndef _DEBUG
+  arguments.push_back("--disable-observatory");
   arguments.push_back("--disable-dart-asserts");
 #endif
 

@@ -74,13 +74,13 @@ class _HomePageState extends State<HomePage> {
       Wakelock.enable();
       CloudFunctions.instance
           .getHttpsCallable(functionName: 'relayMessage')
-          .call(<String, dynamic>{"items": "-100"});
+          .call(<String, dynamic>{"items": Strings.probePing});
     } 
     else {
       initDesktopReadMessage();
       Fbfunctions.fb_call(
           methodName: 'relayMessage',
-          args: <String, dynamic>{"items": "-100"});
+          args: <String, dynamic>{"items": Strings.probePing});
     }
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
@@ -163,9 +163,9 @@ class _HomePageState extends State<HomePage> {
       Scaffold.of(context).showSnackBar(mySnack);
       return;
     }
-    if(content == "-100")
+    if(content == Strings.probePing)
     {
-//        print("initial message test successful");
+       print("initial message test successful");
         return;
     }
     if(content != "-1") {

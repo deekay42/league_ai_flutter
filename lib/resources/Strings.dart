@@ -7,6 +7,7 @@ class Strings {
   // "3. Press Tab + F12 while in-game for the next recommendation, typically while channeling Back.",
   // "4. Remember: Recommendations change frequently as the game progresses. Check at least once before every back to avoid building outdated recommendations"
   // ];
+  static const String probePing = "Desktop connection established";
 
 static const List<String> instructions = ["1. Start your League IQ Desktop client", "2. Press Tab + F12 while in game"];
 static const List<String> instructionsDesktop = ["1. Start your League IQ app on your phone", "2. Press Tab + F12 while in game"];

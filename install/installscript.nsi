@@ -4,7 +4,7 @@
 !define MUI_COMPONENTSPAGE_NODESC
 SetCompressor /SOLID bzip2
  
- 
+caption "Install League IQ"
 ;---------------------------------
 ;General
  
