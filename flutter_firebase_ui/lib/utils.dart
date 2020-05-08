@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
+import 'package:apple_sign_in/apple_sign_in.dart';
 
 import 'package:flutter_firebase_ui/l10n/localization.dart';
 
-enum ProvidersTypes { email, google, facebook, twitter, phone }
+enum ProvidersTypes { email, google, facebook, twitter, phone, apple }
 
 final GoogleSignIn googleSignIn = new GoogleSignIn();
 final FacebookLogin facebookLogin = new FacebookLogin();
@@ -47,6 +48,7 @@ class ButtonDescription extends StatelessWidget {
     String name,
     VoidCallback onSelected,
   }) {
+    print("Copying $name");
     return new ButtonDescription(
         label: label ?? this.label,
         labelColor: labelColor ?? this.labelColor,
@@ -58,10 +60,12 @@ class ButtonDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("name");
+    print(name);
     VoidCallback _onSelected = onSelected ?? () => {};
     return new Padding(
       padding: const EdgeInsets.fromLTRB(32.0, 16.0, 32.0, 16.0),
-      child: new RaisedButton(
+      child: RaisedButton(
           color: color,
           child: new Row(
             children: <Widget>[
@@ -108,6 +112,12 @@ Map<ProvidersTypes, ButtonDescription> providersDefinitions(
           logo: "twitter-logo.png",
           label: FFULocalizations.of(context).signInTwitter,
           name: "Twitter",
+          labelColor: Colors.white),
+      ProvidersTypes.apple: new ButtonDescription(
+          color: const Color.fromRGBO(0, 0, 0, 1.0),
+          logo: "apple-logo.png",
+          label: FFULocalizations.of(context).signInApple,
+          name: "Apple",
           labelColor: Colors.white),
     };
 

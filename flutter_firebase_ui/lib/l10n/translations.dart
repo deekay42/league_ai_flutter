@@ -42,6 +42,7 @@ class TranslationBundle {
   String get signInGoogle => parent?.signInGoogle;
   String get signInEmail => parent?.signInEmail;
   String get signInTwitter => parent?.signInTwitter;
+  String get signInApple => parent?.signInApple;
 
   String get errorOccurred => parent?.errorOccurred;
 
@@ -211,6 +212,9 @@ Sign in with $providerName to continue.''';
 
   @override
   String get signInTwitter => r'Sign in with Twitter';
+
+  @override
+  String get signInApple => r'Sign in with Apple';
 }
 
 // ignore: camel_case_types

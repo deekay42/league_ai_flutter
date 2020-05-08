@@ -52,7 +52,9 @@ class _LoginPageState extends State<LoginPage> {
         ProvidersTypes.google,
         ProvidersTypes.facebook,
         ProvidersTypes.twitter,
-        ProvidersTypes.email
+        ProvidersTypes.apple,
+        ProvidersTypes.email,
+
       ],
       twitterConsumerKey: "AUdn9voKiWbTzAfef4pucVnAk",
       twitterConsumerSecret: "XSb9f9pGBJ3Xm4VM3tUE3Vqamcsug8JEhBi0wqLG1kxWSshnt6",

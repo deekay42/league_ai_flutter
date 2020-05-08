@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
+import 'package:apple_sign_in/apple_sign_in.dart';
 
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 
@@ -29,6 +30,7 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  bool appleSignInAvailable = false;
 
   Map<ProvidersTypes, ButtonDescription> _buttons;
 
@@ -62,6 +64,32 @@ class _LoginViewState extends State<LoginView> {
           showErrorDialog(context, e.details);
         }
       }
+    }
+  }
+
+  Future<FirebaseUser> _handleAppleSignIn() async {
+    try {
+
+      final AuthorizationResult appleResult = await AppleSignIn.performRequests([
+        AppleIdRequest(requestedScopes: [Scope.email, Scope.fullName])
+      ]);
+
+      if (appleResult.error != null) {
+        // handle errors from Apple here
+      }
+
+      final AuthCredential credential = OAuthProvider(providerId: 'apple.com').getCredential(
+        accessToken: String.fromCharCodes(appleResult.credential.authorizationCode),
+        idToken: String.fromCharCodes(appleResult.credential.identityToken),
+      );
+
+      AuthResult firebaseResult = await _auth.signInWithCredential(credential);
+      final FirebaseUser user = firebaseResult.user;
+
+
+    } catch (error) {
+      print(error);
+      return null;
     }
   }
 
@@ -155,8 +183,20 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
+  void initState()
+  {
+    super.initState();
+    AppleSignIn.isAvailable().then((result)
+    {
+      setState(() {
+      appleSignInAvailable = result;
+    });});
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("applesigninavailable is");
+    print(appleSignInAvailable);
     _buttons = {
       ProvidersTypes.facebook:
           providersDefinitions(context)[ProvidersTypes.facebook]
@@ -169,6 +209,8 @@ class _LoginViewState extends State<LoginView> {
               .copyWith(onSelected: _handleTwitterSignin),
       ProvidersTypes.email: providersDefinitions(context)[ProvidersTypes.email]
           .copyWith(onSelected: _handleEmailSignIn),
+      ProvidersTypes.apple: appleSignInAvailable ? providersDefinitions(context)[ProvidersTypes.apple]
+          .copyWith(onSelected: _handleAppleSignIn) : null,
     };
 
     return new Container(

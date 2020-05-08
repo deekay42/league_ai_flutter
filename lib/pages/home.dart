@@ -1,27 +1,14 @@
-// Copyright 2018-present the Flutter authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:io';
 
 import 'package:fbfunctions/fbfunctions.dart';
 import 'package:firebase_admob/firebase_admob.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
@@ -29,6 +16,7 @@ import '../resources/Strings.dart';
 import '../resources/ads.dart';
 import '../widgets/items_list.dart';
 import '../supplemental/utils.dart';
+
 
 bool notNull(Object o) => o != null;
 
@@ -38,12 +26,14 @@ class HomePage extends StatefulWidget {
   final AnimationController mainBodyController;
   final Function updateRemaining;
   final Function updateSubscription;
+  final String uid;
   HomePage(
       {this.hasSubscription = false,
       this.outOfPredictions = false,
       this.updateRemaining,
       this.updateSubscription,
-      this.mainBodyController});
+      this.mainBodyController,
+      this.uid});
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -52,9 +42,11 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final ItemsRepository itemsRepo = new ItemsRepository();
   List<Item> _items;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+//  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool outOfPredictions;
   StreamSubscription desktopLastFileStream;
+  bool initialDataSnapshotComplete = false;
+  Widget itemsListener;
 
 //  Ads ads;
 //  BannerAd ad;
@@ -65,7 +57,7 @@ class _HomePageState extends State<HomePage> {
 
     outOfPredictions = widget.outOfPredictions;
     if (Platform.isAndroid || Platform.isIOS) {
-      initFirebaseMessaging();
+//      initFirebaseMessaging();
 //      ads = Ads();
 //      ads.getBannerAd().then((BannerAd newAd) {
 //        ad = newAd;
@@ -88,8 +80,8 @@ class _HomePageState extends State<HomePage> {
 //      print("Now sending relaymessage");
 //      CloudFunctions.instance
 //          .getHttpsCallable(functionName: 'relayMessage')
-//          .call(<String, dynamic>{"items": "1001,1001,1001,1001"});
-//////      _handleNewMessageIncoming({'data':{'body':"1001,1001,1001,1001"}});
+//          .call(<String, dynamic>{"items": "3020,3067,1052,1052"});
+////      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
 //    });
   }
 
@@ -259,23 +251,23 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void initFirebaseMessaging() {
-//    print("init firebase messaging in home");
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-//        print("onMessage: $message");
-        _handleNewMessageIncoming(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-//        print("onLaunch: $message");
-        _handleNewMessageIncoming(message);
-      },
-      onResume: (Map<String, dynamic> message) async {
-//        print("onResume: $message");
-        _handleNewMessageIncoming(message);
-      },
-    );
-  }
+//  void initFirebaseMessaging() {
+////    print("init firebase messaging in home");
+//    _firebaseMessaging.configure(
+//      onMessage: (Map<String, dynamic> message) async {
+////        print("onMessage: $message");
+//        _handleNewMessageIncoming(message);
+//      },
+//      onLaunch: (Map<String, dynamic> message) async {
+////        print("onLaunch: $message");
+//        _handleNewMessageIncoming(message);
+//      },
+//      onResume: (Map<String, dynamic> message) async {
+////        print("onResume: $message");
+//        _handleNewMessageIncoming(message);
+//      },
+//    );
+//  }
 
   Widget _buildInstructions(BuildContext context) {
     int counter = 0;
@@ -326,50 +318,93 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget build(BuildContext context) {
-    // if (errorOccurred)
-    //   showDialog(
-    //     context: context,
-    //     builder: (BuildContext context) {
-    //       // return object of type Dialog
-    //       return AlertDialog(
-    //         title: new Text("Error"),
-    //         content: new Text(
-    //             "Unable to find user id. Make sure to create an account on the mobile app first. Then redownload and reinstall this desktop app."),
-    //         actions: <Widget>[
-    //           // usually buttons at the bottom of the dialog
-    //           new FlatButton(
-    //             child: new Text("Close"),
-    //             onPressed: () {
-    //               Navigator.of(context).pop();
-    //             },
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //   );
-//    print("Building home.dart");
-    var mainContent;
     if(outOfPredictions)
       return _buildOutOfPredictions(context);
-    if (_items == null) {
-//      print("items are null");
-      mainContent = _buildInstructions(context);
-    } else {
-      int counter = 0;
 
-      var listItems = _items.map((item) {
-        return MyItemListItem(item: item, last: ++counter == _items.length);
-      }).toList();
+    if(itemsListener == null)
+      itemsListener = createItemsListener();
+    return itemsListener;
+  }
 
-      mainContent = SlidingList(
-          title: Strings.buildRec,
-          children: listItems,
-          animationController: widget.mainBodyController);
-    }
+  Widget createItemsListener()
+  {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError)
+          return new Text('Error: ${snapshot.error}');
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return _buildInstructions(context);
+          default:
+            if(!initialDataSnapshotComplete)
+            {
+              initialDataSnapshotComplete = true;
+              return _buildInstructions(context);
+            }
+            var newDoc = snapshot.data.documentChanges[0];
+            if(newDoc.type != DocumentChangeType.added)
+              return _buildInstructions(context);
 
-    return mainContent;
+            int counter = 0;
+            String itemUpdate = newDoc.document.data["items"];
 
-//    return Container(
-//        margin: EdgeInsets.symmetric(horizontal: 20), child: mainContent);
+            if(itemUpdate == "-1")
+            {
+
+              Future.delayed(Duration(seconds: 3), () {
+                var mySnack = SnackBar(
+                    duration: const Duration(seconds: 10),
+                    content: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Desktop connection established!", textAlign: TextAlign.center)
+                        ]));
+                Scaffold.of(context).showSnackBar(mySnack);
+              });
+              return _buildInstructions(context);
+            }
+
+            List<String> itemsS = itemUpdate.split(",");
+            Iterable<Future<Item>> mappedList =
+            itemsS.map((i) async => await itemsRepo.getItem(i));
+            Future<List<Item>> futureList = Future.wait(mappedList);
+
+            return FutureBuilder<List<Item>>(
+              future: futureList, // async work
+              builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting: return _buildInstructions(context);
+                  default:
+                    if (snapshot.hasError)
+                      return new Text('Error: ${snapshot.error}');
+                    else {
+                      List<Item> items = snapshot.data;
+//                      if(items[0].id== "0")
+//                        return _buildInstructions(context);
+                      var listItems = items.map((item) {
+                        return MyItemListItem(item: item, last: ++counter == items.length);
+                      }).toList();
+//                      if (remaining!=null)
+//                        widget.updateRemaining(remaining);
+
+
+                      if (mounted) {
+                        _playListAnimation();
+                      }
+                      return SlidingList(
+                          title: Strings.buildRec,
+                          children: listItems,
+                          animationController: widget.mainBodyController);
+                    }
+                }
+              },
+            );
+
+
+        }
+      },
+    );
   }
 }

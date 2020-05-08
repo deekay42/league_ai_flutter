@@ -16,6 +16,10 @@ dependencies:
 
   flutter_twitter_login: ^1.1.0
 
+
+  apple_sign_in: ^0.1.0
+
+
   firebase_auth: ^0.16.0
 
   google_sign_in: ^4.4.4
@@ -31,6 +35,10 @@ flutter:
    - assets/fb-logo.png
    - assets/2.0x/fb-logo.png
    - assets/3.0x/fb-logo.png
+
+   - assets/apple-logo.png
+   - assets/2.0x/apple-logo.png
+   - assets/3.0x/apple-logo.png
 
    - assets/email-logo.png
    - assets/2.0x/email-logo.png

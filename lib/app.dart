@@ -1,17 +1,3 @@
-// Copyright 2018-present the Flutter authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:io' show Platform;
@@ -22,11 +8,12 @@ import 'pages/login.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fbfunctions/fbfunctions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
 import 'package:launchbrowser/launchbrowser.dart' as launchbrowser;
-import 'package:notification_permissions/notification_permissions.dart';
+//import 'package:notification_permissions/notification_permissions.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'pages/MobilePairingPage.dart';
 import 'pages/QRPage.dart';
@@ -53,7 +40,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   FirebaseUser user;
   StreamSubscription<FirebaseUser> _listener;
   Future<String> desktopUID;
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+//  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool newlyCreatedUser = false;
   bool paired;
   bool hasSubscription;
@@ -93,7 +80,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     _playFullAnimation();
     if (Platform.isAndroid || Platform.isIOS) {
       checkIfUserHasSubscription();
-      initFirebaseMessaging();
+//      initFirebaseMessaging();
 
 
       _listener = FirebaseAuth.instance.onAuthStateChanged
@@ -113,7 +100,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
           user = result;
         });
         if (user != null) {
-          initFirebaseMessaging();
+//          initFirebaseMessaging();
           checkIfUserHasSubscription();
         }
       });
@@ -125,6 +112,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
       hasValidInviteCodeSavedDesktop();
     }
   }
+
 
   Future<void> desktopAuthenticate({int timeout = 0}) async {
     var result = await Fbfunctions.fb_call(methodName: 'authenticate');
@@ -195,112 +183,112 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     });
   }
 
-  void initFirebaseMessaging() {
-//    print("init fb messaging in app");
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-//        print("onMessage: $message");
-        _handleNewMessageIncoming(message);
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-//        print("onLaunch: $message");
-        _handleNewMessageIncoming(message);
-      },
-      onResume: (Map<String, dynamic> message) async {
-//        print("onResume: $message");
-        _handleNewMessageIncoming(message);
-      },
-    );
-    getCheckNotificationPermStatus();
-    WidgetsBinding.instance.addObserver(this);
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true));
-//    _firebaseMessaging.onIosSettingsRegistered
-//        .listen((IosNotificationSettings settings) {
-////      print("Settings registered: $settings");
+//  void initFirebaseMessaging() {
+////    print("init fb messaging in app");
+//    _firebaseMessaging.configure(
+//      onMessage: (Map<String, dynamic> message) async {
+////        print("onMessage: $message");
+//        _handleNewMessageIncoming(message);
+//      },
+//      onLaunch: (Map<String, dynamic> message) async {
+////        print("onLaunch: $message");
+//        _handleNewMessageIncoming(message);
+//      },
+//      onResume: (Map<String, dynamic> message) async {
+////        print("onResume: $message");
+//        _handleNewMessageIncoming(message);
+//      },
+//    );
+//    getCheckNotificationPermStatus();
+//    WidgetsBinding.instance.addObserver(this);
+//    _firebaseMessaging.requestNotificationPermissions(
+//        const IosNotificationSettings(sound: true, badge: true, alert: true));
+////    _firebaseMessaging.onIosSettingsRegistered
+////        .listen((IosNotificationSettings settings) {
+//////      print("Settings registered: $settings");
+////    });
+//  }
+
+//  /// When the application has a resumed status, check for the permission
+//  /// status
+//  @override
+//  void didChangeAppLifecycleState(AppLifecycleState state) {
+//    if (state == AppLifecycleState.resumed) {
+//      setState(() {
+//        getCheckNotificationPermStatus();
+//      });
+//    }
+//  }
+
+//  /// Checks the notification permission status
+//  Future<void> getCheckNotificationPermStatus() {
+//    return NotificationPermissions.getNotificationPermissionStatus()
+//        .then((status) {
+//      setState(() {
+//        switch (status) {
+//          case PermissionStatus.denied:
+//            permissionStatus = permDenied;
+//            break;
+//          case PermissionStatus.granted:
+//            permissionStatus = permGranted;
+//            break;
+//          case PermissionStatus.unknown:
+//          default:
+//            permissionStatus = permUnknown;
+//        }
+//
+//      });
+//
 //    });
-  }
+//  }
 
-  /// When the application has a resumed status, check for the permission
-  /// status
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      setState(() {
-        getCheckNotificationPermStatus();
-      });
-    }
-  }
-
-  /// Checks the notification permission status
-  Future<void> getCheckNotificationPermStatus() {
-    return NotificationPermissions.getNotificationPermissionStatus()
-        .then((status) {
-      setState(() {
-        switch (status) {
-          case PermissionStatus.denied:
-            permissionStatus = permDenied;
-            break;
-          case PermissionStatus.granted:
-            permissionStatus = permGranted;
-            break;
-          case PermissionStatus.unknown:
-          default:
-            permissionStatus = permUnknown;
-        }
-
-      });
-
-    });
-  }
-
-  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-//    print("got a message whoop whoop");
-//    print(message);
-    String content;
-    if(Platform.isIOS) {
-      content = message['aps']['alert']['title'];
-    }
-    else if(Platform.isAndroid)
-    {
-      content = message['notification']['title'];
-    }
-//    print(message);
-    //its the pairing confirmation message
-    if (content == "PAIRING SUCCESSFUL") {
-      showDialog<Null>(
-        context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (BuildContext context) => AlertDialog(
-          title: Text("Success"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Pairing successful"),
-              SizedBox(
-                height: 15,
-              ),
-              RaisedButton(
-                child: Text("OK"),
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                  _playListAnimation();
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-
-      setState(() {
-        paired = true;
-      });
-      _playFullAnimation();
-
-      return;
-    }
-  }
+//  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
+////    print("got a message whoop whoop");
+////    print(message);
+//    String content;
+//    if(Platform.isIOS) {
+//      content = message['aps']['alert']['title'];
+//    }
+//    else if(Platform.isAndroid)
+//    {
+//      content = message['notification']['title'];
+//    }
+////    print(message);
+//    //its the pairing confirmation message
+//    if (content == "PAIRING SUCCESSFUL") {
+//      showDialog<Null>(
+//        context: context,
+//        barrierDismissible: false, // user must tap button!
+//        builder: (BuildContext context) => AlertDialog(
+//          title: Text("Success"),
+//          content: Column(
+//            mainAxisSize: MainAxisSize.min,
+//            children: [
+//              Text("Pairing successful"),
+//              SizedBox(
+//                height: 15,
+//              ),
+//              RaisedButton(
+//                child: Text("OK"),
+//                onPressed: () {
+//                  Navigator.pop(context);
+//                  Navigator.pop(context);
+//                  _playListAnimation();
+//                },
+//              ),
+//            ],
+//          ),
+//        ),
+//      );
+//
+//      setState(() {
+//        paired = true;
+//      });
+//      _playFullAnimation();
+//
+//      return;
+//    }
+//  }
 
   void checkIfUserHasSubscription({int timeout = 0}) async {
 //    print("Starting isValid");
@@ -310,13 +298,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     });
     dynamic resp;
     if (Platform.isIOS || Platform.isAndroid) {
-      String deviceID = await _firebaseMessaging.getToken();
+//      String deviceID = await _firebaseMessaging.getToken();
 //      print("Got device_id: $deviceID");
 //      assert(deviceID != null);
       resp = CloudFunctions.instance
           .getHttpsCallable(functionName: 'isValid')
           .call(<String, dynamic>{
-        "device_id": deviceID,
+//        "device_id": deviceID,
         "current_version": Strings.version
       });
     } else
@@ -465,22 +453,22 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     return BasicAppBar(false, choices, false);
   }
 
-  void pushPairingPage() {
-    Widget mainPairingPage = MainPageTemplateAnimator(
-        mainController: mainController,
-        appBar: null,
-        body: Platform.isAndroid || Platform.isIOS
-            ? MobilePairingPage()
-            : QRPage(dataString: getUIDDBKeyForDesktop()),
-        mainBodyController: mainBodyController,
-        footer: null,
-        backdrop: background,
-        bottomSheet:
-            Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
-
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => mainPairingPage));
-  }
+//  void pushPairingPage() {
+//    Widget mainPairingPage = MainPageTemplateAnimator(
+//        mainController: mainController,
+//        appBar: null,
+//        body: Platform.isAndroid || Platform.isIOS
+//            ? MobilePairingPage()
+//            : QRPage(dataString: getUIDDBKeyForDesktop()),
+//        mainBodyController: mainBodyController,
+//        footer: null,
+//        backdrop: background,
+//        bottomSheet:
+//            Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
+//
+//    Navigator.of(context)
+//        .push(MaterialPageRoute(builder: (context) => mainPairingPage));
+//  }
 
   void _testConnection()
   {
@@ -599,34 +587,34 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     }
 
     if (Platform.isAndroid || Platform.isIOS) {
-      if(permissionStatus == permDenied || permissionStatus == permUnknown)
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-        Text("League IQ sends recommendations as notifications. Please grant permission or the app won't work."),
-          SizedBox(
-            height: 20,
-          ),
-          RaisedButton(
-            child:
-            Text("OK"),
-            onPressed: () {
-              // show the dialog/open settings screen
-              NotificationPermissions
-                  .requestNotificationPermissions(
-                  iosSettings:
-                  const NotificationSettingsIos(
-                      sound: true,
-                      badge: true,
-                      alert: true))
-                  .then((_) {
-                // when finished, check the permission status
-                      getCheckNotificationPermStatus();
-              });
-            },
-          )
-        ],
-      );
+//      if(permissionStatus == permDenied || permissionStatus == permUnknown)
+//      return Column(
+//        mainAxisAlignment: MainAxisAlignment.center,
+//        children: <Widget>[
+//        Text("League IQ sends recommendations as notifications. Please grant permission or the app won't work."),
+//          SizedBox(
+//            height: 20,
+//          ),
+//          RaisedButton(
+//            child:
+//            Text("OK"),
+//            onPressed: () {
+//              // show the dialog/open settings screen
+//              NotificationPermissions
+//                  .requestNotificationPermissions(
+//                  iosSettings:
+//                  const NotificationSettingsIos(
+//                      sound: true,
+//                      badge: true,
+//                      alert: true))
+//                  .then((_) {
+//                // when finished, check the permission status
+//                      getCheckNotificationPermStatus();
+//              });
+//            },
+//          )
+//        ],
+//      );
       if (paired == null || paired) {
 //        print("rebuilding regular homepage now");
         return HomePage(
@@ -634,10 +622,55 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             outOfPredictions: outOfPredictions,
             updateRemaining: updateRemaining,
             updateSubscription: checkIfUserHasSubscription,
-            mainBodyController: mainBodyController);
+            mainBodyController: mainBodyController,
+            uid: user.uid);
       }
-      else
+      else {
+
+        Firestore.instance
+            .collection('users')
+            .document(user.uid)
+            .snapshots()
+            .listen((DocumentSnapshot documentSnapshot) {
+
+          bool isPaired = documentSnapshot.data["paired"];
+          if(isPaired) {
+            showDialog<Null>(
+              context: context,
+              barrierDismissible: false, // user must tap button!
+              builder: (BuildContext context) =>
+                  AlertDialog(
+                    title: Text("Success"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Pairing successful"),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        RaisedButton(
+                          child: Text("OK"),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            _playListAnimation();
+                            setState(() {
+                              paired = true;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+            );
+
+          }
+
+        })
+            .onError((e) => print(e));
+
         return MobilePairingPage();
+      }
     }
 
     desktopUID ??= getUIDForDesktop();
@@ -649,7 +682,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
           outOfPredictions: outOfPredictions,
           updateRemaining: updateRemaining,
           updateSubscription: checkIfUserHasSubscription,
-          mainBodyController: mainBodyController);
+          mainBodyController: mainBodyController,
+          uid: user.uid);
     } else {
 //      print("returnin qrpage ");
       return QRPage(dataString: getUIDDBKeyForDesktop());
