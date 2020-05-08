@@ -105,7 +105,9 @@ static flutter::EncodableValue CreateResponseObject(
       else if (val.is_double())
         response.insert({flutter::EncodableValue(key), flutter::EncodableValue(val.double_value())});
       else if (val.is_int64())
-        response.insert({flutter::EncodableValue(key), flutter::EncodableValue(val.int64_value())});
+          response.insert({ flutter::EncodableValue(key), flutter::EncodableValue(val.int64_value()) });
+      else if (val.is_map())
+          response.insert({ flutter::EncodableValue(key), CreateResponseObject(val) });
       else if (val.is_null())
         response.insert({flutter::EncodableValue(key), flutter::EncodableValue(nullptr)});
       else {

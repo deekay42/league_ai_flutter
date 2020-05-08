@@ -39,7 +39,8 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> with TickerProviderStateMixin, WidgetsBindingObserver {
   FirebaseUser user;
   StreamSubscription<FirebaseUser> _listener;
-  Future<String> desktopUID;
+  Future<String> desktopUIDFuture;
+  String desktopUID;
 //  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool newlyCreatedUser = false;
   bool paired;
@@ -359,7 +360,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
 //        print("Some event!!: $filePath ${event.path}");
-        if (desktopUID != null || filePath != event.path) return;
+        if (desktopUIDFuture != null || filePath != event.path) return;
 
         File file = File.fromUri(Uri.file(filePath));
         await waitForFileToFinishLoading(file);
@@ -371,7 +372,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
           throw AuthException(
               "FATAL: Unable to authenticate user. files are still missing");
         setState(() {
-          desktopUID = file.readAsString();
+          desktopUIDFuture = file.readAsString();
+          desktopUIDFuture.then((result){setState(() {desktopUID = result; });} );
           desktopUIDListener.cancel();
         });
       }
@@ -417,7 +419,11 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     String filePath = dirPath + "\\uid";
 //    print("dirPath: $dirPath filePath: $filePath");
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-      return File(filePath).readAsString();
+    {
+      var future =  File(filePath).readAsString();
+      future.then((result){setState(() {desktopUID = result; });} );
+      return future;
+    }
     else {
       listenForUIDFile(dirPath, filePath);
       return null;
@@ -672,21 +678,24 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         return MobilePairingPage();
       }
     }
+    else
+    {
 
-    desktopUID ??= getUIDForDesktop();
-    if (desktopUID != null) {
-      if (!inviteCodeValid) return _getInviteCodeWidget(context);
-//      print("rendering homepage");
-      return HomePage(
-          hasSubscription: hasSubscription,
-          outOfPredictions: outOfPredictions,
-          updateRemaining: updateRemaining,
-          updateSubscription: checkIfUserHasSubscription,
-          mainBodyController: mainBodyController,
-          uid: user.uid);
-    } else {
-//      print("returnin qrpage ");
-      return QRPage(dataString: getUIDDBKeyForDesktop());
+      desktopUIDFuture ??= getUIDForDesktop();
+      if (desktopUID != null) {
+        if (!inviteCodeValid) return _getInviteCodeWidget(context);
+  //      print("rendering homepage");
+        return HomePage(
+            hasSubscription: hasSubscription,
+            outOfPredictions: outOfPredictions,
+            updateRemaining: updateRemaining,
+            updateSubscription: checkIfUserHasSubscription,
+            mainBodyController: mainBodyController,
+            uid: desktopUID);
+      } else {
+  //      print("returnin qrpage ");
+        return QRPage(dataString: getUIDDBKeyForDesktop());
+      }
     }
   }
 
@@ -723,7 +732,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
                   methodName: 'getInviteCode',
                   args: <String, dynamic>{
                     "invite_code": codeEntered,
-                    "uid": await desktopUID
+                    "uid": await desktopUIDFuture
                   });
               if (enteredValidInviteCode) {
                 homePageScaffoldKey.currentState.showSnackBar(SnackBar(

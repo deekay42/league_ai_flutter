@@ -155,26 +155,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
     if(content != "-1") {
-      List<String> itemsS = content.split(",");
-
-      Iterable<Future<Item>> mappedList =
-      itemsS.map((i) async => await itemsRepo.getItem(i));
-      Future<List<Item>> futureList = Future.wait(mappedList);
-      List<Item> items = await futureList;
-
-//      print("building new list1  ");
-      setState(() {
-        _items = items;
-        //updateremaining does this
-        //outOfPredictions = false;
-//        print("building new list2");
-
-        if (remaining!=null)
-          widget.updateRemaining(remaining);
-      });
-      if (mounted) {
-        _playListAnimation();
-      }
+      handleNewItems(content);
     }
     else
       setState(() {
@@ -237,10 +218,11 @@ class _HomePageState extends State<HomePage> {
             // means that somebody is subscribed
             if (tmp != "1337")
               widget.updateRemaining(tmp);
-            Map<String, dynamic> arg = {
-              'notification': <String, dynamic>{'body': contents}
-            };
-            _handleNewMessageIncoming(arg);
+            handleNewItems(contents);
+            // Map<String, dynamic> arg = {
+            //   'notification': <String, dynamic>{'body': contents}
+            // };
+            // _handleNewMessageIncoming(arg);
           } else if (response == "UID DOES NOT EXIST") {
             setState(() => {});
           } else if (response == "LIMIT REACHED") widget.updateRemaining("0");
@@ -321,90 +303,175 @@ class _HomePageState extends State<HomePage> {
     if(outOfPredictions)
       return _buildOutOfPredictions(context);
 
-    if(itemsListener == null)
-      itemsListener = createItemsListener();
-    return itemsListener;
+    var mainContent;
+    if (_items == null) {
+//      print("items are null");
+      mainContent = _buildInstructions(context);
+    } else {
+      int counter = 0;
+
+      var listItems = _items.map((item) {
+        return MyItemListItem(item: item, last: ++counter == _items.length);
+      }).toList();
+
+      mainContent = SlidingList(
+          title: Strings.buildRec,
+          children: listItems,
+          animationController: widget.mainBodyController);
+    }
+ 
+    return mainContent;
+
+    // if(itemsListener == null)
+    //   itemsListener = createItemsListener();
+    // return itemsListener;
+  }
+
+  void handleNewItems(String content) async
+  {
+    String remaining;
+    List<String> itemsS = content.split(",");
+
+    Iterable<Future<Item>> mappedList =
+    itemsS.map((i) async => await itemsRepo.getItem(i));
+    Future<List<Item>> futureList = Future.wait(mappedList);
+    List<Item> items = await futureList;
+
+//      print("building new list1  ");
+    setState(() {
+      _items = items;
+      //updateremaining does this
+      //outOfPredictions = false;
+//        print("building new list2");
+
+      if (remaining!=null)
+        widget.updateRemaining(remaining);
+    });
+    if (mounted) {
+      _playListAnimation();
+    }
   }
 
   Widget createItemsListener()
   {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.hasError)
-          return new Text('Error: ${snapshot.error}');
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return _buildInstructions(context);
-          default:
-            if(!initialDataSnapshotComplete)
-            {
-              initialDataSnapshotComplete = true;
-              return _buildInstructions(context);
-            }
-            var newDoc = snapshot.data.documentChanges[0];
-            if(newDoc.type != DocumentChangeType.added)
-              return _buildInstructions(context);
+    Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots().listen((snapshot)
+    {
+      if(!initialDataSnapshotComplete)
+      {
+        initialDataSnapshotComplete = true;
+        return;
+      }
+      var newDoc = snapshot.documentChanges[0];
+      if(newDoc.type != DocumentChangeType.added)
+        return;
 
-            int counter = 0;
-            String itemUpdate = newDoc.document.data["items"];
+      int counter = 0;
+      String itemUpdate = newDoc.document.data["items"];
 
-            if(itemUpdate == "-1")
-            {
+      if(itemUpdate == "-1")
+      {
 
-              Future.delayed(Duration(seconds: 3), () {
-                var mySnack = SnackBar(
-                    duration: const Duration(seconds: 10),
-                    content: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Desktop connection established!", textAlign: TextAlign.center)
-                        ]));
-                Scaffold.of(context).showSnackBar(mySnack);
-              });
-              return _buildInstructions(context);
-            }
+        // Future.delayed(Duration(seconds: 3), () {
+          var mySnack = SnackBar(
+              duration: const Duration(seconds: 10),
+              content: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("Desktop connection established!", textAlign: TextAlign.center)
+                  ]));
+          Scaffold.of(context).showSnackBar(mySnack);
+        // });
+        return;
+      }
 
-            List<String> itemsS = itemUpdate.split(",");
-            Iterable<Future<Item>> mappedList =
-            itemsS.map((i) async => await itemsRepo.getItem(i));
-            Future<List<Item>> futureList = Future.wait(mappedList);
+      handleNewItems(itemUpdate);
+        
+      });
+    
+    
 
-            return FutureBuilder<List<Item>>(
-              future: futureList, // async work
-              builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting: return _buildInstructions(context);
-                  default:
-                    if (snapshot.hasError)
-                      return new Text('Error: ${snapshot.error}');
-                    else {
-                      List<Item> items = snapshot.data;
-//                      if(items[0].id== "0")
-//                        return _buildInstructions(context);
-                      var listItems = items.map((item) {
-                        return MyItemListItem(item: item, last: ++counter == items.length);
-                      }).toList();
-//                      if (remaining!=null)
-//                        widget.updateRemaining(remaining);
-
-
-                      if (mounted) {
-                        _playListAnimation();
-                      }
-                      return SlidingList(
-                          title: Strings.buildRec,
-                          children: listItems,
-                          animationController: widget.mainBodyController);
-                    }
-                }
-              },
-            );
-
-
-        }
-      },
-    );
   }
+
+//   Widget createItemsListener()
+//   {
+//     return StreamBuilder<QuerySnapshot>(
+//       stream: Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots(),
+//       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+//         if (snapshot.hasError)
+//           return new Text('Error: ${snapshot.error}');
+//         switch (snapshot.connectionState) {
+//           case ConnectionState.waiting:
+//             return _buildInstructions(context);
+//           default:
+//             if(!initialDataSnapshotComplete)
+//             {
+//               initialDataSnapshotComplete = true;
+//               return _buildInstructions(context);
+//             }
+//             var newDoc = snapshot.data.documentChanges[0];
+//             if(newDoc.type != DocumentChangeType.added)
+//               return _buildInstructions(context);
+
+//             int counter = 0;
+//             String itemUpdate = newDoc.document.data["items"];
+
+//             if(itemUpdate == "-1")
+//             {
+
+//               Future.delayed(Duration(seconds: 3), () {
+//                 var mySnack = SnackBar(
+//                     duration: const Duration(seconds: 10),
+//                     content: Row(
+//                         mainAxisSize: MainAxisSize.max,
+//                         mainAxisAlignment: MainAxisAlignment.center,
+//                         children: [
+//                           Text("Desktop connection established!", textAlign: TextAlign.center)
+//                         ]));
+//                 Scaffold.of(context).showSnackBar(mySnack);
+//               });
+//               return _buildInstructions(context);
+//             }
+
+//             List<String> itemsS = itemUpdate.split(",");
+//             Iterable<Future<Item>> mappedList =
+//             itemsS.map((i) async => await itemsRepo.getItem(i));
+//             Future<List<Item>> futureList = Future.wait(mappedList);
+
+//             return FutureBuilder<List<Item>>(
+//               future: futureList, // async work
+//               builder: (BuildContext context, AsyncSnapshot<List<Item>> snapshot) {
+//                 switch (snapshot.connectionState) {
+//                   case ConnectionState.waiting: return _buildInstructions(context);
+//                   default:
+//                     if (snapshot.hasError)
+//                       return new Text('Error: ${snapshot.error}');
+//                     else {
+//                       List<Item> items = snapshot.data;
+// //                      if(items[0].id== "0")
+// //                        return _buildInstructions(context);
+//                       var listItems = items.map((item) {
+//                         return MyItemListItem(item: item, last: ++counter == items.length);
+//                       }).toList();
+// //                      if (remaining!=null)
+// //                        widget.updateRemaining(remaining);
+
+
+//                       if (mounted) {
+//                         _playListAnimation();
+//                       }
+//                       return SlidingList(
+//                           title: Strings.buildRec,
+//                           children: listItems,
+//                           animationController: widget.mainBodyController);
+//                     }
+//                 }
+//               },
+//             );
+
+
+//         }
+//       },
+//     );
+//   }
 }
