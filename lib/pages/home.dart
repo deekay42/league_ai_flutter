@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
   bool outOfPredictions;
   StreamSubscription desktopLastFileStream;
   bool initialDataSnapshotComplete = false;
-  Widget itemsListener;
+  StreamSubscription<QuerySnapshot> itemsListener;
 
 //  Ads ads;
 //  BannerAd ad;
@@ -57,12 +57,18 @@ class _HomePageState extends State<HomePage> {
 
     outOfPredictions = widget.outOfPredictions;
     if (Platform.isAndroid || Platform.isIOS) {
+
+
 //      initFirebaseMessaging();
 //      ads = Ads();
 //      ads.getBannerAd().then((BannerAd newAd) {
 //        ad = newAd;
 //        ad.show();
 //      });
+
+    if(itemsListener == null)
+      itemsListener = createItemsListener();
+
       Wakelock.enable();
       CloudFunctions.instance
           .getHttpsCallable(functionName: 'relayMessage')
@@ -110,6 +116,8 @@ class _HomePageState extends State<HomePage> {
     }
     else
     {
+      itemsListener.cancel();
+      itemsListener = null;
       Wakelock.disable();
     }
     super.dispose();
@@ -321,10 +329,6 @@ class _HomePageState extends State<HomePage> {
     }
  
     return mainContent;
-
-    // if(itemsListener == null)
-    //   itemsListener = createItemsListener();
-    // return itemsListener;
   }
 
   void handleNewItems(String content) async
@@ -352,9 +356,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Widget createItemsListener()
+  StreamSubscription<QuerySnapshot> createItemsListener()
   {
-    Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots().listen((snapshot)
+    StreamSubscription<QuerySnapshot> streamSub = Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots().listen((snapshot)
     {
       if(!initialDataSnapshotComplete)
       {
@@ -388,9 +392,7 @@ class _HomePageState extends State<HomePage> {
       handleNewItems(itemUpdate);
         
       });
-    
-    
-
+    return streamSub;
   }
 
 //   Widget createItemsListener()

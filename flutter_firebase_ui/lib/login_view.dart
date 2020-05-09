@@ -195,8 +195,6 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    print("applesigninavailable is");
-    print(appleSignInAvailable);
     _buttons = {
       ProvidersTypes.facebook:
           providersDefinitions(context)[ProvidersTypes.facebook]

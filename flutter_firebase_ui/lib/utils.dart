@@ -48,7 +48,7 @@ class ButtonDescription extends StatelessWidget {
     String name,
     VoidCallback onSelected,
   }) {
-    print("Copying $name");
+
     return new ButtonDescription(
         label: label ?? this.label,
         labelColor: labelColor ?? this.labelColor,
@@ -60,8 +60,6 @@ class ButtonDescription extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("name");
-    print(name);
     VoidCallback _onSelected = onSelected ?? () => {};
     return new Padding(
       padding: const EdgeInsets.fromLTRB(32.0, 16.0, 32.0, 16.0),
