@@ -36,9 +36,9 @@ flutter:
    - assets/2.0x/fb-logo.png
    - assets/3.0x/fb-logo.png
 
-   - assets/apple-logo.png
-   - assets/2.0x/apple-logo.png
-   - assets/3.0x/apple-logo.png
+   - assets/apple-logo-black.png
+   - assets/2.0x/apple-logo-black.png
+   - assets/3.0x/apple-logo-black.png
 
    - assets/email-logo.png
    - assets/2.0x/email-logo.png

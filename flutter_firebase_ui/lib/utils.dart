@@ -94,11 +94,11 @@ Map<ProvidersTypes, ButtonDescription> providersDefinitions(
           name: "Facebook",
           labelColor: Colors.white),
       ProvidersTypes.google: new ButtonDescription(
-          color: Colors.white,
+          color: const Color.fromRGBO(255, 255, 255, 1.0),
           logo: "go-logo.png",
           label: FFULocalizations.of(context).signInGoogle,
           name: "Google",
-          labelColor: Colors.grey),
+          labelColor: Colors.black),
       ProvidersTypes.email: new ButtonDescription(
           color: const Color.fromRGBO(219, 68, 55, 1.0),
           logo: "email-logo.png",
@@ -112,11 +112,11 @@ Map<ProvidersTypes, ButtonDescription> providersDefinitions(
           name: "Twitter",
           labelColor: Colors.white),
       ProvidersTypes.apple: new ButtonDescription(
-          color: const Color.fromRGBO(0, 0, 0, 1.0),
-          logo: "apple-logo.png",
+          color: const Color.fromRGBO(255, 255, 255, 1.0),
+          logo: "apple-logo-black.png",
           label: FFULocalizations.of(context).signInApple,
           name: "Apple",
-          labelColor: Colors.white),
+          labelColor: Colors.black),
     };
 
 Future<Null> showErrorDialog(BuildContext context, String message,

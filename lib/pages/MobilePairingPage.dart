@@ -33,9 +33,9 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      SizedBox(height:15),
-      Text(Strings.mobileWelcome),
-      SizedBox(height:5),
+      SizedBox(height:55),
+      Text(Strings.mobileWelcome, textAlign: TextAlign.center),
+      SizedBox(height:55),
       RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context))
     ]);
   }

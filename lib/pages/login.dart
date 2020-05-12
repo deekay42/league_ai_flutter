@@ -50,9 +50,10 @@ class _LoginPageState extends State<LoginPage> {
       ),
       providers: [
         ProvidersTypes.google,
+        ProvidersTypes.apple,
         ProvidersTypes.facebook,
         ProvidersTypes.twitter,
-        ProvidersTypes.apple,
+
         ProvidersTypes.email,
 
       ],
