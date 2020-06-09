@@ -66,15 +66,17 @@ class UIDListener : public firebase::database::ValueListener {
   {
 	  printf("deleting listener now\n");
 	  printf("Removing value!\n");
-	  myRef.RemoveAllValueListeners();
-	  WaitForCompletion(myRef.RemoveValue(), "removeDBVal");
+	//   myRef.RemoveAllValueListeners();
+	  //WaitForCompletion(myRef.RemoveValue(), "removeDBVal");
   }
   
 
   void OnValueChanged(
       const firebase::database::DataSnapshot &snapshot) override {
-    if (snapshot.value().is_null()) return;
-    std::cout << "CALLBACK!!" << std::endl;
+          std::cout << "CALLBACK!!" << std::endl;
+    if (snapshot.value().is_null() || !snapshot.value().is_map()) return;
+    
+    std::cout << snapshot.value().AsString().string_value() << std::endl;
     auto mymap = snapshot.value().map();
 
     // std::cout << "Here's the data:--------------------------------- "
@@ -102,10 +104,13 @@ class UIDListener : public firebase::database::ValueListener {
     secret_file << secret;
     secret_file.close();
 
+    
 	DeleteFileW((dirPath + L"\\db_key").c_str());
 
     myuid = uid;
     mysecret = secret;
+    myRef.SetValue("submitted");    
+
   }
   void OnCancelled(const firebase::database::Error &error_code,
                    const char *error_message) override {

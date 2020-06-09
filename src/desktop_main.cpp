@@ -351,6 +351,10 @@ UIDListener* listenForUIDUpdate() {
   myRef.Child(key).Child("uid").SetValue(
       "waiting");  // this creates the reqs key-value pair
   std::cout << "Data is now set" << std::endl;
+  std::cout << "db url1: " << std::endl;
+  std::cout << database->url() << std::endl;
+
+  std::cout << (void*)database << std::endl;
 
   UIDListener *listener = new UIDListener(myRef.Child(key));
   myRef.Child(key).AddValueListener(listener);

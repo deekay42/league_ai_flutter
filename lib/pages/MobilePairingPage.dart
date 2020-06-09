@@ -6,8 +6,12 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
 
 class MobilePairingPage extends StatefulWidget {
+  final Function setPairedToTrue;
+  MobilePairingPage({this.setPairedToTrue});
+  
   @override
   _MobilePairingPageState createState() => _MobilePairingPageState();
 }
@@ -102,6 +106,62 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
       {
         Navigator.pop(context);
         displayErrorDialog(context, "Pairing unsuccessful. Please try again");
+      }
+      else
+      {
+        DatabaseReference desktopUIDSubmittedRef = FirebaseDatabase.instance.reference().child('uids').child(realtimeDBID);
+        StreamSubscription<Event> desktopUIDSubmittedListener;
+        desktopUIDSubmittedListener = desktopUIDSubmittedRef.onValue.listen((Event event) {
+            
+          if(event.snapshot.value == "submitted") {
+            showDialog<Null>(
+              context: context,
+              barrierDismissible: false, // user must tap button!
+              builder: (BuildContext context) =>
+                  AlertDialog(
+                    title: Text("Success"),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Pairing successful"),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        RaisedButton(
+                          child: Text("OK"),
+                          onPressed: () {
+                            widget.setPairedToTrue();
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            setState(() {
+                              desktopUIDSubmittedListener.cancel();
+                              FirebaseDatabase.instance
+                              .reference()
+                              .child('uids')
+                              .child(realtimeDBID).remove();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+            );
+
+          }
+          else
+          {
+            Navigator.pop(context);
+            displayErrorDialog(context, "Pairing unsuccessful. Please try again");
+          }
+
+
+        }, onError: (Object o) {
+            Navigator.pop(context);
+            displayErrorDialog(context, "Pairing unsuccessful. Please try again");
+          });
+
+
+          
       }
     }).catchError((e) {
       Navigator.pop(context);

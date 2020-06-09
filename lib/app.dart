@@ -355,11 +355,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     if (desktopUIDListener != null) return;
     Stream<FileSystemEvent> dirStream =
         Directory(dirPath).watch(events: FileSystemEvent.create);
+    print("uid listener commenced");
 
     desktopUIDListener = dirStream.listen((event) async {
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-//        print("Some event!!: $filePath ${event.path}");
+        print("Some event!!: $filePath ${event.path}");
         if (desktopUIDFuture != null || filePath != event.path) return;
 
         File file = File.fromUri(Uri.file(filePath));
@@ -367,7 +368,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
         await desktopAuthenticate();
         if (desktopAuthenticated == DesktopAuthState.AUTHENTICATED)
-          Fbfunctions.fb_call(methodName: 'completePairing');
+          // Fbfunctions.fb_call(methodName: 'completePairing');
+          print("auth successfull");
         else
           throw AuthException(
               "FATAL: Unable to authenticate user. files are still missing");
@@ -420,11 +422,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //    print("dirPath: $dirPath filePath: $filePath");
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
     {
+      print("uid file present!d");
       var future =  File(filePath).readAsString();
       future.then((result){setState(() {desktopUID = result; });} );
       return future;
     }
     else {
+      print("uid file not present");
       listenForUIDFile(dirPath, filePath);
       return null;
     }
@@ -433,10 +437,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   Future<String> getUIDDBKeyForDesktop() async {
     String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
     String filePath = dirPath + "\\db_key";
-    if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
-      return await File(filePath).readAsString();
-    else
-      throw "WAAAAH";
+    while(FileSystemEntity.typeSync(filePath) == FileSystemEntityType.notFound)
+        await Future.delayed(const Duration(seconds: 1)); 
+    String result = await File(filePath).readAsString();
+    return result;
   }
 
   Widget _myAppBar() {
@@ -452,29 +456,40 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //      Choice(title: 'Test Connection', action: _testConnection),
       (Platform.isIOS || Platform.isAndroid)
           ? Choice(title: 'Logout', action: signOutProviders)
-          : hasSubscription != null && hasSubscription
-              ? Choice(title: 'Unsubscribe', action: _unsubscribe)
-              : null,
+          // : hasSubscription != null && hasSubscription
+          //     ? Choice(title: 'Unsubscribe', action: _unsubscribe)
+              : Choice(title: 'Pair new phone', action: resetPairing)
     ].where(notNull).toList();
+
     return BasicAppBar(false, choices, false);
   }
 
-//  void pushPairingPage() {
-//    Widget mainPairingPage = MainPageTemplateAnimator(
-//        mainController: mainController,
-//        appBar: null,
-//        body: Platform.isAndroid || Platform.isIOS
-//            ? MobilePairingPage()
-//            : QRPage(dataString: getUIDDBKeyForDesktop()),
-//        mainBodyController: mainBodyController,
-//        footer: null,
-//        backdrop: background,
-//        bottomSheet:
-//            Platform.isAndroid || Platform.isIOS ? null : aiLoadingWidget());
-//
-//    Navigator.of(context)
-//        .push(MaterialPageRoute(builder: (context) => mainPairingPage));
-//  }
+  Future<void> resetPairing() async
+  {
+
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    for(String path in ["\\uid", "\\secret"])
+    {
+      
+      String filePath = dirPath + path;
+      if (FileSystemEntity.typeSync(filePath) !=
+            FileSystemEntityType.notFound)
+          await File.fromUri(Uri.file(filePath)).delete();
+    }
+    desktopSignout();
+  }
+
+  void desktopSignout()
+  {
+    Fbfunctions.fb_call(methodName: 'signout');
+    setState(() {
+        desktopAuthenticated = DesktopAuthState.AUTHERROR;
+        desktopUID = null;
+        desktopUIDFuture = null;
+        desktopUIDListener.cancel();
+        desktopUIDListener = null;
+      });
+  }
 
   void _testConnection()
   {
@@ -632,50 +647,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             uid: user.uid);
       }
       else {
-
-        Firestore.instance
-            .collection('users')
-            .document(user.uid)
-            .snapshots()
-            .listen((DocumentSnapshot documentSnapshot) {
-
-          bool isPaired = documentSnapshot.data["paired"];
-          if(isPaired) {
-            showDialog<Null>(
-              context: context,
-              barrierDismissible: false, // user must tap button!
-              builder: (BuildContext context) =>
-                  AlertDialog(
-                    title: Text("Success"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("Pairing successful"),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        RaisedButton(
-                          child: Text("OK"),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                            _playListAnimation();
-                            setState(() {
-                              paired = true;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-            );
-
-          }
-
-        })
-            .onError((e) => print(e));
-
-        return MobilePairingPage();
+        return MobilePairingPage(setPairedToTrue: setPairedToTrue);
       }
     }
     else
@@ -697,6 +669,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         return QRPage(dataString: getUIDDBKeyForDesktop());
       }
     }
+  }
+
+  void setPairedToTrue()
+  {
+    paired = true;
+    _playFullAnimation();
   }
 
   Widget _getInviteCodeWidget(BuildContext context) {

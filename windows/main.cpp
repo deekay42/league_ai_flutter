@@ -69,27 +69,29 @@ int common_main() {
    std::wstring dirPath = getLocalAppDataFolder();
    DeleteFileW((dirPath + L"\\ai_loaded").c_str());
    std::remove("ai_loaded");
-   printf("Now running python code\n");
-   std::thread pythonThread(runCythonCode);
-   printf("Python code kickced off\n");
+   
 
    std::cout << "now runnning flutter" << std::endl;
-  runFlutterCode();
+   std::thread flutterThread(runFlutterCode);
    std::cout << "runnning flutter complete" << std::endl;
+
+   printf("Now running python code\n");
+   runCythonCode();
+   printf("Python code complete\n");
 
   
 
-  std::ofstream outfile(getLocalAppDataFolder() + L"\\terminate");
-  outfile << "terminate" << std::endl;
-  outfile.close();
+  //std::ofstream outfile(getLocalAppDataFolder() + L"\\terminate");
+  //outfile << "terminate" << std::endl;
+  //outfile.close();
 
   
 
  
 
-  std::cout << "Waiting for join" << std::endl;
-  pythonThread.join();
-  std::cout << "join complete" << std::endl;
+  //std::cout << "Waiting for join" << std::endl;
+  //pythonThread.join();
+  //std::cout << "join complete" << std::endl;
 
  #ifdef _DEBUG
   // Wait until the user wants to quit the app.
@@ -102,7 +104,7 @@ int common_main() {
 }
 
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     _In_ wchar_t* command_line, _In_ int show_command) {
 #else
@@ -197,6 +199,10 @@ int runFlutterCode() {
     // the possibility of one queue starving the other.
     wait_duration = flutter_controller.ProcessMessages();
   }
+
+  std::ofstream outfile(getLocalAppDataFolder() + L"\\terminate");
+  outfile << "terminate" << std::endl;
+  outfile.close();
 
   return EXIT_SUCCESS;
 }

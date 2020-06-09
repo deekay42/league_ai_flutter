@@ -68,6 +68,7 @@ FbfunctionsPlugin::FbfunctionsPlugin()
         std::getline(file_uid, myuid);
         std::getline(file_secret, mysecret);
     }
+    
 }
 
 FbfunctionsPlugin::~FbfunctionsPlugin() 
@@ -136,6 +137,7 @@ static flutter::EncodableValue CreateResponseObject(
   return response;
 }
 
+
 void FbfunctionsPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue> &method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
@@ -165,6 +167,11 @@ void FbfunctionsPlugin::HandleMethodCall(
 
       bool signInResult = authenticate(myuid, mysecret);
       variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");
+    }
+    else if (methodName == "signout") {
+      if(auth != nullptr)
+        auth->SignOut();
+        listener = listenForUIDUpdate();
     } else {
       firebase::auth::User* current_user = auth->current_user();
       if (current_user != nullptr) {
