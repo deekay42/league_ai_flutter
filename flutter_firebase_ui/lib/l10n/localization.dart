@@ -48,6 +48,8 @@ class FFULocalizations {
   String get signInFacebook => _translationBundle.signInFacebook;
   String get signInGoogle => _translationBundle.signInGoogle;
   String get signInEmail => _translationBundle.signInEmail;
+  String get loginEmail => _translationBundle.loginEmail;
+  String get createEmail => _translationBundle.createEmail;
   String get signInTwitter => _translationBundle.signInTwitter;
   String get signInApple => _translationBundle.signInApple;
 

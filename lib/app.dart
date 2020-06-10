@@ -455,7 +455,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
       Choice(title: 'Version ' + Strings.version),
 //      Choice(title: 'Test Connection', action: _testConnection),
       (Platform.isIOS || Platform.isAndroid)
-          ? Choice(title: 'Logout', action: signOutProviders)
+          ? Choice(title: 'Logout', action: FirebaseAuth.instance.signOut)
           // : hasSubscription != null && hasSubscription
           //     ? Choice(title: 'Unsubscribe', action: _unsubscribe)
               : Choice(title: 'Pair new phone', action: resetPairing)
@@ -647,6 +647,24 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             uid: user.uid);
       }
       else {
+
+
+        StreamSubscription<DocumentSnapshot> pairedListener;
+        pairedListener = Firestore.instance
+            .collection('users')
+            .document(user.uid)
+            .snapshots()
+            .listen((DocumentSnapshot documentSnapshot) {
+            if(paired)
+            {
+              pairedListener.cancel();
+              return;
+            }
+          bool isPaired = documentSnapshot.data["paired"];
+          if(isPaired)
+            setPairedToTrue();
+        });
+
         return MobilePairingPage(setPairedToTrue: setPairedToTrue);
       }
     }
@@ -673,8 +691,38 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   void setPairedToTrue()
   {
-    paired = true;
-    _playFullAnimation();
+    print("in setptotrue");
+    if(paired)
+      return;
+    setState(() {
+      paired = true;
+    });
+    showDialog<Null>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) =>
+          AlertDialog(
+            title: Text("Success"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Pairing successful"),
+                SizedBox(
+                  height: 15,
+                ),
+                RaisedButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            _playListAnimation();
+
+                  },
+                ),
+              ],
+            ),
+          ),
+    );
   }
 
   Widget _getInviteCodeWidget(BuildContext context) {

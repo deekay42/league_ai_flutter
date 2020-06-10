@@ -1,10 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_firebase_ui/password_view.dart';
+import 'package:flutter_firebase_ui/sign_up_view.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
 import 'package:apple_sign_in/apple_sign_in.dart';
-
+import 'package:flutter_firebase_ui/flutter_firebase_ui.dart';
 import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 
 import 'email_view.dart';
@@ -34,19 +36,55 @@ class _LoginViewState extends State<LoginView> {
 
   Map<ProvidersTypes, ButtonDescription> _buttons;
 
-  _handleEmailSignIn() async {
-    String value = await Navigator.of(context)
-        .push(new MaterialPageRoute<String>(builder: (BuildContext context) {
-      return new EmailView(widget.passwordCheck);
-    }));
+  _handleEmailGeneral() async {
+    await Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
 
-    if (value != null) {
-      _followProvider(value);
-    }
+      return decideEmailSignInOrUp();
+    }));
+  }
+
+  _handleEmailLogin() async {
+    await Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
+
+      return PasswordView("");
+    }));
+  }
+
+  _handleEmailCreate() async {
+    await Navigator.of(context)
+        .push(new MaterialPageRoute<bool>(builder: (BuildContext context) {
+
+      return SignUpView("", widget.passwordCheck);
+    }));
+  }
+
+  Widget decideEmailSignInOrUp()
+  {
+
+    return SignInScreen(
+      color: Colors.grey[900],
+      title: "Welcome",
+      header: new Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: new Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: new Text("New or Returning User?"),
+        ),
+      ),
+      providers: [
+        ProvidersTypes.emailSignIn,
+        ProvidersTypes.emailSignUp
+      ],
+      twitterConsumerKey: "AUdn9voKiWbTzAfef4pucVnAk",
+      twitterConsumerSecret: "XSb9f9pGBJ3Xm4VM3tUE3Vqamcsug8JEhBi0wqLG1kxWSshnt6",
+    );
   }
 
 
   _handleGoogleSignIn() async {
+    await FirebaseAuth.instance.signOut();
     final GoogleSignInAccount googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -69,7 +107,7 @@ class _LoginViewState extends State<LoginView> {
 
   Future<FirebaseUser> _handleAppleSignIn() async {
     try {
-
+      await FirebaseAuth.instance.signOut();
       final AuthorizationResult appleResult = await AppleSignIn.performRequests([
         AppleIdRequest(requestedScopes: [Scope.email, Scope.fullName])
       ]);
@@ -116,7 +154,7 @@ class _LoginViewState extends State<LoginView> {
 
 
   _handleFacebookSignin() async {
-
+    await FirebaseAuth.instance.signOut();
     final facebookLogin = FacebookLogin();
     final facebookLoginResult = await facebookLogin.logIn(['email']);
 
@@ -157,6 +195,7 @@ class _LoginViewState extends State<LoginView> {
 //  }
 
   _handleTwitterSignin() async {
+    await FirebaseAuth.instance.signOut();
     var twitterLogin = new TwitterLogin(
       consumerKey: widget.twitterConsumerKey,
       consumerSecret: widget.twitterConsumerSecret,
@@ -206,7 +245,11 @@ class _LoginViewState extends State<LoginView> {
           providersDefinitions(context)[ProvidersTypes.twitter]
               .copyWith(onSelected: _handleTwitterSignin),
       ProvidersTypes.email: providersDefinitions(context)[ProvidersTypes.email]
-          .copyWith(onSelected: _handleEmailSignIn),
+          .copyWith(onSelected: _handleEmailGeneral),
+      ProvidersTypes.emailSignIn: providersDefinitions(context)[ProvidersTypes.emailSignIn]
+          .copyWith(onSelected: _handleEmailLogin),
+      ProvidersTypes.emailSignUp: providersDefinitions(context)[ProvidersTypes.emailSignUp]
+          .copyWith(onSelected: _handleEmailCreate),
       ProvidersTypes.apple: appleSignInAvailable ? providersDefinitions(context)[ProvidersTypes.apple]
           .copyWith(onSelected: _handleAppleSignIn) : null,
     };

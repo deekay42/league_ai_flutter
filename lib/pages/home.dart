@@ -70,15 +70,15 @@ class _HomePageState extends State<HomePage> {
       itemsListener = createItemsListener();
 
       Wakelock.enable();
-      CloudFunctions.instance
-          .getHttpsCallable(functionName: 'relayMessage')
-          .call(<String, dynamic>{"items": "-1"});
+//      CloudFunctions.instance
+//          .getHttpsCallable(functionName: 'relayMessage')
+//          .call(<String, dynamic>{"items": "-1"});
     } 
     else {
       initDesktopReadMessage();
-      Fbfunctions.fb_call(
-          methodName: 'relayMessage',
-          args: <String, dynamic>{"items": "-1"});
+//      Fbfunctions.fb_call(
+//          methodName: 'relayMessage',
+//          args: <String, dynamic>{"items": "-1"});
     }
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
@@ -200,43 +200,47 @@ class _HomePageState extends State<HomePage> {
         file.delete();
 
 //        print("Contents: " + contents);
-        final stopwatch = Stopwatch()..start();
-
-        Fbfunctions.fb_call(
-            methodName: 'relayMessage',
-            args: <String, dynamic>{"items": contents}).then((response) {
-            
-//        print('relayMessage executed in ${stopwatch.elapsed}');
-//          print("Response status: $response");
-          if (response == null) {
-//            print("relayMessage ERROR");
-            var mySnack = SnackBar(
-                duration: const Duration(seconds: 10),
-                content: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Connection problem", textAlign: TextAlign.center)
-                    ]));
-            Scaffold.of(context).showSnackBar(mySnack);
-            return;
-          }
-          if (response.startsWith("SUCCESSFUL")) {
-            String tmp = response.split(',')[1];
-            // means that somebody is subscribed
-            if (tmp != "1337")
-              widget.updateRemaining(tmp);
-            handleNewItems(contents);
-            // Map<String, dynamic> arg = {
-            //   'notification': <String, dynamic>{'body': contents}
-            // };
-            // _handleNewMessageIncoming(arg);
-          } else if (response == "UID DOES NOT EXIST") {
-            setState(() => {});
-          } else if (response == "LIMIT REACHED") widget.updateRemaining("0");
-        }).catchError((e) {
-          print("relayMessage catchError ERROR $e");
+//        final stopwatch = Stopwatch()..start();
+        Firestore.instance.collection('users').document(widget.uid).collection('predictions').add(<String, dynamic>{
+          'timestamp': DateTime.now(),
+          'items': contents,
         });
+
+//        Fbfunctions.fb_call(
+//            methodName: 'relayMessage',
+//            args: <String, dynamic>{"items": contents}).then((response) {
+//
+////        print('relayMessage executed in ${stopwatch.elapsed}');
+////          print("Response status: $response");
+//          if (response == null) {
+////            print("relayMessage ERROR");
+//            var mySnack = SnackBar(
+//                duration: const Duration(seconds: 10),
+//                content: Row(
+//                    mainAxisSize: MainAxisSize.max,
+//                    mainAxisAlignment: MainAxisAlignment.center,
+//                    children: [
+//                      Text("Connection problem", textAlign: TextAlign.center)
+//                    ]));
+//            Scaffold.of(context).showSnackBar(mySnack);
+//            return;
+//          }
+//          if (response.startsWith("SUCCESSFUL")) {
+//            String tmp = response.split(',')[1];
+//            // means that somebody is subscribed
+//            if (tmp != "1337")
+//              widget.updateRemaining(tmp);
+//            handleNewItems(contents);
+//            // Map<String, dynamic> arg = {
+//            //   'notification': <String, dynamic>{'body': contents}
+//            // };
+//            // _handleNewMessageIncoming(arg);
+//          } else if (response == "UID DOES NOT EXIST") {
+//            setState(() => {});
+//          } else if (response == "LIMIT REACHED") widget.updateRemaining("0");
+//        }).catchError((e) {
+//          print("relayMessage catchError ERROR $e");
+//        });
       }
     });
   }
@@ -377,7 +381,7 @@ class _HomePageState extends State<HomePage> {
 
         // Future.delayed(Duration(seconds: 3), () {
           var mySnack = SnackBar(
-              duration: const Duration(seconds: 10),
+              duration: const Duration(seconds: 5),
               content: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,

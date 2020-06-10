@@ -44,13 +44,13 @@ class _PasswordViewState extends State<PasswordView> {
                   controller: _controllerEmail,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
+                  autofocus: true,
                   decoration: new InputDecoration(
                       labelText: FFULocalizations.of(context).emailLabel),
                 ),
                 //const SizedBox(height: 5.0),
                 new TextField(
                   controller: _controllerPassword,
-                  autofocus: true,
                   onSubmitted: _submit,
                   obscureText: true,
                   autocorrect: false,
@@ -115,7 +115,8 @@ class _PasswordViewState extends State<PasswordView> {
     }
 
     if (user != null) {
-      Navigator.of(context).pop(true);
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
     }
   }
 }

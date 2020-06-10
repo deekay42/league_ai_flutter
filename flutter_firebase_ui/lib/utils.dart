@@ -9,7 +9,7 @@ import 'package:apple_sign_in/apple_sign_in.dart';
 
 import 'package:flutter_firebase_ui/l10n/localization.dart';
 
-enum ProvidersTypes { email, google, facebook, twitter, phone, apple }
+enum ProvidersTypes { email, google, facebook, twitter, phone, apple, emailSignIn, emailSignUp}
 
 final GoogleSignIn googleSignIn = new GoogleSignIn();
 final FacebookLogin facebookLogin = new FacebookLogin();
@@ -117,6 +117,18 @@ Map<ProvidersTypes, ButtonDescription> providersDefinitions(
           label: FFULocalizations.of(context).signInApple,
           name: "Apple",
           labelColor: Colors.black),
+      ProvidersTypes.emailSignUp: new ButtonDescription(
+          color: const Color.fromRGBO(219, 68, 55, 1.0),
+          logo: "email-logo.png",
+          label: FFULocalizations.of(context).createEmail,
+          name: "Create Account",
+          labelColor: Colors.white),
+      ProvidersTypes.emailSignIn: new ButtonDescription(
+          color: const Color.fromRGBO(219, 68, 55, 1.0),
+          logo: "email-logo.png",
+          label: FFULocalizations.of(context).loginEmail,
+          name: "Login",
+          labelColor: Colors.white),
     };
 
 Future<Null> showErrorDialog(BuildContext context, String message,

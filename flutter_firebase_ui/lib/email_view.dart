@@ -84,6 +84,7 @@ class _EmailViewState extends State<EmailView> {
     } else
       return;
     try {
+      await FirebaseAuth.instance.signOut();
       final FirebaseAuth auth = FirebaseAuth.instance;
 
       List<String> providers =

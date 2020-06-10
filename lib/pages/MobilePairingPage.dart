@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
 import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MobilePairingPage extends StatefulWidget {
   final Function setPairedToTrue;
@@ -37,10 +38,11 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
   @override
   Widget build(BuildContext context) {
     return Column(children: [
-      SizedBox(height:55),
+      Expanded(child:Container()),
       Text(Strings.mobileWelcome, textAlign: TextAlign.center),
-      SizedBox(height:55),
-      RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context))
+      SizedBox(height:15),
+      RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context)),
+      Expanded(child:Container()),
     ]);
   }
 
@@ -104,6 +106,8 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
       
       if (result != "SUCCESS")
       {
+        print("this didnt work1");
+        print(result);
         Navigator.pop(context);
         displayErrorDialog(context, "Pairing unsuccessful. Please try again");
       }
@@ -111,53 +115,34 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
       {
         DatabaseReference desktopUIDSubmittedRef = FirebaseDatabase.instance.reference().child('uids').child(realtimeDBID);
         StreamSubscription<Event> desktopUIDSubmittedListener;
-        desktopUIDSubmittedListener = desktopUIDSubmittedRef.onValue.listen((Event event) {
-            
-          if(event.snapshot.value == "submitted") {
-            showDialog<Null>(
-              context: context,
-              barrierDismissible: false, // user must tap button!
-              builder: (BuildContext context) =>
-                  AlertDialog(
-                    title: Text("Success"),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("Pairing successful"),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        RaisedButton(
-                          child: Text("OK"),
-                          onPressed: () {
-                            widget.setPairedToTrue();
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                            setState(() {
-                              desktopUIDSubmittedListener.cancel();
-                              FirebaseDatabase.instance
-                              .reference()
-                              .child('uids')
-                              .child(realtimeDBID).remove();
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-            );
+        desktopUIDSubmittedListener = desktopUIDSubmittedRef.onValue.listen((Event event) async {
 
+          String uid = (await FirebaseAuth.instance.currentUser()).uid;
+          if(event.snapshot.value.containsKey("uid")) {
+            if (event.snapshot.value["uid"] == uid)
+              return;
+            if (event.snapshot.value["uid"] == "submitted") {
+              print("GOTIT");
+              desktopUIDSubmittedListener.cancel();
+              FirebaseDatabase.instance
+                  .reference()
+                  .child('uids')
+                  .child(realtimeDBID).remove();
+              widget.setPairedToTrue();
+              return;
+            }
           }
-          else
-          {
-            Navigator.pop(context);
-            displayErrorDialog(context, "Pairing unsuccessful. Please try again");
-          }
-
-
+          print("this didnt work2");
+          print(event.snapshot.value);
+          Navigator.pop(context);
+          displayErrorDialog(context, "Pairing unsuccessful. Please try again");
+          desktopUIDSubmittedListener.cancel();
         }, onError: (Object o) {
+          print("this didnt work3");
+          print(o);
             Navigator.pop(context);
             displayErrorDialog(context, "Pairing unsuccessful. Please try again");
+            desktopUIDSubmittedListener.cancel();
           });
 
 

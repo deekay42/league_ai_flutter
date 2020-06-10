@@ -80,7 +80,7 @@ class _TroubleSignInState extends State<TroubleSignIn> {
       await _auth.sendPasswordResetEmail(email: _controllerEmail.text);
       Navigator.of(context).pop();
     } catch (exception) {
-      showErrorDialog(context, exception);
+      showErrorDialog(context, exception.toString());
     }
 
     showErrorDialog(context,

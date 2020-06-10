@@ -41,6 +41,8 @@ class TranslationBundle {
   String get signInFacebook => parent?.signInFacebook;
   String get signInGoogle => parent?.signInGoogle;
   String get signInEmail => parent?.signInEmail;
+  String get loginEmail => parent?.loginEmail;
+  String get createEmail => parent?.createEmail;
   String get signInTwitter => parent?.signInTwitter;
   String get signInApple => parent?.signInApple;
 
@@ -209,6 +211,12 @@ Sign in with $providerName to continue.''';
 
   @override
   String get signInEmail => r'Sign in with email';
+
+  @override
+  String get loginEmail => r'Login';
+
+  @override
+  String get createEmail => r'Create Account';
 
   @override
   String get signInTwitter => r'Sign in with Twitter';

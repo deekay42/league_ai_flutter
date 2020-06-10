@@ -47,7 +47,7 @@ class _SignUpViewState extends State<SignUpView> {
     _controllerEmail.text = widget.email;
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Please enter your information"),
+        title: new Text("Create A New Account"),
         elevation: 4.0,
       ),
       body: new Builder(
@@ -60,6 +60,7 @@ class _SignUpViewState extends State<SignUpView> {
                   controller: _controllerEmail,
                   keyboardType: TextInputType.emailAddress,
                   autocorrect: false,
+                  autofocus: true,
                   onSubmitted: _submit,
                   decoration: new InputDecoration(
                       labelText: FFULocalizations.of(context).emailLabel),
@@ -148,18 +149,19 @@ class _SignUpViewState extends State<SignUpView> {
       )).user;
       try {
 
-        var userUpdateInfo = new UserUpdateInfo();
-        userUpdateInfo.displayName = _controllerDisplayName.text;
-        await user.updateProfile(userUpdateInfo);
-        Navigator.pop(context, true);
+//        var userUpdateInfo = new UserUpdateInfo();
+//        userUpdateInfo.displayName = _controllerDisplayName.text;
+//        await user.updateProfile(userUpdateInfo);
+        Navigator.pop(context);
+        Navigator.pop(context);
       } catch (e) {
-        showErrorDialog(context, e.message);
+        showErrorDialog(context, e.toString());
         alreadySubmitted = false;
       }
     } on PlatformException catch (e) {
 
       //String msg = FFULocalizations.of(context).passwordLengthMessage;
-      showErrorDialog(context, e.message);
+      showErrorDialog(context, e.toString());
       print(e.toString());
       //TODO improve errors catching
 
