@@ -201,10 +201,11 @@ class _HomePageState extends State<HomePage> {
 
 //        print("Contents: " + contents);
 //        final stopwatch = Stopwatch()..start();
-        Firestore.instance.collection('users').document(widget.uid).collection('predictions').add(<String, dynamic>{
-          'timestamp': DateTime.now(),
-          'items': contents,
-        });
+        Fbfunctions.fb_call(
+                  methodName: 'newRecommendation',
+                  args: <String, dynamic>{"items": contents});
+        
+        handleNewItems(contents);
 
 //        Fbfunctions.fb_call(
 //            methodName: 'relayMessage',

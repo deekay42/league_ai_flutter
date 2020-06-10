@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#define NOMINMAX
+
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -27,13 +29,12 @@
 #include "firebase/log.h"
 #include "firebase/util.h"
 #include "firebase_commons.h"
+#include "firebase/firestore.h"
 
 #include <shlwapi.h>
 #include "shlobj.h"
 #include <iostream>
 #include <fstream>
-
-#include <windows.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -95,6 +96,7 @@ using ::firebase::Variant;
 
 ::firebase::App *app = nullptr;
 ::firebase::database::Database *database = nullptr;
+::firebase::firestore::Firestore *firestore = nullptr;
 ::firebase::functions::Functions *functions = nullptr;
 ::firebase::auth::Auth *auth = nullptr;
 ::firebase::auth::User* user = nullptr;
@@ -252,6 +254,16 @@ bool authenticate(std::string uid, std::string secret)
 	return signIn(customToken.string_value());
 }
 
+void newRecommendation(const std::string& items)
+{
+    std::string uid(auth->current_user()->uid());
+  firebase::firestore::CollectionReference document =
+            firestore->Collection("users/" + uid + "/predictions");
+  document.Add(firebase::firestore::MapFieldValue{
+      {"items", firebase::firestore::FieldValue::String(items)},
+      {"timestamp", firebase::firestore::FieldValue::Timestamp(firebase::Timestamp::Now())} });
+}
+
 
 
 
@@ -347,14 +359,9 @@ UIDListener* listenForUIDUpdate() {
   myfile.open(dirPath + L"\\db_key");
   myfile << key;
   myfile.close();
-  std::cout << "Now setting data" << std::endl;
   myRef.Child(key).Child("uid").SetValue(
       "waiting");  // this creates the reqs key-value pair
-  std::cout << "Data is now set" << std::endl;
-  std::cout << "db url1: " << std::endl;
-  std::cout << database->url() << std::endl;
-
-  std::cout << (void*)database << std::endl;
+  
 
   UIDListener *listener = new UIDListener(myRef.Child(key));
   myRef.Child(key).AddValueListener(listener);
@@ -387,7 +394,7 @@ void initializeFirebase() {
 
   // Use ModuleInitializer to initialize both Auth and Functions, ensuring no
   // dependencies are missing.
-  void *initialize_targets[] = {&auth, &functions, &database};
+  void *initialize_targets[] = {&auth, &functions, &database, &firestore};
 
   const firebase::ModuleInitializer::InitializerFn initializers[] = {
       [](::firebase::App *myapp, void *data) {
@@ -413,7 +420,16 @@ void initializeFirebase() {
         *reinterpret_cast<::firebase::database::Database **>(targets[2]) =
             ::firebase::database::Database::GetInstance(myapp, &result);
         return result;
-      }};
+      },
+      [](firebase::App* app, void* data) {
+        LogMessage("Attempt to initialize Firebase Firestore.");
+        void** targets = reinterpret_cast<void**>(data);
+        ::firebase::InitResult result;
+        *reinterpret_cast<firebase::firestore::Firestore**>(targets[3]) =
+            firebase::firestore::Firestore::GetInstance(app, &result);
+        return result;
+      }
+      };
 
   ::firebase::ModuleInitializer initializer;
   initializer.Initialize(app, initialize_targets, initializers,
@@ -427,7 +443,7 @@ void initializeFirebase() {
     ProcessEvents(2000);
   }
   LogMessage(
-      "Successfully initialized Firebase Auth, Cloud Functions and Realtime "
+      "Successfully initialized Firebase Auth, Cloud Functions, Firestore and Realtime "
       "Database.");
 
   // To test against a local emulator, uncomment this line:

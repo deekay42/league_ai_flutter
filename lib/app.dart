@@ -444,27 +444,46 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   }
 
   Widget _myAppBar() {
-    var choices = <Choice>[
-      // hasSubscription != null && hasSubscription
-      //     ? Choice(
-      //         title: 'My Account',
 
-      //         action: _myaccount)
-      //     : null,
-      //Choice(title: 'Pair new', action: pushPairingPage),
-      Choice(title: 'Version ' + Strings.version),
-//      Choice(title: 'Test Connection', action: _testConnection),
-      (Platform.isIOS || Platform.isAndroid)
-          ? Choice(title: 'Logout', action: FirebaseAuth.instance.signOut)
-          // : hasSubscription != null && hasSubscription
-          //     ? Choice(title: 'Unsubscribe', action: _unsubscribe)
-              : Choice(title: 'Pair new phone', action: resetPairing)
-    ].where(notNull).toList();
+
+    var choices;
+
+    if(Platform.isIOS || Platform.isAndroid)
+      choices = <Choice>[
+     
+        Choice(title: 'Pair new', action: resetPairingPhone),
+        // Choice(title: 'Version ' + Strings.version),
+        Choice(title: 'Logout', action: FirebaseAuth.instance.signOut)
+          
+      ].where(notNull).toList();
+    else
+      choices = <Choice>[
+        Choice(title: 'Pair new phone', action: resetPairingDesktop)
+      ].where(notNull).toList();
 
     return BasicAppBar(false, choices, false);
   }
 
-  Future<void> resetPairing() async
+  
+
+  Future<void> resetPairingPhone() async
+  {
+    if(user == null)
+      return;
+      
+    Firestore.instance.collection('users').document(user.uid).updateData(<String, dynamic>{
+          'paired': false
+        });
+
+    setState(() {
+        paired = false;
+      });
+    
+  }
+
+
+
+  Future<void> resetPairingDesktop() async
   {
 
     String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
@@ -486,7 +505,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         desktopAuthenticated = DesktopAuthState.AUTHERROR;
         desktopUID = null;
         desktopUIDFuture = null;
-        desktopUIDListener.cancel();
+        desktopUIDListener?.cancel();
         desktopUIDListener = null;
       });
   }
@@ -760,6 +779,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
                     "invite_code": codeEntered,
                     "uid": await desktopUIDFuture
                   });
+              print("code is ${enteredValidInviteCode}");
               if (enteredValidInviteCode) {
                 homePageScaffoldKey.currentState.showSnackBar(SnackBar(
                     content: Row(

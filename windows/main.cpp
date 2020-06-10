@@ -1,4 +1,5 @@
 #include <flutter/flutter_view_controller.h>
+#define NOMINMAX
 #include <windows.h>
 
 #include <chrono>

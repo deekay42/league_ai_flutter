@@ -31,6 +31,7 @@
 #endif  // _WIN32
 
 #ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
 #endif  // _WIN32
 
@@ -128,6 +129,7 @@ void initializeFirebase();
 void shutdownFirebase();
 UIDListener* listenForUIDUpdate();
 bool isAlreadyRunning();
+void newRecommendation(const std::string& items);
 
 
 #ifdef _WIN32

@@ -21,8 +21,32 @@ class _QRPageState extends State<QRPage>  with SingleTickerProviderStateMixin{
   Widget build(BuildContext context)
   {
     return Column(children: [
+      SizedBox(height:25),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children:[
+      RichText(
+        text: TextSpan( 
+          text: '',
+          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18),
+          children: <TextSpan>[
+            TextSpan(text: '1. Download the '),
+            TextSpan(text: 'League IQ app', style: TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: ' on your phone.'),
+          ],
+        ),
+      ),
       SizedBox(height:15),
-      Text( Strings.desktopWelcome),
+      RichText(
+        text: TextSpan(
+          text: '2. Scan the QR Code with your ',
+          style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18 ),
+          children: <TextSpan>[
+            TextSpan(text: 'League IQ app', style: TextStyle(fontWeight: FontWeight.bold))
+          ],
+        ),
+      )]),
+      SizedBox(height:25),
       Expanded(
               child: Center(
                 child: Padding(

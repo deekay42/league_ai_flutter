@@ -156,7 +156,9 @@ void FbfunctionsPlugin::HandleMethodCall(
     if (it != args.end()) {
       methodName = it->second.StringValue();
     }
+    std::cout << methodName << std::endl;
     if (methodName == "authenticate") {
+      std::cout << "AUTHENTICATE" << std::endl;
       if (myuid == "" || mysecret == "")
       {
         //ugly, but using result->Error apparently creates uncatchable exceptions.
@@ -172,7 +174,12 @@ void FbfunctionsPlugin::HandleMethodCall(
       if(auth != nullptr)
         auth->SignOut();
         listener = listenForUIDUpdate();
-    } else {
+    } 
+    else if (methodName == "newRecommendation") 
+    {
+        newRecommendation(args.begin()->second.StringValue());
+    }
+    else {
       firebase::auth::User* current_user = auth->current_user();
       if (current_user != nullptr) {
         firebase::Future<std::string> idToken = current_user->GetToken(true);
