@@ -22,6 +22,7 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
 
   PermissionStatus perm;
   Future<PermissionStatus> permFuture;
+  bool buttonPressed = false;
   void initState() {
     super.initState();
 
@@ -39,14 +40,47 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
   Widget build(BuildContext context) {
     return Column(children: [
       Expanded(child:Container()),
-      Text(Strings.mobileWelcome, textAlign: TextAlign.center),
-      SizedBox(height:15),
-      RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context)),
+      Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:[
+            RichText(
+              text: TextSpan(
+                text: '',
+                style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18),
+                children: <TextSpan>[
+                  TextSpan(text: '1. Download the '),
+                  TextSpan(text: 'League IQ windows app', style: TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' on your computer: '),
+                  TextSpan(text: 'http://leagueiq.gg', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            SizedBox(height:35),
+            RichText(
+              text: TextSpan(
+                text: '2. Scan the QR Code in the ',
+                style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18 ),
+                children: <TextSpan>[
+                  TextSpan(text: 'League IQ windows app', style: TextStyle(fontWeight: FontWeight.bold))
+                ],
+              ),
+            )]),
+
+      SizedBox(height:25),
+      buttonPressed ?
+          Column( children: [
+          CircularProgressIndicator(),
+          SizedBox(
+            width: 15,
+          ),
+          Text("Please wait...")])
+      :   RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context)),
       Expanded(child:Container()),
     ]);
   }
 
   void triggerPairing(BuildContext context) async {
+
     print("Now trying to get camera permissions");
     permFuture = Permission.camera.request();
     perm = await permFuture;
@@ -93,9 +127,11 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
     if(realtimeDBID == null)
       return;
     print("Obtained the realtimeDBID: $realtimeDBID");
-    displayFullScreenModal(
-        context, MyDialog(modalText: "", spinner: true));
-
+//    displayFullScreenModal(
+//        context, MyDialog(modalText: "", spinner: true));
+    setState(() {
+      buttonPressed = true;
+    });
     CloudFunctions.instance.getHttpsCallable(
       functionName: 'passUIDtoDesktop').call(
       <String, dynamic>{
@@ -108,8 +144,11 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
       {
         print("this didnt work1");
         print(result);
-        Navigator.pop(context);
+
         displayErrorDialog(context, "Pairing unsuccessful. Please try again");
+        setState(() {
+          buttonPressed = false;
+        });
       }
       else
       {
@@ -134,22 +173,28 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
           }
           print("this didnt work2");
           print(event.snapshot.value);
-          Navigator.pop(context);
+
           displayErrorDialog(context, "Pairing unsuccessful. Please try again");
           desktopUIDSubmittedListener.cancel();
+          setState(() {
+            buttonPressed = false;
+          });
         }, onError: (Object o) {
           print("this didnt work3");
           print(o);
-            Navigator.pop(context);
+
             displayErrorDialog(context, "Pairing unsuccessful. Please try again");
             desktopUIDSubmittedListener.cancel();
+          setState(() {
+            buttonPressed = false;
+          });
           });
 
 
           
       }
     }).catchError((e) {
-      Navigator.pop(context);
+
       print("ERROR " + e.message);
       displayErrorDialog(context, "Pairing unsuccessful. Please try again");
     });

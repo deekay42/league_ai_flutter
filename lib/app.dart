@@ -59,6 +59,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   StreamSubscription desktopUIDListener;
   StreamSubscription aiListener;
   String permissionStatus;
+  StreamSubscription<DocumentSnapshot> pairedListener;
 
   var permGranted = "granted";
   var permDenied = "denied";
@@ -80,6 +81,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
     _playFullAnimation();
     if (Platform.isAndroid || Platform.isIOS) {
+
+
       checkIfUserHasSubscription();
 //      initFirebaseMessaging();
 
@@ -103,6 +106,32 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         if (user != null) {
 //          initFirebaseMessaging();
           checkIfUserHasSubscription();
+
+
+          pairedListener = Firestore.instance
+              .collection('users')
+              .document(user.uid)
+              .snapshots()
+              .listen((DocumentSnapshot documentSnapshot) {
+            print("new paired activity");
+//            if(paired)
+//            {
+//              pairedListener.cancel();
+//              return;
+//            }
+            bool isPaired = documentSnapshot.data["paired"];
+            if(isPaired)
+              setPairedToTrue();
+            else
+              setState(() {
+                paired = false;
+              });
+          });
+
+        }
+        else
+        {
+          pairedListener?.cancel()
         }
       });
     } else
@@ -470,10 +499,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   {
     if(user == null)
       return;
-      
-    Firestore.instance.collection('users').document(user.uid).updateData(<String, dynamic>{
-          'paired': false
-        });
+
+    CloudFunctions.instance.getHttpsCallable(functionName: 'unpair').call();
 
     setState(() {
         paired = false;
@@ -486,21 +513,21 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   Future<void> resetPairingDesktop() async
   {
 
-    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
-    for(String path in ["\\uid", "\\secret"])
-    {
-      
-      String filePath = dirPath + path;
-      if (FileSystemEntity.typeSync(filePath) !=
-            FileSystemEntityType.notFound)
-          await File.fromUri(Uri.file(filePath)).delete();
-    }
+//    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+//    for(String path in ["\\uid", "\\secret"])
+//    {
+//
+//      String filePath = dirPath + path;
+//      if (FileSystemEntity.typeSync(filePath) !=
+//            FileSystemEntityType.notFound)
+//          await File.fromUri(Uri.file(filePath)).delete();
+//    }
+    await Fbfunctions.fb_call(methodName: 'unpair');
     desktopSignout();
   }
 
   void desktopSignout()
   {
-    Fbfunctions.fb_call(methodName: 'signout');
     setState(() {
         desktopAuthenticated = DesktopAuthState.AUTHERROR;
         desktopUID = null;
@@ -508,6 +535,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         desktopUIDListener?.cancel();
         desktopUIDListener = null;
       });
+
+
+    Fbfunctions.fb_call(methodName: 'signout');
   }
 
   void _testConnection()
@@ -666,24 +696,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             uid: user.uid);
       }
       else {
-
-
-        StreamSubscription<DocumentSnapshot> pairedListener;
-        pairedListener = Firestore.instance
-            .collection('users')
-            .document(user.uid)
-            .snapshots()
-            .listen((DocumentSnapshot documentSnapshot) {
-            if(paired)
-            {
-              pairedListener.cancel();
-              return;
-            }
-          bool isPaired = documentSnapshot.data["paired"];
-          if(isPaired)
-            setPairedToTrue();
-        });
-
         return MobilePairingPage(setPairedToTrue: setPairedToTrue);
       }
     }
@@ -711,7 +723,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   void setPairedToTrue()
   {
     print("in setptotrue");
-    if(paired)
+    if(paired != null && paired)
       return;
     setState(() {
       paired = true;
@@ -732,7 +744,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
                 RaisedButton(
                   child: Text("OK"),
                   onPressed: () {
-                            Navigator.pop(context);
                             Navigator.pop(context);
                             _playListAnimation();
 
