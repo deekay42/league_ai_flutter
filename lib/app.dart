@@ -131,7 +131,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         }
         else
         {
-          pairedListener?.cancel()
+          pairedListener?.cancel();
         }
       });
     } else
