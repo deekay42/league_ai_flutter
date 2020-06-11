@@ -1,8 +1,6 @@
 #include "fbfunctions_plugin.h"
 
-// This must be included before many other Windows headers.
-#include <windows.h>
-
+#include <firebase_commons.h>
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
 
@@ -10,7 +8,7 @@
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
-#include <firebase_commons.h>
+
 
 #include <map>
 #include <memory>
@@ -74,6 +72,8 @@ FbfunctionsPlugin::FbfunctionsPlugin()
 FbfunctionsPlugin::~FbfunctionsPlugin() 
 {
     shutdownFirebase();
+    terminateUserRecordListener();
+    terminateAuthListeners();
     if (this->listener)
     {
         delete this->listener;
@@ -171,9 +171,11 @@ void FbfunctionsPlugin::HandleMethodCall(
       variant_result = firebase::Variant(signInResult ? "successful" : "unsuccessful");
     }
     else if (methodName == "signout") {
-      if(auth != nullptr)
-        auth->SignOut();
+        if(auth != nullptr)
+            auth->SignOut();
+        terminateUserRecordListener();
         listener = listenForUIDUpdate();
+        
     } 
     else if (methodName == "newRecommendation") 
     {

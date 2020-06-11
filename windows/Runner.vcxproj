@@ -87,7 +87,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)..\include\firebase_cpp;$(ProjectDir);$(FLUTTER_EPHEMERAL_DIR);$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WEBVIEW_WINAPI=1;_CRT_SECURE_NO_WARNINGS;_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WEBVIEW_WINAPI=1;_CRT_SECURE_NO_WARNINGS;_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>
@@ -137,7 +137,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\include\Python37\include;$(ProjectDir)..\include\firebase_cpp;$(ProjectDir);$(FLUTTER_EPHEMERAL_DIR);$(FLUTTER_EPHEMERAL_DIR)\cpp_client_wrapper\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WEBVIEW_WINAPI=1;_CRT_SECURE_NO_WARNINGS;_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WEBVIEW_WINAPI=1;_CRT_SECURE_NO_WARNINGS;_MBCS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4100</DisableSpecificWarnings>
     </ClCompile>

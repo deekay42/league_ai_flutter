@@ -77,7 +77,7 @@ int common_main() {
    std::cout << "runnning flutter complete" << std::endl;
 
    printf("Now running python code\n");
-   runCythonCode();
+   //runCythonCode();
    printf("Python code complete\n");
 
   
@@ -105,7 +105,7 @@ int common_main() {
 }
 
 
-#ifdef _DEBUG
+#ifndef _DEBUG
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     _In_ wchar_t* command_line, _In_ int show_command) {
 #else

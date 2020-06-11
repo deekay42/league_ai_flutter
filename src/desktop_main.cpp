@@ -20,37 +20,14 @@
 #include <stdexcept>
 #include <sstream>
 
-
-#include "firebase/app.h"
-#include "firebase/auth.h"
-#include "firebase/database.h"
-#include "firebase/functions.h"
-#include "firebase/future.h"
-#include "firebase/log.h"
-#include "firebase/util.h"
 #include "firebase_commons.h"
-#include "firebase/firestore.h"
 
 #include <shlwapi.h>
 #include "shlobj.h"
 #include <iostream>
 #include <fstream>
-
-#ifdef _WIN32
-#include <direct.h>
-#define chdir _chdir
-#else
-#include <unistd.h>
-#endif  // _WIN32
-
-#ifdef _WIN32
-#include <windows.h>
-#endif  // _WIN32
-
 #include <algorithm>
 #include <string>
-
-#include "firebase_commons.h"
 
 // The TO_STRING macro is useful for command line defined strings as the quotes
 // get stripped.
@@ -104,6 +81,13 @@ using ::firebase::Variant;
 std::string myuid = "";
 std::string mysecret = "";
 
+
+firebase::firestore::ListenerRegistration* userListenerRegistration = nullptr;
+UserListener<firebase::firestore::DocumentSnapshot>* userListener = nullptr;
+
+MyAuthStateListener* myAuthStateListener = nullptr;
+MyIdTokenListener* myIdTokenListener = nullptr;
+
 firebase::Future<firebase::functions::HttpsCallableResult> GetCustomToken(
     const std::string &uid, const std::string &secret);
 
@@ -125,20 +109,6 @@ void LogMessage(const char* format, ...) {
   fflush(stdout);
 }
 
-class MyAuthStateListener : public firebase::auth::AuthStateListener {
- public:
-  void OnAuthStateChanged(firebase::auth::Auth *auth_state) override {
-    ::user = auth_state->current_user();
-    if (user != nullptr) {
-      // User is signed in
-      printf("OnAuthStateChanged: signed_in %s\n", user->uid().c_str());
-    } else {
-      // User is signed out
-      printf("OnAuthStateChanged: signed_out\n");
-    }
-    // ...
-  }
-};
 
 
 std::wstring getLocalAppDataFolder()
@@ -205,23 +175,72 @@ static void LogVariantMap(const std::map<Variant, Variant> &variant_map,
   }
 }
 
-class MyIdTokenListener : public ::firebase::auth::IdTokenListener {
-public:
-	virtual void OnIdTokenChanged(::firebase::auth::Auth* authstate)
-	{
-		printf("\nid token changed!: ");
-		
-	}
-};
+
+void terminateUserRecordListener()
+{
+    if (userListenerRegistration != nullptr)
+    {
+        userListenerRegistration->Remove();
+        delete userListenerRegistration;
+        userListenerRegistration = nullptr;
+    }
+
+    if (userListener != nullptr)
+    {
+        delete userListener;
+        userListener = nullptr;
+    }
+
+
+}
+
+void startUserRecordListener()
+{
+    terminateUserRecordListener();
+    firebase::firestore::DocumentReference document =
+        firestore->Document("/users/" + auth->current_user()->uid());
+    userListener = new UserListener<firebase::firestore::DocumentSnapshot>();
+    userListenerRegistration = new firebase::firestore::ListenerRegistration(userListener->AttachTo(&document));
+}
+
+
+
+
+void terminateAuthListeners()
+{
+    if (myAuthStateListener != nullptr)
+    {
+        delete myAuthStateListener;
+        myAuthStateListener = nullptr;
+    }
+
+    if (myIdTokenListener != nullptr)
+    {
+        delete myIdTokenListener;
+        myIdTokenListener = nullptr;
+    }
+}
+
+void startAuthListeners()
+{
+    if (myAuthStateListener == nullptr)
+    {
+        myAuthStateListener = new MyAuthStateListener();
+        myIdTokenListener = new MyIdTokenListener();
+        auth->AddAuthStateListener(myAuthStateListener);
+        auth->AddIdTokenListener(myIdTokenListener);
+    }
+}
 
 bool signIn(std::string custom_token) {
-	auth->AddAuthStateListener(new MyAuthStateListener());
-	auth->AddIdTokenListener(new MyIdTokenListener());
+    startAuthListeners();
 	firebase::Future<firebase::auth::User *> sign_in_future =
 		auth->SignInWithCustomToken(custom_token.c_str());
 	WaitForCompletion(sign_in_future, "SignIn");
 	if (sign_in_future.error() == firebase::auth::kAuthErrorNone) {
 		LogMessage("Auth: Signed in as user!");
+
+        startUserRecordListener();
 		return true;
 	}
 	else {
@@ -231,10 +250,14 @@ bool signIn(std::string custom_token) {
 	}
 }
 
+
+
+
 bool authenticate(std::string uid, std::string secret)
 {
     firebase::auth::User* currentuser = auth->current_user();
 	if (currentuser != nullptr) {
+        startUserRecordListener();
 		return true;
 	}
 	LogMessage("Trying to auth user!");
@@ -461,6 +484,10 @@ void shutdownFirebase() {
 	LogMessage("Shutting down the DB library.");
 	delete database;
 	database = nullptr;
+
+    LogMessage("Shutting down firestore ");
+    delete firestore;
+    firestore = nullptr;
 
 	LogMessage("Signing out from account.");
 	auth->SignOut();

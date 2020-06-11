@@ -1,17 +1,29 @@
 #pragma once
 
+#ifdef _WIN32
+#include <direct.h>
+#define chdir _chdir
+#else
+#include <unistd.h>
+#endif  // _WIN32
+
+#ifdef _WIN32
+#include <windows.h>
+#endif  // _WIN32
+
 #include ".\common.h"
 
 #include "firebase/app.h"
 #include "firebase/auth.h"
 #include "firebase/database.h"
+#include "firebase/firestore.h"
 #include "firebase/functions.h"
 #include "firebase/future.h"
 #include "firebase/log.h"
+#include "firebase/util.h"
 #include <stdlib.h>  
 #include <signal.h>  
 #include <tchar.h>  
-#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdexcept>
@@ -23,18 +35,10 @@
 #include <shlwapi.h>
 #include "shlobj.h"
 
-#ifdef _WIN32
-#include <direct.h>
-#define chdir _chdir
-#else
-#include <unistd.h>
-#endif  // _WIN32
 
-#ifdef _WIN32
-#define NOMINMAX
-#include <windows.h>
-#endif  // _WIN32
-
+template <typename T> class UserListener;
+class MyAuthStateListener;
+class MyIdTokenListener;
 
 extern ::firebase::App *app;
 extern ::firebase::database::Database *database;
@@ -45,6 +49,11 @@ extern ::firebase::functions::Functions *functions;
 extern ::firebase::auth::Auth *auth;
 extern std::string myuid;
 extern std::string mysecret;
+extern firebase::firestore::ListenerRegistration* userListenerRegistration;
+extern UserListener<firebase::firestore::DocumentSnapshot>* userListener;
+
+extern MyAuthStateListener* myAuthStateListener;
+extern MyIdTokenListener* myIdTokenListener;
 
 std::wstring getLocalAppDataFolder();
 
@@ -123,6 +132,82 @@ class UIDListener : public firebase::database::ValueListener {
 };
 
 
+template <typename T>
+class UserListener : public firebase::firestore::EventListener<T> {
+
+private:
+    bool initEventFired;
+ public:
+    
+     UserListener()
+         :initEventFired(false)
+     { }
+  void OnEvent(const T& value,
+               const firebase::firestore::Error error) override {
+    if (error != firebase::firestore::kOk) {
+      LogMessage("ERROR: UserListener got %d.", error);
+      return;
+    }
+    LogMessage("C++: user record activity");
+    bool paired = value.Get("paired").boolean_value();
+    LogMessage("Paired is %d.", paired);
+    if (!initEventFired)
+    {
+        LogMessage("this is the Init event");
+        initEventFired = true;
+        return;
+    }
+    LogMessage("This is not the init event");
+    if (paired == false)
+    {
+        std::wstring dirPath = getLocalAppDataFolder();
+        DeleteFileW((dirPath + L"\\uid").c_str());
+        DeleteFileW((dirPath + L"\\secret").c_str());
+    }
+  }
+
+  // Hides the STLPort-related quirk that `AddSnapshotListener` has different
+  // signatures depending on whether `std::function` is available.
+  template <typename U>
+  firebase::firestore::ListenerRegistration AttachTo(U* ref) {
+#if !defined(STLPORT)
+    return ref->AddSnapshotListener(
+        [this](const T& result, firebase::firestore::Error error) {
+          OnEvent(result, error);
+        });
+#else
+    return ref->AddSnapshotListener(this);
+#endif
+  }
+};
+
+
+class MyIdTokenListener : public ::firebase::auth::IdTokenListener {
+public:
+    virtual void OnIdTokenChanged(::firebase::auth::Auth* authstate)
+    {
+        printf("\nid token changed!: ");
+
+    }
+};
+
+
+class MyAuthStateListener : public firebase::auth::AuthStateListener {
+public:
+    void OnAuthStateChanged(firebase::auth::Auth* auth_state) override {
+        ::user = auth_state->current_user();
+        if (user != nullptr) {
+            // User is signed in
+            printf("OnAuthStateChanged: signed_in %s\n", user->uid().c_str());
+        }
+        else {
+            // User is signed out
+            printf("OnAuthStateChanged: signed_out\n");
+        }
+        // ...
+    }
+};
+
 bool authenticate(std::string uid, std::string secret);
 
 void initializeFirebase();
@@ -130,6 +215,9 @@ void shutdownFirebase();
 UIDListener* listenForUIDUpdate();
 bool isAlreadyRunning();
 void newRecommendation(const std::string& items);
+void startUserRecordListener();
+void terminateUserRecordListener();
+void terminateAuthListeners();
 
 
 #ifdef _WIN32

@@ -380,16 +380,17 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   void listenForUIDFile(String dirPath, String filePath) async {
     //UID not present. need to wait until file appears which contains it.
-
+    print("in listenforuidfile");
     if (desktopUIDListener != null) return;
     Stream<FileSystemEvent> dirStream =
-        Directory(dirPath).watch(events: FileSystemEvent.create);
+        Directory(dirPath).watch(events: FileSystemEvent.all);
     print("uid listener commenced");
 
-    desktopUIDListener = dirStream.listen((event) async {
-      if (FileSystemEntity.typeSync(filePath) !=
-          FileSystemEntityType.notFound) {
-        print("Some event!!: $filePath ${event.path}");
+    desktopUIDListener ??= dirStream.listen((event) async {
+      if(filePath != event.path)
+        return;
+      if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound) {
+        print("File created: $filePath ${event.path}");
         if (desktopUIDFuture != null || filePath != event.path) return;
 
         File file = File.fromUri(Uri.file(filePath));
@@ -405,9 +406,15 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         setState(() {
           desktopUIDFuture = file.readAsString();
           desktopUIDFuture.then((result){setState(() {desktopUID = result; });} );
-          desktopUIDListener.cancel();
         });
       }
+      else
+      {
+        
+        print("File deleted: $filePath ${event.path}");
+        desktopSignout();
+      }
+    
     });
   }
 
@@ -446,8 +453,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   }
 
   Future<String> getUIDForDesktop() {
+    print("in getuidfordesktop");
     String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
     String filePath = dirPath + "\\uid";
+    listenForUIDFile(dirPath, filePath);
 //    print("dirPath: $dirPath filePath: $filePath");
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound)
     {
@@ -458,7 +467,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     }
     else {
       print("uid file not present");
-      listenForUIDFile(dirPath, filePath);
       return null;
     }
   }
@@ -523,7 +531,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //          await File.fromUri(Uri.file(filePath)).delete();
 //    }
     await Fbfunctions.fb_call(methodName: 'unpair');
-    desktopSignout();
+    // desktopSignout();
   }
 
   void desktopSignout()
@@ -532,8 +540,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         desktopAuthenticated = DesktopAuthState.AUTHERROR;
         desktopUID = null;
         desktopUIDFuture = null;
-        desktopUIDListener?.cancel();
-        desktopUIDListener = null;
       });
 
 
