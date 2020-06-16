@@ -110,12 +110,14 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
 //    print("Disposing of old home state now");
 //    ad?.dispose();
+    print("NOW DISPOSING HOME");
     if (!Platform.isIOS && !Platform.isAndroid) 
     {
       desktopLastFileStream.cancel();
     }
     else
     {
+      print("itemslistener canceled");
       itemsListener.cancel();
       itemsListener = null;
       Wakelock.disable();
@@ -367,9 +369,13 @@ class _HomePageState extends State<HomePage> {
     {
       if(!initialDataSnapshotComplete)
       {
+        print("this was the initial itemslistener INIT");
+        print(snapshot.documentChanges[0].document.data);
         initialDataSnapshotComplete = true;
         return;
       }
+      print("this was the REAL itemslistener");
+      print(snapshot.documentChanges[0].document.data);
       var newDoc = snapshot.documentChanges[0];
       if(newDoc.type != DocumentChangeType.added)
         return;

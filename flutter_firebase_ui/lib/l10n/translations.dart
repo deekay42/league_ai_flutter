@@ -216,7 +216,7 @@ Sign in with $providerName to continue.''';
   String get loginEmail => r'Login';
 
   @override
-  String get createEmail => r'Create Account';
+  String get createEmail => r'Create New Account';
 
   @override
   String get signInTwitter => r'Sign in with Twitter';

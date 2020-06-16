@@ -60,6 +60,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   StreamSubscription aiListener;
   String permissionStatus;
   StreamSubscription<DocumentSnapshot> pairedListener;
+  bool initialPairedFired = false;
 
   var permGranted = "granted";
   var permDenied = "denied";
@@ -114,18 +115,25 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
               .snapshots()
               .listen((DocumentSnapshot documentSnapshot) {
             print("new paired activity");
+            if(!initialPairedFired) {
+              initialPairedFired = true;
+              print("this was the initial");
+              return;
+            }
+
 //            if(paired)
 //            {
 //              pairedListener.cancel();
 //              return;
 //            }
-            bool isPaired = documentSnapshot.data["paired"];
-            if(isPaired)
-              setPairedToTrue();
-            else
-              setState(() {
-                paired = false;
-              });
+              bool isPaired = documentSnapshot.data["paired"];
+              if(isPaired)
+                setPairedToTrue();
+              else
+                setState(() {
+                  paired = false;
+                });
+
           });
 
         }
@@ -488,14 +496,14 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     if(Platform.isIOS || Platform.isAndroid)
       choices = <Choice>[
      
-        Choice(title: 'Pair new', action: resetPairingPhone),
+        Choice(title: 'Pair with Computer', action: resetPairingPhone),
         // Choice(title: 'Version ' + Strings.version),
         Choice(title: 'Logout', action: FirebaseAuth.instance.signOut)
           
       ].where(notNull).toList();
     else
       choices = <Choice>[
-        Choice(title: 'Pair new phone', action: resetPairingDesktop)
+        Choice(title: 'Pair New Phone', action: resetPairingDesktop)
       ].where(notNull).toList();
 
     return BasicAppBar(false, choices, false);

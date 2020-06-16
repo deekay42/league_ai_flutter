@@ -74,7 +74,11 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
             width: 15,
           ),
           Text("Please wait...")])
-      :   RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context)),
+      :   RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(3.0),
+                side: BorderSide(color: Colors.white)
+            )),
       Expanded(child:Container()),
     ]);
   }
