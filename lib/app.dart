@@ -126,6 +126,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
               setState(() {
                 paired = false;
               });
+              desktopSignout();
           });
 
         }
@@ -344,12 +345,16 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
     resp.then((dynamic result) {
       if (Platform.isIOS || Platform.isAndroid) result = result.data;
-//      print("Got the result: $result");
+     print("ISVALID: Got the result: $result");
       setState(() {
         if (result["paired"] == "true")
           paired = true;
         else
+        {
           paired = false;
+          desktopSignout();
+
+        }
 
         if (result["subscribed"] == "true")
         {
@@ -407,6 +412,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
           desktopUIDFuture = file.readAsString();
           desktopUIDFuture.then((result){setState(() {desktopUID = result; });} );
         });
+        hasValidInviteCodeSavedDesktop();
       }
       else
       {
@@ -530,6 +536,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //            FileSystemEntityType.notFound)
 //          await File.fromUri(Uri.file(filePath)).delete();
 //    }
+    if(desktopUID == null)
+    {
+      print("desktopuid is NULL");
+          return;
+    }
+    print("desktopuid is NOT NULL");
     await Fbfunctions.fb_call(methodName: 'unpair');
     // desktopSignout();
   }
@@ -709,7 +721,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     {
 
       desktopUIDFuture ??= getUIDForDesktop();
-      if (desktopUID != null) {
+      if (desktopUID != null && paired) {
         if (!inviteCodeValid) return _getInviteCodeWidget(context);
   //      print("rendering homepage");
         return HomePage(
