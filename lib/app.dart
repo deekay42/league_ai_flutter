@@ -60,6 +60,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   StreamSubscription aiListener;
   String permissionStatus;
   StreamSubscription<DocumentSnapshot> pairedListener;
+  bool initialPairedFired = false;
 
   var permGranted = "granted";
   var permDenied = "denied";
@@ -114,6 +115,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
               .snapshots()
               .listen((DocumentSnapshot documentSnapshot) {
             print("new paired activity");
+            if(!initialPairedFired) {
+              initialPairedFired = true;
+              print("this was the initial");
+              return;
+            }
+
 //            if(paired)
 //            {
 //              pairedListener.cancel();
@@ -494,14 +501,14 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     if(Platform.isIOS || Platform.isAndroid)
       choices = <Choice>[
      
-        Choice(title: 'Pair new', action: resetPairingPhone),
+        Choice(title: 'Pair with Computer', action: resetPairingPhone),
         // Choice(title: 'Version ' + Strings.version),
         Choice(title: 'Logout', action: FirebaseAuth.instance.signOut)
           
       ].where(notNull).toList();
     else
       choices = <Choice>[
-        Choice(title: 'Pair new phone', action: resetPairingDesktop)
+        Choice(title: 'Pair New Phone', action: resetPairingDesktop)
       ].where(notNull).toList();
 
     return BasicAppBar(false, choices, false);
@@ -560,10 +567,34 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   void _testConnection()
   {
-    CloudFunctions.instance.getHttpsCallable(functionName: 'completePairing').call();
+    print("test oconnection!");
+    Fbfunctions.fb_call(
+                  methodName: 'newRecommendation',
+                  args: <String, dynamic>{"items": "-1"});
+    showDialog<Null>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) =>
+          AlertDialog(
+            title: Text("Test message sent"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("If you didn't see a notification on your phone, try to pair again."),
+                SizedBox(
+                  height: 15,
+                ),
+                RaisedButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                            Navigator.pop(context);
 
-    if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection').call();
-    else Fbfunctions.fb_call(methodName: 'testConnection');
+                  },
+                ),
+              ],
+            ),
+          ),
+    );              
   }
 
   void _unsubscribe() {
@@ -843,7 +874,28 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   Widget _getFooter(BuildContext context) {
     ThemeData theme = Theme.of(context);
     if ((hasSubscription != null && hasSubscription))
-      return Container();
+    {
+      if(desktopUID != null)
+        
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                child:
+                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      RaisedButton(child: Text("Send test message"), onPressed: _testConnection,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3.0),
+                        side: BorderSide(color: Colors.white)
+                    )),
+                  SizedBox(height: 8)
+                ]),
+              )),
+        );
+      else
+        return Container();
+    }
     else
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 20),

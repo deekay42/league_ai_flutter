@@ -60,6 +60,7 @@ std::wstring getLocalAppDataFolder();
 // Wait for a Future to be completed. If the Future returns an error, it will
 // be logged.
 void WaitForCompletion(const firebase::FutureBase &future, const char *name);
+void deleteAuthFiles();
 
 firebase::Variant callFBFunctionSync(
     const char *functionName,
@@ -160,11 +161,10 @@ private:
     LogMessage("This is not the init event");
     if (paired == false)
     {
-        std::wstring dirPath = getLocalAppDataFolder();
-        DeleteFileW((dirPath + L"\\uid").c_str());
-        DeleteFileW((dirPath + L"\\secret").c_str());
+        deleteAuthFiles();
     }
   }
+
 
   // Hides the STLPort-related quirk that `AddSnapshotListener` has different
   // signatures depending on whether `std::function` is available.
@@ -180,6 +180,7 @@ private:
 #endif
   }
 };
+
 
 
 class MyIdTokenListener : public ::firebase::auth::IdTokenListener {

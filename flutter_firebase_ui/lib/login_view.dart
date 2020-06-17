@@ -70,7 +70,7 @@ class _LoginViewState extends State<LoginView> {
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: new Padding(
           padding: const EdgeInsets.all(16.0),
-          child: new Text("New or Returning User?"),
+          child: new Text(""),
         ),
       ),
       providers: [

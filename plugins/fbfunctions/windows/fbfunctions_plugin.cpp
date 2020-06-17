@@ -174,6 +174,7 @@ void FbfunctionsPlugin::HandleMethodCall(
         if(auth != nullptr)
             auth->SignOut();
         terminateUserRecordListener();
+        deleteAuthFiles();
         listener = listenForUIDUpdate();
         
     } 

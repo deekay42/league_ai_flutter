@@ -232,6 +232,13 @@ void startAuthListeners()
     }
 }
 
+void deleteAuthFiles()
+{
+    std::wstring dirPath = getLocalAppDataFolder();
+    DeleteFileW((dirPath + L"\\uid").c_str());
+    DeleteFileW((dirPath + L"\\secret").c_str());
+}
+
 bool signIn(std::string custom_token) {
     startAuthListeners();
 	firebase::Future<firebase::auth::User *> sign_in_future =
