@@ -71,7 +71,7 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
           Column( children: [
           CircularProgressIndicator(),
           SizedBox(
-            width: 15,
+            height: 15,
           ),
           Text("Please wait...")])
       :   RaisedButton(child: Text("Pair Now"), onPressed: ()=>triggerPairing(context),

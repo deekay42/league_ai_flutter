@@ -139,7 +139,9 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         }
         else
         {
+          print("canceling pairedListener");
           pairedListener?.cancel();
+          initialPairedFired = false;
         }
       });
     } else
@@ -489,17 +491,15 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   }
 
   Widget _myAppBar() {
-
-
     var choices;
 
-    if(Platform.isIOS || Platform.isAndroid)
+    if (Platform.isIOS || Platform.isAndroid)
       choices = <Choice>[
-     
+
         Choice(title: 'Pair with Computer', action: resetPairingPhone),
         // Choice(title: 'Version ' + Strings.version),
         Choice(title: 'Logout', action: FirebaseAuth.instance.signOut)
-          
+
       ].where(notNull).toList();
     else
       choices = <Choice>[
@@ -508,8 +508,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
     return BasicAppBar(false, choices, false);
   }
-
-  
 
   Future<void> resetPairingPhone() async
   {

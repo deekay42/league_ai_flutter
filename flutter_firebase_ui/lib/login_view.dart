@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_firebase_ui/password_view.dart';
 import 'package:flutter_firebase_ui/sign_up_view.dart';
@@ -84,10 +85,31 @@ class _LoginViewState extends State<LoginView> {
 
 
   _handleGoogleSignIn() async {
+
     await FirebaseAuth.instance.signOut();
-    final GoogleSignInAccount googleUser = await googleSignIn.signIn();
+    print("google signed out");
+    GoogleSignInAccount googleUser = null;
+    int failcounter = 0;
+    while(true) {
+      try {
+        googleUser = await googleSignIn.signIn();
+      }
+      catch (e) {
+        print("failed");
+        if (failcounter < 5 &&
+            (e.code == "network_error" || e.code == "internal_error")) {
+          print("but we're retrying");
+          continue;
+        }
+        else
+          break;
+      }
+      break;
+    }
+    print("google signed in");
     if (googleUser != null) {
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      print("google signout");
       if (googleAuth.accessToken != null) {
         try {
 
@@ -96,7 +118,10 @@ class _LoginViewState extends State<LoginView> {
             idToken: googleAuth.idToken,
           );
 
+          print("google accesttoken");
+
           final FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
+          print("google usr complete");
           print(user);
         } catch (e) {
           showErrorDialog(context, e.details);
