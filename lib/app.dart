@@ -126,14 +126,14 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //              pairedListener.cancel();
 //              return;
 //            }
-              bool isPaired = documentSnapshot.data["paired"];
-              if(isPaired)
-                setPairedToTrue();
-              else
-                setState(() {
-                  paired = false;
-                });
-
+            bool isPaired = documentSnapshot.data["paired"];
+            if(isPaired)
+              setPairedToTrue();
+            else
+              setState(() {
+                paired = false;
+              });
+              desktopSignout();
           });
 
         }
@@ -354,12 +354,16 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
     resp.then((dynamic result) {
       if (Platform.isIOS || Platform.isAndroid) result = result.data;
-//      print("Got the result: $result");
+     print("ISVALID: Got the result: $result");
       setState(() {
         if (result["paired"] == "true")
           paired = true;
         else
+        {
           paired = false;
+          desktopSignout();
+
+        }
 
         if (result["subscribed"] == "true")
         {
@@ -417,6 +421,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
           desktopUIDFuture = file.readAsString();
           desktopUIDFuture.then((result){setState(() {desktopUID = result; });} );
         });
+        hasValidInviteCodeSavedDesktop();
       }
       else
       {
@@ -536,6 +541,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //            FileSystemEntityType.notFound)
 //          await File.fromUri(Uri.file(filePath)).delete();
 //    }
+    if(desktopUID == null)
+    {
+      print("desktopuid is NULL");
+          return;
+    }
+    print("desktopuid is NOT NULL");
     await Fbfunctions.fb_call(methodName: 'unpair');
     // desktopSignout();
   }
@@ -554,10 +565,34 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   void _testConnection()
   {
-    CloudFunctions.instance.getHttpsCallable(functionName: 'completePairing').call();
+    print("test oconnection!");
+    Fbfunctions.fb_call(
+                  methodName: 'newRecommendation',
+                  args: <String, dynamic>{"items": "-1"});
+    showDialog<Null>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) =>
+          AlertDialog(
+            title: Text("Test message sent"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("If you didn't see a notification on your phone, try to pair again."),
+                SizedBox(
+                  height: 15,
+                ),
+                RaisedButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                            Navigator.pop(context);
 
-    if (Platform.isIOS || Platform.isAndroid) CloudFunctions.instance.getHttpsCallable(functionName: 'testConnection').call();
-    else Fbfunctions.fb_call(methodName: 'testConnection');
+                  },
+                ),
+              ],
+            ),
+          ),
+    );              
   }
 
   void _unsubscribe() {
@@ -715,7 +750,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     {
 
       desktopUIDFuture ??= getUIDForDesktop();
-      if (desktopUID != null) {
+      if (desktopUID != null && paired) {
         if (!inviteCodeValid) return _getInviteCodeWidget(context);
   //      print("rendering homepage");
         return HomePage(
@@ -837,7 +872,28 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   Widget _getFooter(BuildContext context) {
     ThemeData theme = Theme.of(context);
     if ((hasSubscription != null && hasSubscription))
-      return Container();
+    {
+      if(desktopUID != null)
+        
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 20),
+          child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                child:
+                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+                      RaisedButton(child: Text("Send test message"), onPressed: _testConnection,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3.0),
+                        side: BorderSide(color: Colors.white)
+                    )),
+                  SizedBox(height: 8)
+                ]),
+              )),
+        );
+      else
+        return Container();
+    }
     else
       return Container(
         margin: const EdgeInsets.symmetric(vertical: 20),

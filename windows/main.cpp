@@ -77,7 +77,7 @@ int common_main() {
    std::cout << "runnning flutter complete" << std::endl;
 
    printf("Now running python code\n");
-   //runCythonCode();
+   runCythonCode();
    printf("Python code complete\n");
 
   
