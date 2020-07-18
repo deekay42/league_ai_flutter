@@ -1,6 +1,6 @@
-#include "fbfunctions_plugin.h"
+#include "include/fbfunctions/fbfunctions_plugin.h"
 
-#include <firebase_commons.h>
+#include "firebase_commons.h"
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
 

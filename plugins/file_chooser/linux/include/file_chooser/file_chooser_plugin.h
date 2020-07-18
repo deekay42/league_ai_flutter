@@ -11,28 +11,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifndef PLUGINS_FILE_CHOOSER_LINUX_INCLUDE_FILE_CHOOSER_FILE_CHOOSER_PLUGIN_H_
-#define PLUGINS_FILE_CHOOSER_LINUX_INCLUDE_FILE_CHOOSER_FILE_CHOOSER_PLUGIN_H_
+#ifndef PLUGINS_FILE_CHOOSER_LINUX_FILE_CHOOSER_PLUGIN_H_
+#define PLUGINS_FILE_CHOOSER_LINUX_FILE_CHOOSER_PLUGIN_H_
 
 // A plugin to show native save/open file choosers.
 
-#include <flutter_desktop_embedding_core/embedder_plugin_registrar.h>
+#include <flutter_linux/flutter_linux.h>
 
-#ifdef FILE_CHOOSER_PLUGIN_IMPL
-#define FILE_CHOOSER_PLUGIN_EXPORT __attribute__((visibility("default")))
+G_BEGIN_DECLS
+
+#ifdef FLUTTER_PLUGIN_IMPL
+#define FLUTTER_PLUGIN_EXPORT __attribute__((visibility("default")))
 #else
-#define FILE_CHOOSER_PLUGIN_EXPORT
+#define FLUTTER_PLUGIN_EXPORT
 #endif
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+G_DECLARE_FINAL_TYPE(FlFileChooserPlugin, fl_file_chooser_plugin, FL,
+                     FILE_CHOOSER_PLUGIN, GObject)
 
-FILE_CHOOSER_PLUGIN_EXPORT void FileChooserRegisterWithRegistrar(
-    FlutterEmbedderPluginRegistrarRef registrar);
+FLUTTER_PLUGIN_EXPORT FlFileChooserPlugin* fl_file_chooser_plugin_new(
+    FlPluginRegistrar* registrar);
 
-#if defined(__cplusplus)
-}  // extern "C"
-#endif
+FLUTTER_PLUGIN_EXPORT void file_chooser_plugin_register_with_registrar(
+    FlPluginRegistrar* registrar);
 
-#endif  // PLUGINS_FILE_CHOOSER_LINUX_INCLUDE_FILE_CHOOSER_FILE_CHOOSER_PLUGIN_H_
+G_END_DECLS
+
+#endif  // PLUGINS_FILE_CHOOSER_LINUX_FILE_CHOOSER_PLUGIN_H_

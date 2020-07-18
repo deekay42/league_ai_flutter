@@ -1,0 +1,78 @@
+added this to the bottom of runner Cmakelist:
+
+set(no_copy $<NOT:$<CONFIG:Release>>)
+
+add_custom_command(TARGET ${BINARY_NAME} PRE_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E
+    # do nothing for non-Release build
+    $<${no_copy}:echo>
+    # output text to make clear that the copy command is not actually issued
+    $<${no_copy}:"copy omitted for non-release build, command would have been ">
+    # the actual copy command, which is overridden by the "echo" above
+    # in the case of a non-release build
+    touch releaseflag)
+
+add_custom_command(TARGET ${BINARY_NAME}
+                       PRE_BUILD
+                       COMMAND "..\\..\\..\\..\\python\\build\\embed_py2c.bat" "..\\..\\..\\..\\python" Release "..\\..\\..")
+
+added this to the top:
+
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE")
+
+
+add_executable(${BINARY_NAME} WIN32
+  "flutter_window.cpp"
+  "main.cpp"
+  "run_loop.cpp"
+  "utils.cpp"
+  "win32_window.cpp"
+  "../../src/desktop_main.cpp"
+  "window_configuration.cpp"
+  "${FLUTTER_MANAGED_DIR}/generated_plugin_registrant.cc"
+  "Runner.rc"
+  "runner.exe.manifest"
+)
+
+
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-DNOMINMAX)
+endif()
+
+
+windows folder cmakelists ile:
+
+added
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../include/Python37/include/")
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../libs")
+
+
+plugins fbfunctions windows folder cmakelists:
+
+
+add_library(${PLUGIN_NAME} SHARED
+  "${PLUGIN_NAME}.cpp"
+  "../../../../src/desktop_main.cpp"
+)
+
+
+set( leagueiq_libs 
+    debug flutter optimized flutter
+    debug flutter_wrapper_plugin optimized flutter_wrapper_plugin
+    debug firebase_app_d optimized firebase_app
+    debug firebase_auth_d optimized firebase_auth
+    debug firebase_database_d optimized firebase_database
+    debug firebase_firestore_d optimized firebase_firestore
+    debug firebase_functions_d optimized firebase_functions
+    debug firebase_messaging_d optimized firebase_messaging
+    debug advapi32 optimized advapi32
+    debug crypt32 optimized crypt32
+    debug iphlpapi optimized iphlpapi
+    debug psapi optimized psapi
+    debug userenv optimized userenv
+    debug ws2_32 optimized ws2_32
+    debug RpcRT4 optimized RpcRT4
+    debug shell32 optimized shell32)
+target_link_libraries( ${PLUGIN_NAME} ${leagueiq_libs} )

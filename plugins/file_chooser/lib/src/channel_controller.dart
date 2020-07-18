@@ -13,17 +13,55 @@
 // limitations under the License.
 import 'package:flutter/services.dart';
 
-import 'callbacks.dart';
+import 'filter_group.dart';
+import 'result.dart';
 
-// Plugin channel constants. See common/channel_constants.h for details.
+/// The name of the plugin's platform channel.
 const String _kChannelName = 'flutter/filechooser';
+
+/// The method name to instruct the native plugin to show an open panel.
 const String _kShowOpenPanelMethod = 'FileChooser.Show.Open';
+
+/// The method name to instruct the native plugin to show a save panel.
 const String _kShowSavePanelMethod = 'FileChooser.Show.Save';
+
+// Configuration parameters for file chooser panels:
+
+/// The path, as a string, for initial directory to display. Default behavior is
+/// left to the OS if not provided.]
 const String _kInitialDirectoryKey = 'initialDirectory';
+
+/// The initial file name that should appears in the file chooser. Defaults to
+/// an empty string if not provided.
 const String _kInitialFileNameKey = 'initialFileName';
+
+/// An array of UTI or file extension groups a user should be able to select.
+///
+/// The format is:
+/// [
+///   [ label, [extension, extension, ...] ],
+///   [ label, [extension, extension, ...] ],
+///   ...
+/// ]
+///
+/// On platforms that don't support selectable groups (e.g., macOS), the
+/// extension lists can be merged. An empty extension array indicates that any
+/// type is allowed; when merging, this should cause all other arrays to be
+/// ignored.
 const String _kAllowedFileTypesKey = 'allowedFileTypes';
+
+/// The text that appears on the panel's confirmation button. If not provided,
+/// the OS default is used.
 const String _kConfirmButtonTextKey = 'confirmButtonText';
+
+// Configuration parameters that only apply to open panels:
+
+/// A boolean indicating whether a panel should allow choosing multiple file
+/// paths. Defaults to false if not set.
 const String _kAllowsMultipleSelectionKey = 'allowsMultipleSelection';
+
+/// A boolean indicating whether a panel should allow choosing directories
+/// instead of files. Defaults to false if not set.
 const String _kCanChooseDirectoriesKey = 'canChooseDirectories';
 
 /// A File chooser type.
@@ -46,11 +84,12 @@ class FileChooserConfigurationOptions {
       this.canSelectDirectories,
       this.confirmButtonText});
 
-  // See channel_constants.h for documentation; these correspond exactly to
+  // See the constants above for documentation; these correspond exactly to
   // the configuration parameters defined in the channel protocol.
   final String initialDirectory; // ignore: public_member_api_docs
   final String initialFileName; // ignore: public_member_api_docs
-  final List<String> allowedFileTypes; // ignore: public_member_api_docs
+  final List<FileTypeFilterGroup>
+      allowedFileTypes; // ignore: public_member_api_docs
   final bool allowsMultipleSelection; // ignore: public_member_api_docs
   final bool canSelectDirectories; // ignore: public_member_api_docs
   final String confirmButtonText; // ignore: public_member_api_docs
@@ -70,7 +109,9 @@ class FileChooserConfigurationOptions {
       args[_kCanChooseDirectoriesKey] = canSelectDirectories;
     }
     if (allowedFileTypes != null && allowedFileTypes.isNotEmpty) {
-      args[_kAllowedFileTypesKey] = allowedFileTypes;
+      args[_kAllowedFileTypesKey] = allowedFileTypes
+          .map((filter) => [filter.label ?? '', filter.fileExtensions ?? []])
+          .toList();
     }
     if (confirmButtonText != null && confirmButtonText.isNotEmpty) {
       args[_kConfirmButtonTextKey] = confirmButtonText;
@@ -90,32 +131,23 @@ class FileChooserChannelController {
   FileChooserChannelController._();
 
   /// The platform channel used to manage native file chooser affordances.
-  final _channel = new MethodChannel(_kChannelName, new JSONMethodCodec());
+  final _channel = new MethodChannel(_kChannelName);
 
   /// A reference to the singleton instance of the class.
   static final FileChooserChannelController instance =
       new FileChooserChannelController._();
 
-  /// Shows a file chooser of [type] configured with [options], calling
-  /// [callback] when it completes.
-  void show(FileChooserType type, FileChooserConfigurationOptions options,
-      FileChooserCallback callback) {
-    try {
-      final methodName = type == FileChooserType.open
-          ? _kShowOpenPanelMethod
-          : _kShowSavePanelMethod;
-      _channel
-          .invokeMethod(methodName, options.asInvokeMethodArguments())
-          .then((response) {
-        final paths = response?.cast<String>();
-        final result =
-            paths == null ? FileChooserResult.cancel : FileChooserResult.ok;
-        callback(result, paths);
-      });
-    } on PlatformException catch (e) {
-      print('File chooser plugin failure: ${e.message}');
-    } on Exception catch (e, s) {
-      print('Exception during file chooser operation: $e\n$s');
-    }
+  /// Shows a file chooser of [type] configured with [options], returning a
+  /// [FileChooserResult] when complete.
+  Future<FileChooserResult> show(
+    FileChooserType type,
+    FileChooserConfigurationOptions options,
+  ) async {
+    final methodName = type == FileChooserType.open
+        ? _kShowOpenPanelMethod
+        : _kShowSavePanelMethod;
+    final paths = await _channel.invokeListMethod<String>(
+        methodName, options.asInvokeMethodArguments());
+    return FileChooserResult(paths: paths ?? [], canceled: paths == null);
   }
 }
