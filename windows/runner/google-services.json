@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "1056292748920-4t6r9l870k2od1d6j9kj6ppavmvq98rb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.leagueiq.app",
+            "certificate_hash": "dc22842a97aedbc8c7e3175ba3fc38388b18a9db"
+          }
+        },
+        {
+          "client_id": "1056292748920-of82foeve83519gr632fpetehi2qb8d8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.leagueiq.app",
+            "certificate_hash": "4a177bd5c11646d795f454d079d915a108edd652"
+          }
+        },
+        {
           "client_id": "1056292748920-8v33egof9cch310klqr004najqhrfidu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -40,10 +56,11 @@
               "client_type": 3
             },
             {
-              "client_id": "1056292748920-j0ltt6q4ohlqt8895lkigv23dieqi0r9.apps.googleusercontent.com",
+              "client_id": "1056292748920-ni1864f5ahve2rbsfvam80su8998f5rm.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.deekay.leagueIqFlutter"
+                "bundle_id": "gg.leagueiq.app",
+                "app_store_id": "1511807071"
               }
             }
           ]

@@ -113,6 +113,6 @@ install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   COMPONENT Runtime)
 
 
-set (script_name "windows\\postbuild.bat")
-set (script_args "build\\windows\\runner\\Release")
-install(CODE "execute_process(${script_name})")
+set (script_name "..\\\\..\\\\windows\\\\postbuild.bat")
+set (script_args "runner\\\\Release")
+install(CODE "execute_process(COMMAND \"${script_name}\" \"${script_args}\")" COMPONENT Runtime)
