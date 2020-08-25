@@ -72,7 +72,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     mainController = AnimationController(
         duration: Duration(milliseconds: 5500), vsync: this);
     mainBodyController = AnimationController(
-        duration: Duration(milliseconds: 500), vsync: this);
+        duration: Duration(milliseconds: 1500), vsync: this);
 
     var list = [
       'assets/imgs/1.png'
