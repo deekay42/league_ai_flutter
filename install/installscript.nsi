@@ -1,6 +1,6 @@
 !include "MUI2.nsh"
 !define MUI_ICON "..\assets\icons\logo.ico"
-!define MUI_PRODUCT "League IQ"
+!define MUI_PRODUCT "LeagueIQ"
 !define MUI_COMPONENTSPAGE_NODESC
 SetCompressor /SOLID bzip2
  
@@ -41,7 +41,7 @@ InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
 Section
 
   SetOutPath "$INSTDIR"
-  File /nonfatal /a /r "..\build\windows\x64\Release\Runner\"
+  File /nonfatal /a /r "..\build\windows\runner\Release\"
   ;CreateShortCut "$INSTDIR\data\flutter_assets\assets.lnk" "$INSTDIR\assets"
 
 

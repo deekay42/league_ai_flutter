@@ -18,7 +18,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'pages/MobilePairingPage.dart';
 import 'pages/QRPage.dart';
 import 'pages/main_page_template.dart';
-import 'pages/subscribe.dart';
+// import 'pages/subscribe.dart';
 import 'resources/Strings.dart';
 import 'widgets/appbar.dart';
 import 'supplemental/utils.dart';
@@ -629,13 +629,13 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
                 // CircularProgressIndicator(),
                 // SizedBox(height: 15,),
                 Text(
-                    "A new update is available. To receive the best builds for the new meta, please download the latest update."),
+                    "A new update is available. To receive the best builds for the newest patch, please download the latest update."),
               ],
             ),
             actions: <Widget>[
               RaisedButton(
                   onPressed: () {
-                    launchbrowser.launchbrowser(url: updateURL);
+                    launchbrowser.launchbrowser(updateURL);
                     Navigator.pop(context);
                   },
                   child: Text("Download Now")),

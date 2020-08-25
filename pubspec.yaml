@@ -31,8 +31,8 @@ dependencies:
   notification_permissions: ^0.4.4
   permission_handler: ^5.0.0+hotfix.5
   apple_sign_in: ^0.1.0
-  btnonce:
-    path: ./plugins/btnonce
+  # btnonce:
+  #   path: ./plugins/btnonce
   fbfunctions:
     path: ./plugins/fbfunctions
   launchbrowser:

@@ -11,28 +11,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#ifndef PLUGINS_MENUBAR_LINUX_INCLUDE_MENUBAR_MENUBAR_PLUGIN_H_
-#define PLUGINS_MENUBAR_LINUX_INCLUDE_MENUBAR_MENUBAR_PLUGIN_H_
+#ifndef PLUGINS_MENUBAR_LINUX_MENUBAR_PLUGIN_H_
+#define PLUGINS_MENUBAR_LINUX_MENUBAR_PLUGIN_H_
 
 // A plugin to control a native menubar.
 
-#include <flutter_desktop_embedding_core/embedder_plugin_registrar.h>
+#include <flutter_linux/flutter_linux.h>
 
-#ifdef MENUBAR_PLUGIN_IMPL
-#define MENUBAR_PLUGIN_EXPORT __attribute__((visibility("default")))
+G_BEGIN_DECLS
+
+#ifdef FLUTTER_PLUGIN_IMPL
+#define FLUTTER_PLUGIN_EXPORT __attribute__((visibility("default")))
 #else
-#define MENUBAR_PLUGIN_EXPORT
+#define FLUTTER_PLUGIN_EXPORT
 #endif
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
+G_DECLARE_FINAL_TYPE(FlMenubarPlugin, fl_menubar_plugin, FL, MENUBAR_PLUGIN,
+                     GObject)
 
-MENUBAR_PLUGIN_EXPORT void MenubarRegisterWithRegistrar(
-    FlutterEmbedderPluginRegistrarRef registrar);
+FLUTTER_PLUGIN_EXPORT FlMenubarPlugin* fl_menubar_plugin_new(
+    FlPluginRegistrar* registrar);
 
-#if defined(__cplusplus)
-}  // extern "C"
-#endif
+FLUTTER_PLUGIN_EXPORT void menubar_plugin_register_with_registrar(
+    FlPluginRegistrar* registrar);
 
-#endif  // PLUGINS_MENUBAR_LINUX_INCLUDE_MENUBAR_MENUBAR_PLUGIN_H_
+G_END_DECLS
+
+#endif  // PLUGINS_MENUBAR_LINUX_MENUBAR_PLUGIN_H_

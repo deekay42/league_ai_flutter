@@ -145,7 +145,7 @@ private:
      { }
   void OnEvent(const T& value,
                const firebase::firestore::Error error) override {
-    if (error != firebase::firestore::kOk) {
+    if (error != firebase::firestore::Error::kErrorOk) {
       LogMessage("ERROR: UserListener got %d.", error);
       return;
     }

@@ -115,12 +115,9 @@ std::wstring getLocalAppDataFolder()
 {
     wchar_t* localAppData = 0;
     SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &localAppData);
-
     std::wstringstream base, tess;
     base << localAppData << "\\League IQ";
     CreateDirectoryW(base.str().c_str(), NULL);
-    tess << localAppData << "\\League IQ" << "\\tesseract";
-    CreateDirectoryW(tess.str().c_str(), NULL);
     CoTaskMemFree(static_cast<void*>(localAppData));
     return base.str();
 }
