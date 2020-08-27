@@ -50,7 +50,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   String background;
   bool aiLoaded = false;
   bool waitingOnIsValid = false;
-  bool inviteCodeValid = false;
+  bool inviteCodeValid = true;
   bool waitingOnInviteCodeCheck = false;
   bool outOfPredictions = false;
   GlobalKey<ScaffoldState> homePageScaffoldKey = GlobalKey<ScaffoldState>();
@@ -72,7 +72,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     mainController = AnimationController(
         duration: Duration(milliseconds: 5500), vsync: this);
     mainBodyController = AnimationController(
-        duration: Duration(milliseconds: 500), vsync: this);
+        duration: Duration(milliseconds: 1500), vsync: this);
 
     var list = [
       'assets/imgs/1.png'
@@ -149,7 +149,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
     if (!Platform.isAndroid && !Platform.isIOS) {
       waitForAIToLoad();
-      hasValidInviteCodeSavedDesktop();
+//      hasValidInviteCodeSavedDesktop();
     }
   }
 
@@ -423,7 +423,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
           desktopUIDFuture = file.readAsString();
           desktopUIDFuture.then((result){setState(() {desktopUID = result; });} );
         });
-        hasValidInviteCodeSavedDesktop();
+//        hasValidInviteCodeSavedDesktop();
       }
       else
       {
