@@ -67,6 +67,57 @@ firebase::Variant callFBFunctionSync(
     std::map<std::string, firebase::Variant> *data = nullptr);
 
 
+
+// Log a map of variants.
+static void LogVariantMap(const std::map<firebase::Variant, firebase::Variant> &variant_map,
+                          int indent);
+
+// Log a vector of variants.
+static void LogVariantVector(const std::vector<firebase::Variant> &variants, int indent) {
+  std::string indent_string(indent * 2, ' ');
+  printf("%s[", indent_string.c_str());
+  for (auto it = variants.begin(); it != variants.end(); ++it) {
+    const firebase::Variant &item = *it;
+    if (item.is_fundamental_type()) {
+      const firebase::Variant &string_value = item.AsString();
+      printf("%s  %s,", indent_string.c_str(), string_value.string_value());
+    } else if (item.is_vector()) {
+      LogVariantVector(item.vector(), indent + 2);
+    } else if (item.is_map()) {
+      LogVariantMap(item.map(), indent + 2);
+    } else {
+      printf("%s  ERROR: unknown type %d", indent_string.c_str(),
+             static_cast<int>(item.type()));
+    }
+  }
+  printf("%s]", indent_string.c_str());
+}
+
+// Log a map of variants.
+static void LogVariantMap(const std::map<firebase::Variant, firebase::Variant> &variant_map,
+                          int indent) {
+  std::string indent_string(indent * 2, ' ');
+  for (auto it = variant_map.begin(); it != variant_map.end(); ++it) {
+    const firebase::Variant &key_string = it->first.AsString();
+    const firebase::Variant &value = it->second;
+    if (value.is_fundamental_type()) {
+      const firebase::Variant &string_value = value.AsString();
+      printf("%s%s: %s,", indent_string.c_str(), key_string.string_value(),
+             string_value.string_value());
+    } else {
+      printf("%s%s:", indent_string.c_str(), key_string.string_value());
+      if (value.is_vector()) {
+        LogVariantVector(value.vector(), indent + 1);
+      } else if (value.is_map()) {
+        LogVariantMap(value.map(), indent + 1);
+      } else {
+        printf("%s  ERROR: unknown type %d", indent_string.c_str(),
+               static_cast<int>(value.type()));
+      }
+    }
+  }
+}
+
 class UIDListener : public firebase::database::ValueListener {
  public:
   firebase::database::DatabaseReference myRef;
@@ -90,13 +141,13 @@ class UIDListener : public firebase::database::ValueListener {
     std::cout << snapshot.value().AsString().string_value() << std::endl;
     auto mymap = snapshot.value().map();
 
-    // std::cout << "Here's the data:--------------------------------- "
-    //           << std::endl;
-    // LogVariantMap(mymap, 5);
-    // std::cout << "EOD----------------------------------" << std::endl;
+    std::cout << "Here's the data:--------------------------------- "
+              << std::endl;
+    LogVariantMap(mymap, 5);
+    std::cout << "EOD----------------------------------" << std::endl;
 
-    // std::cout << (mymap.begin()->second).AsString().string_value() <<
-    // std::endl;
+    std::cout << (mymap.begin()->second).AsString().string_value() <<
+    std::endl;
     auto it = mymap.begin();
     std::string uid = (mymap["uid"]).AsString().string_value();
     ++it;
