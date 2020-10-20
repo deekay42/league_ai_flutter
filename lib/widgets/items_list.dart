@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import '../model/item.dart';
+import '../model/champion.dart';
 import '../resources/Colors.dart';
 
 bool notNull(Object o) => o != null;
@@ -11,11 +12,15 @@ class SlidingList extends StatefulWidget {
   final String title;
   final Offset origin;
   final Animation<double> animationController;
+  final Axis scrollDir;
+  final bool showLines;
 
   SlidingList(
       {@required this.title,
       @required this.children,
       @required this.animationController,
+      this.scrollDir = Axis.vertical,
+      this.showLines = true,
       this.origin = const Offset(0.0, 20.0)});
 
   @override
@@ -33,7 +38,7 @@ class _SlidingListState extends State<SlidingList>
       key4 = GlobalKey();
   SlidingListAnimations animations;
   bool dimsObtained;
-  
+
   @override
   void initState() {
     super.initState();
@@ -49,16 +54,16 @@ class _SlidingListState extends State<SlidingList>
 
   @override
   void didUpdateWidget(SlidingList oldWidget) {
-     super.didUpdateWidget(oldWidget);
-     
+    super.didUpdateWidget(oldWidget);
+
     animations = SlidingListAnimations(
         controller: widget.animationController,
         origin: widget.origin,
         listLength: widget.children.length);
-      dimsObtained = false;
-      listKey = GlobalKey();
-      builderKey = GlobalKey();
-      WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
+    dimsObtained = false;
+    listKey = GlobalKey();
+    builderKey = GlobalKey();
+    WidgetsBinding.instance.addPostFrameCallback(_afterLayout);
   }
 
   void _afterLayout(_) {
@@ -100,9 +105,10 @@ class _SlidingListState extends State<SlidingList>
     final ThemeData theme = Theme.of(context);
     int count = 0;
     ListView mainList = ListView(
+        scrollDirection: widget.scrollDir,
         key: listKey,
         shrinkWrap: true,
-        padding: EdgeInsets.all(8.0),
+//        padding: EdgeInsets.all(8.0),
         children: widget.children.map((child) {
           return SlidingListItem(
               slider: animations.sliders[count++],
@@ -112,7 +118,10 @@ class _SlidingListState extends State<SlidingList>
 
     return LayoutBuilder(builder: (context, constraints) {
       animations.setDivLength(constraints.maxWidth);
-      return Column(key: key2, mainAxisAlignment:MainAxisAlignment.center, children: [
+      return Column(
+          key: key2,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
             Text(
               widget.title,
               style: theme.textTheme.subtitle,
@@ -124,15 +133,15 @@ class _SlidingListState extends State<SlidingList>
             SlideTransition(
                 position: animations.upperDivDy,
                 child: Container(
-                  color: Colors.white,
+                  color: Colors.white.withOpacity(widget.showLines ? 1.0 : 0.0),
                   width: animations.dividerLength.value,
                   height: 1.0,
                 )),
-            Flexible(fit:FlexFit.loose, child:mainList),
+            Flexible(fit: FlexFit.loose, child: mainList),
             SlideTransition(
                 position: animations.lowerDivDy,
                 child: Container(
-                  color: Colors.white,
+                  color: Colors.white.withOpacity(widget.showLines ? 1.0 : 0.0),
                   width: animations.dividerLength.value,
                   height: 1.0,
                 )),
@@ -157,19 +166,74 @@ class SlidingListItem extends StatelessWidget {
 
 abstract class MyListItem extends StatelessWidget {
   final bool last;
+
   MyListItem({this.last = false});
 }
 
-class MyItemListItem extends MyListItem {
+//class MyItemListItem extends MyListItem {
+//  final Item item;
+//
+//  MyItemListItem({this.item, bool last = false}) : super(last: last);
+//
+//  Widget build(BuildContext context) {
+//    var theme = Theme.of(context);
+//    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+//
+//      Column(
+//        crossAxisAlignment: CrossAxisAlignment.center,
+//        children: [
+//          Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+//            ClipRRect(
+//                borderRadius: BorderRadius.all(
+//                  Radius.circular(10.0),
+//                ),
+//                child: Image.asset(
+//                  item.img,
+//                  height: 50,
+//                  width: 50,
+//                  fit: BoxFit.contain,
+//                )),
+//            SizedBox(width: 20),
+//            Container(width:150, child:Text(
+//                  item.name,
+//                  style: theme.textTheme.body1
+//                )),
+//          ]),
+//          last
+//              ? null
+//              : Column(children: [
+//                  SizedBox(
+//                    height: 5,
+//                  ),
+//                  Row(children: [
+//                    SizedBox(
+//                      width: 10,
+//                    ),
+//                    Text("V",
+//                        style: TextStyle(
+//                            fontWeight: FontWeight.w200,
+//                            fontSize: 12.0,
+//                            color: secondaryText)),
+//                  ]),
+//                  SizedBox(
+//                    height: 5,
+//                  ),
+//                ]),
+//        ].where(notNull).toList(),
+//      )
+//    ]);
+//  }
+//}
+
+class ItemListItem extends MyListItem {
   final Item item;
 
-  MyItemListItem({this.item, bool last = false}) : super(last: last);
+  ItemListItem({this.item, bool last = false}) : super(last: last);
 
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
-    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      
-      Column(
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+    Expanded(child:Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
@@ -179,35 +243,150 @@ class MyItemListItem extends MyListItem {
                 ),
                 child: Image.asset(
                   item.img,
-                  height: 50,
-                  width: 50,
+                  fit: BoxFit.fitHeight,
+                )),
+            last
+              ? Container()
+            : SizedBox(width: 20),
+          ]),
+//          last
+//              ? null
+//              : Column(children: [
+//            SizedBox(
+//              height: 5,
+//            ),
+//            Row(children: [
+//              SizedBox(
+//                width: 10,
+//              ),
+//              Text("V",
+//                  style: TextStyle(
+//                      fontWeight: FontWeight.w200,
+//                      fontSize: 12.0,
+//                      color: secondaryText)),
+//            ]),
+//            SizedBox(
+//              height: 5,
+//            ),
+//          ]),
+        ].where(notNull).toList(),
+      ))
+    ]);
+  }
+}
+
+class ChampListItem extends MyListItem {
+  final Champion champ1, champ2;
+  final int kills1, kills2;
+  final int deaths1, deaths2;
+  final int assists1, assists2;
+  final int level1, level2;
+//  final int currentGold;
+//  final List<Item> champItems;
+  final bool isMyChamp;
+
+  ChampListItem(
+      {this.champ1,
+      this.champ2,
+      this.kills1,
+      this.kills2,
+      this.deaths1,
+      this.deaths2,
+      this.assists1,
+      this.assists2,
+      this.level1,
+      this.level2,
+//      this.currentGold,
+//      this.champItems,
+      this.isMyChamp,
+      bool last = false})
+      : super(last: last);
+
+//  List<Widget> buildItemsList() {
+//    List<Widget> row = [];
+//
+//    for (var item in champItems)
+//      row.add(ClipRRect(
+//          borderRadius: BorderRadius.all(
+//            Radius.circular(10.0),
+//          ),
+//          child: Image.asset(
+//            item.img,
+//            height: 25,
+//            width: 25,
+//            fit: BoxFit.contain,
+//          )));
+//    return row;
+//  }
+
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+
+//    var itemsList = buildItemsList();
+//  itemsList.insert(0, SizedBox(width: 10,));
+
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+
+      Column(children: [
+        SizedBox(height:5),
+        Row(children: [
+          Column(children: [
+            ClipRRect(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                child: Image.asset(
+                  champ1.img,
+                  height: isMyChamp ? 50 : 30,
+                  width: isMyChamp ? 50 : 30,
                   fit: BoxFit.contain,
                 )),
-            SizedBox(width: 20),
-            Container(width:150, child:Text(
-                  item.name,
-                  style: theme.textTheme.body1
+          ]),
+          Row(children:[
+            SizedBox(width:isMyChamp? 10 : 30),
+            Text(level1.toString(), style:theme.textTheme.subtitle),
+            SizedBox(width:level1 > 9 ? 10 : 16),
+            Text(kills1.toString() + "/"+ deaths1.toString() + "/" + assists1.toString(), style:theme.textTheme.body2),
+
+          ])
+
+//                  isMyChamp ? Column(crossAxisAlignment: CrossAxisAlignment.start,
+//                      children:[
+//                        Row(children:itemsList),
+//                        SizedBox(height:5),
+//                        Text(currentGold.toString() + " g"),
+//
+//                      ]) : Container()
+        ]),
+      last?SizedBox(height:5):Container()]),
+      Expanded(child: Container()),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+            Row(children:[
+              Text(kills2.toString() + "/"+ deaths2.toString() + "/" + assists2.toString(), style:theme.textTheme.body2),
+              SizedBox(width:level2 > 9 ? 10 : 16),
+              Text(level2.toString(), style:theme.textTheme.subtitle),
+              SizedBox(width:isMyChamp? 10 : 30),
+            ]),
+            ClipRRect(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
+                ),
+                child: Image.asset(
+                  champ2.img,
+                  height: isMyChamp ? 50 : 30,
+                  width: isMyChamp ? 50 : 30,
+                  fit: BoxFit.contain,
                 )),
           ]),
           last
               ? null
               : Column(children: [
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Row(children: [
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text("V",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w200,
-                            fontSize: 12.0,
-                            color: secondaryText)),
-                  ]),
-                  SizedBox(
-                    height: 5,
-                  ),
+//            SizedBox(
+//              height: 5,
+//            ),
                 ]),
         ].where(notNull).toList(),
       )
@@ -269,21 +448,21 @@ class SlidingListAnimations {
     this.sliders = List.generate(
       listLength,
       (i) => Tween<Offset>(
-            begin: origin,
-            end: Offset.zero,
-          ).animate(
-            CurvedAnimation(
-              parent: listCurve,
-              curve: Interval(
-                calcStartingPointForInterval(
-                    i, calcLenForInterval(0.8, listLength), 0.8),
-                calcStartingPointForInterval(
-                        i, calcLenForInterval(0.8, listLength), 0.8) +
-                    calcLenForInterval(0.8, listLength),
-                curve: Curves.ease,
-              ),
-            ),
+        begin: origin,
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: listCurve,
+          curve: Interval(
+            calcStartingPointForInterval(
+                i, calcLenForInterval(0.8, listLength), 0.8),
+            calcStartingPointForInterval(
+                    i, calcLenForInterval(0.8, listLength), 0.8) +
+                calcLenForInterval(0.8, listLength),
+            curve: Curves.ease,
           ),
+        ),
+      ),
     );
   }
 

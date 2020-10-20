@@ -13,19 +13,19 @@
 // limitations under the License.
 
 import 'package:flutter/foundation.dart';
+import 'champion.dart';
+import 'item.dart';
 
-class Item {
-  const Item({
-    @required this.id,
-    @required this.name,
-  })  : assert(id != null),
-        assert(name != null);
+class Payload {
+  const Payload({this.champs, this.kills, this.deaths, this.assists, this.levels, this.suggestedItems, this.pos, this.patch, this.num_games});
 
-  final String id;
-  final String name;
-
-  String get img => 'assets/train_imgs/$id.png';
-
-  @override
-  String toString() => "$name (id=$id)";
+  final List<Champion> champs;
+  final List<int> kills;
+  final List<int> deaths;
+  final List<int> assists;
+  final List<int> levels;
+  final List<Item> suggestedItems;
+  final int pos;
+  final double patch;
+  final int num_games;
 }

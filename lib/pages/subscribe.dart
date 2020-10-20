@@ -3,7 +3,7 @@ import 'dart:io' show Platform;
 import 'dart:math';
 import 'dart:async';
 
-import 'package:btnonce/btnonce.dart' as btnonce;
+//import 'package:btnonce/btnonce.dart' as btnonce;
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fbfunctions/fbfunctions.dart';
 import 'package:flutter/material.dart';
@@ -207,15 +207,15 @@ class _SubscribePageState extends State<SubscribePage>
   }
 
   Future<String> getDesktopNonce() async {
-    dynamic result =
-        await btnonce.finishPayment(clientToken: await _clientToken);
-    setState(() {});
-    print("Dart: this is the result: $result");
-    if (result != null) {
-      var resultJson = jsonDecode(await result);
-      return resultJson["nonce"];
-    } else
-      return null;
+//    dynamic result =
+//        await btnonce.finishPayment(clientToken: await _clientToken);
+//    setState(() {});
+//    print("Dart: this is the result: $result");
+//    if (result != null) {
+//      var resultJson = jsonDecode(await result);
+//      return resultJson["nonce"];
+//    } else
+//      return null;
   }
 
   Future<void> runPaymentProcess(BuildContext context) async {
