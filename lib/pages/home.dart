@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io' show Platform;
 import 'dart:io';
+import 'dart:math';
+import 'dart:convert';
 
 import 'package:fbfunctions/fbfunctions.dart';
 import 'package:firebase_admob/firebase_admob.dart';
@@ -12,10 +15,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../model/item.dart';
 import '../model/items_repository.dart';
+import '../model/champion_repository.dart';
+import '../model/champion.dart';
+import '../model/payload.dart';
 import '../resources/Strings.dart';
 import '../resources/ads.dart';
 import '../widgets/items_list.dart';
 import '../supplemental/utils.dart';
+
+
 
 
 bool notNull(Object o) => o != null;
@@ -41,7 +49,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ItemsRepository itemsRepo = new ItemsRepository();
-  List<Item> _items;
+  final ChampionRepository championsRepository = new ChampionRepository();
+  Payload payload;
 //  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool outOfPredictions;
   StreamSubscription desktopLastFileStream;
@@ -82,13 +91,25 @@ class _HomePageState extends State<HomePage> {
     }
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
-    Future.delayed(Duration(seconds: 10), () {
-      print("Now sending relaymessage");
-      CloudFunctions.instance
-          .getHttpsCallable(functionName: 'relayMessage')
-          .call(<String, dynamic>{"items": "3111,1057,1042,1042"});
-//      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
-    });
+//    Future.delayed(Duration(seconds: 5), () {
+//      print("Now sending relaymessage");
+//
+//        Map<String, dynamic> payload =
+//          {"items": [3111,1057,1042,1042],
+//            "champs": [24,19,498,76,83,69,57,516,412,10],
+//            "kills": [5,4,1,2,0,0,0,3,2,1],
+//            "deaths": [0,0,1,2,3,0,0,0,1,1],
+//            "assists": [5,6,8,1,5,4,1,3,4,2],
+//            "levels": [11,11,12,13,5,11,9,12,11,7],
+//            "pos": 4,
+//            "patch": 10.18,
+//            'num_games': 36332
+//          };
+//      CloudFunctions.instance
+//          .getHttpsCallable(functionName: 'relayMessage')
+//          .call(payload);
+////      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
+//    });
   }
 
   void didUpdateWidget(HomePage oldWidget)
@@ -127,53 +148,53 @@ class _HomePageState extends State<HomePage> {
 
 
 
-  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
-    print("Received new message: $message");
-    String content;
-    String remaining;
-    if(Platform.isIOS) {
-      if (!message.containsKey('body'))
-        return;
-      content = message['body'];
-//      if (message['aps']['alert'].containsKey('tag'))
-//        remaining = message['aps']['alert']['tag'];
-    }
-    else// if(Platform.isAndroid || Platform.isWindows)
-    {
-      if (!message.containsKey('data') || !message['data'].containsKey('body'))
-        return;
-      content = message['data']['body'];
-//      if (message['notification'].containsKey('tag'))
-//        remaining = message['notification']['tag'];
-    }
-
-//    print("building new list0: content: $content");
-    if(content == "subscribe_success")
-      widget.updateSubscription();
-    //connectivity test successful
-    if(content == "success")
-    {
-      var mySnack = SnackBar(
-                duration: const Duration(seconds: 10),
-                content: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text("Connectivity test successful!", textAlign: TextAlign.center)
-                    ]));
-      Scaffold.of(context).showSnackBar(mySnack);
-      return;
-    }
-    if(content != "-1") {
-      handleNewItems(content);
-    }
-    else
-      setState(() {
-        _items = List<Item>();
-//        if (message['aps']['alert'].containsKey('tag'))
-//          widget.updateRemaining(message['aps']['alert']['tag']);
-      });
-  }
+//  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
+//    print("Received new message: $message");
+//    String content;
+//    String remaining;
+//    if(Platform.isIOS) {
+//      if (!message.containsKey('body'))
+//        return;
+//      content = message['body'];
+////      if (message['aps']['alert'].containsKey('tag'))
+////        remaining = message['aps']['alert']['tag'];
+//    }
+//    else// if(Platform.isAndroid || Platform.isWindows)
+//    {
+//      if (!message.containsKey('data') || !message['data'].containsKey('body'))
+//        return;
+//      content = message['data']['body'];
+////      if (message['notification'].containsKey('tag'))
+////        remaining = message['notification']['tag'];
+//    }
+//
+////    print("building new list0: content: $content");
+//    if(content == "subscribe_success")
+//      widget.updateSubscription();
+//    //connectivity test successful
+//    if(content == "success")
+//    {
+//      var mySnack = SnackBar(
+//                duration: const Duration(seconds: 10),
+//                content: Row(
+//                    mainAxisSize: MainAxisSize.max,
+//                    mainAxisAlignment: MainAxisAlignment.center,
+//                    children: [
+//                      Text("Connectivity test successful!", textAlign: TextAlign.center)
+//                    ]));
+//      Scaffold.of(context).showSnackBar(mySnack);
+//      return;
+//    }
+//    if(content != "-1") {
+//      handleNewItems(content);
+//    }
+//    else
+//      setState(() {
+//        payload = null;
+////        if (message['aps']['alert'].containsKey('tag'))
+////          widget.updateRemaining(message['aps']['alert']['tag']);
+//      });
+//  }
 
   void initDesktopReadMessage() async {
 //    print("initDesktopReadMessage");
@@ -197,9 +218,12 @@ class _HomePageState extends State<HomePage> {
 
         File file = File.fromUri(Uri.file(filePath));
         await waitForFileToFinishLoading(file);
-        var contents = await file.readAsString();
+        String contentsString = await file.readAsString();
+        var contents = jsonDecode(contentsString);
 
         file.delete();
+
+        contents = sanitizeContents(contents);
 
 //        print("Contents: " + contents);
 //        final stopwatch = Stopwatch()..start();
@@ -281,11 +305,13 @@ class _HomePageState extends State<HomePage> {
             .map((p) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(height:5),
                   Text(
                     p,
                     textAlign: TextAlign.start,
                     style: theme.textTheme.body1,
                   ),
+                  SizedBox(height:5),
                   ++counter == instr.length
                       ? null
                       : SizedBox(
@@ -318,39 +344,108 @@ class _HomePageState extends State<HomePage> {
     if(outOfPredictions)
       return _buildOutOfPredictions(context);
 
+    ThemeData theme = Theme.of(context);
     var mainContent;
-    if (_items == null) {
+    if (payload == null) {
 //      print("items are null");
       mainContent = _buildInstructions(context);
     } else {
       int counter = 0;
 
-      var listItems = _items.map((item) {
-        return MyItemListItem(item: item, last: ++counter == _items.length);
+//      var listItems = _items.map((item) {
+//        return MyItemListItem(item: item, last: ++counter == _items.length);
+//      }).toList();
+
+      bool isMyChamp = false;
+//      int currentGold = payload.currentGold;
+
+
+      List<ChampListItem> champs_list = List<ChampListItem>();
+      for(int i=0;i<5;++i) {
+        if (i == payload.pos)
+          isMyChamp = true;
+        champs_list.add(
+            ChampListItem(champ1: payload.champs[i],
+            champ2: payload.champs[i+5],
+            kills1: payload.kills[i],
+            kills2: payload.kills[i+5],
+            deaths1: payload.deaths[i],
+            deaths2: payload.deaths[i+5],
+            assists1: payload.assists[i],
+            assists2: payload.assists[i+5],
+            level1: payload.levels[i],
+            level2: payload.levels[i+5],
+//            champItems: payload.champItems,
+//            currentGold:currentGold,
+            isMyChamp: isMyChamp,
+            last: ++counter == payload.champs.length/2
+        ));
+        isMyChamp = false;
+      }
+      counter = 0;
+
+      var listItems = payload.suggestedItems.map((item) {
+        return ItemListItem(item: item, last: ++counter == payload.suggestedItems.length);
       }).toList();
 
-      mainContent = SlidingList(
-          title: Strings.buildRec,
-          children: listItems,
+      var champsPlayed = SlidingList(
+          scrollDir: Axis.vertical,
+          title: "Based on your specific game state:",
+          children: champs_list,
           animationController: widget.mainBodyController);
+
+      var itemsSuggested = SlidingList(
+          scrollDir: Axis.horizontal,
+          title: "The item buy with the highest win rate is:",
+          children: listItems,
+          showLines:false,
+          animationController: widget.mainBodyController);
+
+//      var lol = Image.asset(
+//        "assets/item_imgs/1006.png",
+//        height: 50,
+//        width: 50,
+//        fit: BoxFit.contain,
+//      );
+//      List<Widget> lulz = [lol,lol,lol,lol,lol];
+
+
+
+
+      mainContent = Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+          Flexible(child:champsPlayed, flex:20),
+//        SizedBox(height:10),
+        Flexible(child: Container(), flex:1),
+      Flexible(child: itemsSuggested, flex:6),
+        Flexible(child: Container(), flex:1),
+        Flexible(child: Text("${payload.num_games} games analyzed (patch ${payload.patch})", style: theme.textTheme.body2), flex:2),
+        Flexible(child: Container(), flex:1),
+      ]);
+
     }
  
     return mainContent;
   }
 
-  void handleNewItems(String content) async
+  void handleNewItems(Map<String, dynamic> content) async
   {
     String remaining;
-    List<String> itemsS = content.split(",");
+    List<int> champsList = List<int>.from(content["champs"]);
+    List<int> itemsList = List<int>.from(content["items"]);
+    Iterable<Future<Champion>> mappedListC =
+      champsList.map((i) async => await championsRepository.getChamp(i.toString()));
+    Future<List<Champion>> futureListC = Future.wait(mappedListC);
+    List<Champion> champs = await futureListC;
 
     Iterable<Future<Item>> mappedList =
-    itemsS.map((i) async => await itemsRepo.getItem(i));
+      itemsList.map((i) async => await itemsRepo.getItem(i.toString()));
     Future<List<Item>> futureList = Future.wait(mappedList);
     List<Item> items = await futureList;
-
+print(items.length);
 //      print("building new list1  ");
     setState(() {
-      _items = items;
+      payload = Payload(champs: champs, kills: content['kills'], deaths:content['deaths'], assists:content['assists'], levels:content['levels'], pos:content['pos'], suggestedItems: items, patch:content['patch'], num_games:content['num_games']);
+
       //updateremaining does this
       //outOfPredictions = false;
 //        print("building new list2");
@@ -361,6 +456,50 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       _playListAnimation();
     }
+  }
+
+  Map<String, dynamic> sanitizeContents(Map<String, dynamic> contents)
+  {
+    int maxLen = 10;
+    Map<String, dynamic> result = Map<String, dynamic>();
+    for(var elem in ["champs", "kills", "deaths", "assists", "levels", "items"]) {
+      if(elem != "items")
+        result[elem] = List.filled(maxLen,0);
+      if(contents.containsKey(elem)) {
+        var givenData = contents[elem];
+        if(givenData is Iterable) {
+          if(elem == "items")
+            result[elem] = List.filled(min(maxLen, contents[elem].length),0);
+          for (int i = 0; i < min(maxLen, contents[elem].length); ++i) {
+            try {
+              result[elem][i] = contents[elem][i] as int;
+            }
+            on TypeError catch (e) {
+              result[elem][i] = 0;
+            }
+          }
+        }
+      }
+    }
+
+    for(String elem in ["patch", "num_games", "pos"]) {
+      result[elem] = 0;
+      if (contents.containsKey(elem))
+        try {
+          if(contents[elem] is int)
+            result[elem] = contents[elem] as int;
+          else if(contents[elem] is double)
+            result[elem] = contents[elem] as double;
+          else
+            result[elem] = contents[elem] as int;
+        }
+        on TypeError catch (e) {
+          continue;
+        }
+    }
+
+
+    return result;
   }
 
   StreamSubscription<QuerySnapshot> createItemsListener()
@@ -381,11 +520,12 @@ class _HomePageState extends State<HomePage> {
         return;
 
       int counter = 0;
-      String itemUpdate = newDoc.document.data["items"];
+      var content = newDoc.document.data['data'];
+      content = sanitizeContents(content);
+      var itemUpdate = content["items"];
 
-      if(itemUpdate == "-1")
+      if(itemUpdate == [-1])
       {
-
         // Future.delayed(Duration(seconds: 3), () {
           var mySnack = SnackBar(
               duration: const Duration(seconds: 5),
@@ -400,7 +540,7 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      handleNewItems(itemUpdate);
+      handleNewItems(content);
         
       });
     return streamSub;

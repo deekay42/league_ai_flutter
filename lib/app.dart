@@ -133,7 +133,6 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
               setState(() {
                 paired = false;
               });
-              desktopSignout();
           });
 
         }
@@ -568,7 +567,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     print("test oconnection!");
     Fbfunctions.fb_call(
                   methodName: 'newRecommendation',
-                  args: <String, dynamic>{"items": "-1"});
+                  args: <String, dynamic>{"items": [-1]});
     showDialog<Null>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -896,7 +895,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     }
     else
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 20),
+//        margin: const EdgeInsets.symmetric(vertical: 20),
         child: Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -909,7 +908,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
                         maxLines: 1,
                       )
                     : Container(),
-                SizedBox(height: 8),
+//                SizedBox(height: 8),
 //                !(Platform.isIOS || Platform.isAndroid)
 //                    ? RaisedButton(
 //                        child: Text(Strings.sub),

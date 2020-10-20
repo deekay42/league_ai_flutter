@@ -14,8 +14,8 @@
 
 import 'package:flutter/foundation.dart';
 
-class Item {
-  const Item({
+class Champion {
+  const Champion({
     @required this.id,
     @required this.name,
   })  : assert(id != null),
@@ -24,7 +24,7 @@ class Item {
   final String id;
   final String name;
 
-  String get img => 'assets/train_imgs/$id.png';
+  String get img => 'assets/train_imgs/champs/$name.png';
 
   @override
   String toString() => "$name (id=$id)";
