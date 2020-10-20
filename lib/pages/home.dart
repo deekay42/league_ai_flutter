@@ -82,13 +82,13 @@ class _HomePageState extends State<HomePage> {
     }
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
-    Future.delayed(Duration(seconds: 10), () {
-      print("Now sending relaymessage");
-      CloudFunctions.instance
-          .getHttpsCallable(functionName: 'relayMessage')
-          .call(<String, dynamic>{"items": "3111,1057,1042,1042"});
-//      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
-    });
+//     Future.delayed(Duration(seconds: 10), () {
+//       print("Now sending relaymessage");
+//       CloudFunctions.instance
+//           .getHttpsCallable(functionName: 'relayMessage')
+//           .call(<String, dynamic>{"items": "3111,1057,1042,1042"});
+// //      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
+//     });
   }
 
   void didUpdateWidget(HomePage oldWidget)
