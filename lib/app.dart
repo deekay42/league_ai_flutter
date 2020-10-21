@@ -153,13 +153,15 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   }
 
 
-  Future<void> desktopAuthenticate({int timeout = 0}) async {
+  Future<void> desktopAuthenticate({int timeout = 0, attempt = 0}) async {
+    if(attempt == 4)
+      desktopSignout();
     var result = await Fbfunctions.fb_call(methodName: 'authenticate');
     if (result == "unsuccessful") {
 //      print("Auth unsuccessful. Trying again in $timeout seconds");
       //retry
       Future.delayed(Duration(seconds: timeout), () {
-        desktopAuthenticate(timeout: 8);
+        desktopAuthenticate(timeout: 8, attempt: attempt + 1);
       });
     } else if (result == "files_missing") {
       setState(() {
