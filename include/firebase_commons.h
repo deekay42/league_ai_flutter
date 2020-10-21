@@ -35,6 +35,10 @@
 #include <shlwapi.h>
 #include "shlobj.h"
 
+#include <flutter/method_channel.h>
+#include <flutter/plugin_registrar_windows.h>
+#include <flutter/standard_method_codec.h>
+
 
 template <typename T> class UserListener;
 class MyAuthStateListener;
@@ -266,7 +270,7 @@ void initializeFirebase();
 void shutdownFirebase();
 UIDListener* listenForUIDUpdate();
 bool isAlreadyRunning();
-void newRecommendation(const std::string& items);
+void newRecommendation(const firebase::firestore::FieldValue& contents);
 void startUserRecordListener();
 void terminateUserRecordListener();
 void terminateAuthListeners();

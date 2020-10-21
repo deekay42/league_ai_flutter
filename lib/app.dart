@@ -566,7 +566,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   void _testConnection()
   {
-    print("test oconnection!");
+    print("test oco66nnection!");
     Fbfunctions.fb_call(
                   methodName: 'newRecommendation',
                   args: <String, dynamic>{"items": [-1]});

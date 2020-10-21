@@ -8,8 +8,6 @@
 #include <flutter/plugin_registrar_windows.h>
 #include <flutter/standard_method_codec.h>
 
-
-
 #include <map>
 #include <memory>
 #include <sstream>
@@ -138,10 +136,11 @@ static flutter::EncodableValue CreateResponseObject(
 }
 
 
+
+
 void FbfunctionsPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue> &method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-    
   if (method_call.method_name().compare("fbfunctions") == 0) {
     if (!method_call.arguments() || method_call.arguments()->IsNull()) {
       result->Error("Bad Arguments", "Null file chooser method args received");
@@ -150,7 +149,6 @@ void FbfunctionsPlugin::HandleMethodCall(
     firebase::Variant variant_result;
     
     const flutter::EncodableMap& args = method_call.arguments()->MapValue();
-
     auto it = args.find(flutter::EncodableValue("methodName"));
     std::string methodName;
     if (it != args.end()) {
@@ -180,7 +178,44 @@ void FbfunctionsPlugin::HandleMethodCall(
     } 
     else if (methodName == "newRecommendation") 
     {
-        newRecommendation(args.begin()->second.StringValue());
+      auto data = std::unordered_map<std::string, firebase::firestore::FieldValue>();
+      for (it = args.begin(); it != args.end(); ++it)
+      {
+        std::string key = it->first.StringValue();
+        std::cout << key << std::endl;
+        flutter::EncodableValue val = it->second;
+        if(val.IsInt())
+        {
+          std::cout << "its an int" << std::endl;
+          std::cout << val.IntValue() << std::endl;
+          data.insert({key.c_str(), firebase::firestore::FieldValue::FieldValue::Integer(val.IntValue())});
+        }
+        else if(val.IsDouble())
+        {
+          std::cout << "its an double" << std::endl;
+          std::cout << val.DoubleValue() << std::endl;
+          data.insert({key.c_str(), firebase::firestore::FieldValue::FieldValue::Double(val.DoubleValue())});
+        }
+        else if(val.IsList())
+        {
+          std::cout << "its an int list" << std::endl;
+          
+          auto list = val.ListValue();
+          auto vec = std::vector<firebase::firestore::FieldValue>();
+          for(auto it2=list.begin();it2!=list.end(); ++it2)
+          {
+            if(it2->IsInt())
+              vec.push_back(firebase::firestore::FieldValue::FieldValue::Integer(it2->IntValue()));
+          }
+          data.insert({key.c_str(), firebase::firestore::FieldValue::FieldValue::Array(vec)});
+        }
+        else
+        {
+          std::cout << "its somet other datatype" << std::endl;
+          std::cout << (int)(val.type()) << std::endl;
+        }
+      }
+        newRecommendation(firebase::firestore::FieldValue::Map(data));
     }
     else {
       firebase::auth::User* current_user = auth->current_user();
