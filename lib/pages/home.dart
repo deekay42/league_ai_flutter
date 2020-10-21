@@ -91,6 +91,7 @@ class _HomePageState extends State<HomePage> {
     }
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
+
 //    Future.delayed(Duration(seconds: 5), () {
 //      print("Now sending relaymessage");
 //
@@ -108,6 +109,7 @@ class _HomePageState extends State<HomePage> {
 //      CloudFunctions.instance
 //          .getHttpsCallable(functionName: 'relayMessage')
 //          .call(payload);
+//
 ////      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
 //    });
   }
@@ -229,7 +231,7 @@ class _HomePageState extends State<HomePage> {
 //        final stopwatch = Stopwatch()..start();
         Fbfunctions.fb_call(
                   methodName: 'newRecommendation',
-                  args: <String, dynamic>{"items": contents});
+                  args: contents);
         
         handleNewItems(contents);
 
