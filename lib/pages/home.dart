@@ -446,7 +446,8 @@ class _HomePageState extends State<HomePage> {
 print(items.length);
 //      print("building new list1  ");
     setState(() {
-      payload = Payload(champs: champs, kills: content['kills'], deaths:content['deaths'], assists:content['assists'], levels:content['levels'], pos:content['pos'], suggestedItems: items, patch:content['patch'], num_games:content['num_games']);
+      print(content);
+      payload = Payload(champs: champs, kills: content['kills'], deaths:content['deaths'], assists:content['assists'], levels:content['levels'], pos:content['pos'], suggestedItems: items, patch:content['patch']*1.0, num_games:content['num_games']);
 
       //updateremaining does this
       //outOfPredictions = false;
@@ -522,7 +523,7 @@ print(items.length);
         return;
 
       int counter = 0;
-      var content = newDoc.document.data['data'];
+      var content = newDoc.document.data['contents'];
       content = sanitizeContents(content);
       var itemUpdate = content["items"];
 

@@ -232,14 +232,17 @@ bool authenticate(std::string uid, std::string secret)
 	return signIn(customToken.string_value());
 }
 
-void newRecommendation(const std::string& items)
+void newRecommendation(const firebase::firestore::FieldValue& contents)
 {
     std::string uid(auth->current_user()->uid());
   firebase::firestore::CollectionReference document =
             firestore->Collection("users/" + uid + "/predictions");
+  
   document.Add(firebase::firestore::MapFieldValue{
-      {"items", firebase::firestore::FieldValue::String(items)},
-      {"timestamp", firebase::firestore::FieldValue::Timestamp(firebase::Timestamp::Now())} });
+      {"contents", contents},
+      {"timestamp", firebase::firestore::FieldValue::Timestamp(firebase::Timestamp::Now())}
+      });
+  std::cout << "done" << std::endl;
 }
 
 
