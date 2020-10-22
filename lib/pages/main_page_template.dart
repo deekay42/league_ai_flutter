@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-
+import 'dart:io' show Platform;
 import '../widgets/logo.dart';
 
 class MainPageTemplateAnimator extends StatelessWidget {
@@ -75,7 +75,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
                                                             
                               ),
                               Flexible(
-                                flex:1,
+                                flex: !(Platform.isIOS || Platform.isAndroid) ? 3 : 1,
 
                                 child: Align(
                                   alignment: Alignment.bottomCenter,

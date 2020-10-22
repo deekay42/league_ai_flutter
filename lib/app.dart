@@ -872,6 +872,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   Widget _getFooter(BuildContext context) {
     ThemeData theme = Theme.of(context);
+
+
     if ((hasSubscription != null && hasSubscription))
     {
       if(desktopUID != null)
