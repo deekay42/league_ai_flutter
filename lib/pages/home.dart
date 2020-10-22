@@ -528,9 +528,9 @@ print(items.length);
       int counter = 0;
       var content = newDoc.document.data['contents'];
       content = sanitizeContents(content);
-      var itemUpdate = content["items"];
+      var itemUpdate = content["items"][0];
 
-      if(itemUpdate == [-1])
+      if(itemUpdate == -1)
       {
         // Future.delayed(Duration(seconds: 3), () {
           var mySnack = SnackBar(
