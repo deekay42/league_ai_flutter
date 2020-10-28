@@ -70,7 +70,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     super.initState();
 
     mainController = AnimationController(
-        duration: Duration(milliseconds: 5500), vsync: this);
+        duration: Duration(milliseconds: 15500), vsync: this);
     mainBodyController = AnimationController(
         duration: Duration(milliseconds: 1500), vsync: this);
 
@@ -689,7 +689,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
 
 
-      return Container(
+      return Stack(children:[Container(color:Colors.black.withOpacity(0.85)), Center(
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -701,40 +701,12 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             Text("Loading user profile...", style: theme.textTheme.body1),
           ],
         ),
-      );
+      )]);
     }
 
     if (Platform.isAndroid || Platform.isIOS) {
-//      if(permissionStatus == permDenied || permissionStatus == permUnknown)
-//      return Column(
-//        mainAxisAlignment: MainAxisAlignment.center,
-//        children: <Widget>[
-//        Text("League IQ sends recommendations as notifications. Please grant permission or the app won't work."),
-//          SizedBox(
-//            height: 20,
-//          ),
-//          RaisedButton(
-//            child:
-//            Text("OK"),
-//            onPressed: () {
-//              // show the dialog/open settings screen
-//              NotificationPermissions
-//                  .requestNotificationPermissions(
-//                  iosSettings:
-//                  const NotificationSettingsIos(
-//                      sound: true,
-//                      badge: true,
-//                      alert: true))
-//                  .then((_) {
-//                // when finished, check the permission status
-//                      getCheckNotificationPermStatus();
-//              });
-//            },
-//          )
-//        ],
-//      );
       if (paired == null || paired) {
-//        print("rebuilding regular homepage now");
+
         return HomePage(
             hasSubscription: hasSubscription,
             outOfPredictions: outOfPredictions,
@@ -895,43 +867,10 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
               )),
         );
       else
-        return Container();
+        return null;
     }
     else
-      return Container(
-//        margin: const EdgeInsets.symmetric(vertical: 20),
-        child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              child:
-                  Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                _remaining != null
-                    ? Text(
-                        Strings.remaining.replaceAll("N", _remaining),
-                        style: theme.textTheme.overline,
-                        maxLines: 1,
-                      )
-                    : Container(),
-//                SizedBox(height: 8),
-//                !(Platform.isIOS || Platform.isAndroid)
-//                    ? RaisedButton(
-//                        child: Text(Strings.sub),
-//                        onPressed: () async {
-//                          //print("Here's the ad we're disposing: $ad");
-//
-//                          if (await Navigator.of(context).push(
-//                            MaterialPageRoute(
-//                                builder: (context) => SubscribePage()),
-//                          )) {
-//                            checkIfUserHasSubscription();
-//                            _playFullAnimation();
-//                          }
-//                        },
-//                      )
-//                    : Container()
-              ]),
-            )),
-      );
+      return null;
   }
 
   Widget aiLoadingWidget() {

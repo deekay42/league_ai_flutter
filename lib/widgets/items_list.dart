@@ -67,9 +67,7 @@ class _SlidingListState extends State<SlidingList>
   }
 
   void _afterLayout(_) {
-    print("In afterLayout");
     if (!dimsObtained) {
-      print("Dims arent obtained yet!");
       final RenderBox renderBoxList = listKey.currentContext.findRenderObject();
       final sizeList = renderBoxList.size;
       //final RenderBox renderBoxBuilder = listKey.currentContext.findRenderObject();

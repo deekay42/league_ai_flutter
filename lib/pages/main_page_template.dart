@@ -53,35 +53,35 @@ class MainPageTemplateAnimator extends StatelessWidget {
                     sigmaY: animationController.backdropBlur.value,
                   ),
                   child: Container(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withOpacity(1 - animationController.backdropOpacity.value),
                         child: Container(
                             margin:
-                                const EdgeInsets.only(left: 20.0, right: 20.0),
+                                const EdgeInsets.only(left: 00.0, right: 00.0),
                             child: Column(children: [
-                              MediaQuery.of(context).size.height > 500 ?
-                              Flexible(flex:2, child:
-                              Padding(
-                                  padding: EdgeInsets.only(top: 15),
-                                  child: PoppingLogoAnimation(
-                                    child: Image.asset(
-                                      'assets/icons/logo.png',
-                                      fit: BoxFit.fitHeight,
-                                    ),
-                                    animation: animationController.logoPop,
-                                  ))) : Container(height:10),
+//                              MediaQuery.of(context).size.height > 500 ?
+//                              Flexible(flex:2, child:
+//                              Padding(
+//                                  padding: EdgeInsets.only(top: 15),
+//                                  child: PoppingLogoAnimation(
+//                                    child: Image.asset(
+//                                      'assets/icons/logo.png',
+//                                      fit: BoxFit.fitHeight,
+//                                    ),
+//                                    animation: animationController.logoPop,
+//                                  ))) : Container(height:10),
                               Flexible( flex:12,
 
                                 child:Align(child:body, alignment:Alignment.center)
                                                             
                               ),
-                              Flexible(
+                              footer != null ? Flexible(
                                 flex: !(Platform.isIOS || Platform.isAndroid) ? 3 : 1,
 
                                 child: Align(
                                   alignment: Alignment.bottomCenter,
                                   child: footer,
                                 ),
-                              ),
+                              ) : Container(),
                             ])))
                   ,
                 )
@@ -95,7 +95,7 @@ class MainPageTemplateAnimator extends StatelessWidget {
 class MainPageTemplateAnimations {
   MainPageTemplateAnimations(
       {@required this.controller, this.mainBodyController})
-      : backdropOpacity = new Tween(begin: 1.0, end: 0.7).animate(
+      : backdropOpacity = new Tween(begin: 1.0, end: 1.0).animate(
           new CurvedAnimation(
             parent: controller,
             curve: Interval(
@@ -105,7 +105,7 @@ class MainPageTemplateAnimations {
             ),
           ),
         ),
-        backdropBlur = new Tween(begin: 0.0, end: 3.0).animate(
+        backdropBlur = new Tween(begin: 0.0, end: 0.0).animate(
           new CurvedAnimation(
             parent: controller,
             curve: Interval(

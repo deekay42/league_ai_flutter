@@ -5,8 +5,10 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:convert';
 
+import 'package:LeagueAI/widgets/breathing_text.dart';
 import 'package:fbfunctions/fbfunctions.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+
 //import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:wakelock/wakelock.dart';
@@ -23,9 +25,6 @@ import '../resources/ads.dart';
 import '../widgets/items_list.dart';
 import '../supplemental/utils.dart';
 
-
-
-
 bool notNull(Object o) => o != null;
 
 class HomePage extends StatefulWidget {
@@ -35,6 +34,7 @@ class HomePage extends StatefulWidget {
   final Function updateRemaining;
   final Function updateSubscription;
   final String uid;
+
   HomePage(
       {this.hasSubscription = false,
       this.outOfPredictions = false,
@@ -51,11 +51,13 @@ class _HomePageState extends State<HomePage> {
   final ItemsRepository itemsRepo = new ItemsRepository();
   final ChampionRepository championsRepository = new ChampionRepository();
   Payload payload;
+
 //  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool outOfPredictions;
   StreamSubscription desktopLastFileStream;
   bool initialDataSnapshotComplete = false;
   StreamSubscription<QuerySnapshot> itemsListener;
+  bool ai_loaded = false;
 
 //  Ads ads;
 //  BannerAd ad;
@@ -66,8 +68,6 @@ class _HomePageState extends State<HomePage> {
 
     outOfPredictions = widget.outOfPredictions;
     if (Platform.isAndroid || Platform.isIOS) {
-
-
 //      initFirebaseMessaging();
 //      ads = Ads();
 //      ads.getBannerAd().then((BannerAd newAd) {
@@ -75,15 +75,13 @@ class _HomePageState extends State<HomePage> {
 //        ad.show();
 //      });
 
-    if(itemsListener == null)
-      itemsListener = createItemsListener();
+      if (itemsListener == null) itemsListener = createItemsListener();
 
       Wakelock.enable();
 //      CloudFunctions.instance
 //          .getHttpsCallable(functionName: 'relayMessage')
 //          .call(<String, dynamic>{"items": "-1"});
-    } 
-    else {
+    } else {
       initDesktopReadMessage();
 //      Fbfunctions.fb_call(
 //          methodName: 'relayMessage',
@@ -92,23 +90,29 @@ class _HomePageState extends State<HomePage> {
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
 
-    // Future.delayed(Duration(seconds: 5), () {
-    //   print("Now sending relaymessage");
+    Future.delayed(Duration(seconds: 5), () {
+      print("Now sending relaymessage");
 
-    //     Map<String, dynamic> payload =
-    //     { "timestamp": 1234321,
-    //       "contents": {"items": [-1],
-    //         "champs": [24,19,498,76,83,69,57,516,412,10],
-    //         "kills": [5,4,1,2,0,0,0,3,2,1],
-    //         "deaths": [0,0,1,2,3,0,0,0,1,1],
-    //         "assists": [5,6,8,1,5,4,1,3,4,2],
-    //         "levels": [11,11,12,13,5,11,9,12,11,7],
-    //         "pos": 4,
-    //         "patch": 10.18,
-    //         'num_games': 36332
-    //       }};
+      Map<String, dynamic> payload = {
+        "timestamp": 1234321,
+        "contents": {
+          "items": [1001, 1001, 1001],
+          "champs": [24, 19, 498, 76, 83, 69, 57, 516, 412, 10],
+          "kills": [5, 4, 1, 2, 0, 0, 0, 3, 2, 1],
+          "deaths": [0, 0, 1, 2, 3, 0, 0, 0, 1, 1],
+          "assists": [5, 6, 8, 1, 5, 4, 1, 3, 4, 2],
+          "levels": [11, 11, 12, 13, 5, 11, 9, 12, 11, 7],
+          "pos": 4,
+          "patch": 10.18,
+          'num_games': 36332
+        }
+      };
 
-    //   Firestore.instance.collection('users').document(widget.uid).collection('predictions').add(payload);
+      Firestore.instance
+          .collection('users')
+          .document(widget.uid)
+          .collection('predictions')
+          .add(payload);
 //      CloudFunctions.instance
 //          .getHttpsCallable(functionName: 'relayMessage')
 //          .call(payload);
@@ -117,8 +121,7 @@ class _HomePageState extends State<HomePage> {
     // });
   }
 
-  void didUpdateWidget(HomePage oldWidget)
-  {
+  void didUpdateWidget(HomePage oldWidget) {
     super.didUpdateWidget(oldWidget);
     outOfPredictions = widget.outOfPredictions;
 //    print("In homepage didUpdateWidget");
@@ -137,12 +140,9 @@ class _HomePageState extends State<HomePage> {
 //    print("Disposing of old home state now");
 //    ad?.dispose();
     print("NOW DISPOSING HOME");
-    if (!Platform.isIOS && !Platform.isAndroid) 
-    {
+    if (!Platform.isIOS && !Platform.isAndroid) {
       desktopLastFileStream.cancel();
-    }
-    else
-    {
+    } else {
       print("itemslistener canceled");
       itemsListener.cancel();
       itemsListener = null;
@@ -150,8 +150,6 @@ class _HomePageState extends State<HomePage> {
     }
     super.dispose();
   }
-
-
 
 //  Future<void> _handleNewMessageIncoming(Map<String, dynamic> message) async {
 //    print("Received new message: $message");
@@ -232,10 +230,8 @@ class _HomePageState extends State<HomePage> {
 
 //        print("Contents: " + contents);
 //        final stopwatch = Stopwatch()..start();
-        Fbfunctions.fb_call(
-                  methodName: 'newRecommendation',
-                  args: contents);
-        
+        Fbfunctions.fb_call(methodName: 'newRecommendation', args: contents);
+
         handleNewItems(contents);
 
 //        Fbfunctions.fb_call(
@@ -303,51 +299,26 @@ class _HomePageState extends State<HomePage> {
       instr = Strings.instructions;
     else
       instr = Strings.instructionsDesktop;
-
-    return SlidingList(
-        title: "INSTRUCTIONS",
-        children: instr
-            .map((p) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height:5),
-                  Text(
-                    p,
-                    textAlign: TextAlign.start,
-                    style: theme.textTheme.body1,
-                  ),
-                  SizedBox(height:5),
-                  ++counter == instr.length
-                      ? null
-                      : SizedBox(
-                          height: 72,
-                        ),
-                ].where(notNull).toList()))
-            .toList(),
-        animationController: widget.mainBodyController,
-        origin: Offset(10, 0));
+    return BreathingImage();
+//    return Opacity(opacity:0.5, child:Container(color: Colors.black, child:BreathingImage()));
   }
 
   Widget _buildOutOfPredictions(BuildContext context) {
     ThemeData theme = Theme.of(context);
 
-    return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(child:
-              Center(child:
-
-              Text(
-                Strings.outOfPredictions,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.body1,
-              )))
-            ]);
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Expanded(
+          child: Center(
+              child: Text(
+        Strings.outOfPredictions,
+        textAlign: TextAlign.center,
+        style: theme.textTheme.body1,
+      )))
+    ]);
   }
 
   Widget build(BuildContext context) {
-    if(outOfPredictions)
-      return _buildOutOfPredictions(context);
+    if (outOfPredictions) return _buildOutOfPredictions(context);
 
     ThemeData theme = Theme.of(context);
     var mainContent;
@@ -364,33 +335,31 @@ class _HomePageState extends State<HomePage> {
       bool isMyChamp = false;
 //      int currentGold = payload.currentGold;
 
-
       List<ChampListItem> champs_list = List<ChampListItem>();
-      for(int i=0;i<5;++i) {
-        if (i == payload.pos)
-          isMyChamp = true;
-        champs_list.add(
-            ChampListItem(champ1: payload.champs[i],
-            champ2: payload.champs[i+5],
+      for (int i = 0; i < 5; ++i) {
+        if (i == payload.pos) isMyChamp = true;
+        champs_list.add(ChampListItem(
+            champ1: payload.champs[i],
+            champ2: payload.champs[i + 5],
             kills1: payload.kills[i],
-            kills2: payload.kills[i+5],
+            kills2: payload.kills[i + 5],
             deaths1: payload.deaths[i],
-            deaths2: payload.deaths[i+5],
+            deaths2: payload.deaths[i + 5],
             assists1: payload.assists[i],
-            assists2: payload.assists[i+5],
+            assists2: payload.assists[i + 5],
             level1: payload.levels[i],
-            level2: payload.levels[i+5],
+            level2: payload.levels[i + 5],
 //            champItems: payload.champItems,
 //            currentGold:currentGold,
             isMyChamp: isMyChamp,
-            last: ++counter == payload.champs.length/2
-        ));
+            last: ++counter == payload.champs.length / 2));
         isMyChamp = false;
       }
       counter = 0;
 
       var listItems = payload.suggestedItems.map((item) {
-        return ItemListItem(item: item, last: ++counter == payload.suggestedItems.length);
+        return ItemListItem(
+            item: item, last: ++counter == payload.suggestedItems.length);
       }).toList();
 
       var champsPlayed = SlidingList(
@@ -403,7 +372,7 @@ class _HomePageState extends State<HomePage> {
           scrollDir: Axis.horizontal,
           title: "The item buy with the highest win rate is:",
           children: listItems,
-          showLines:false,
+          showLines: false,
           animationController: widget.mainBodyController);
 
 //      var lol = Image.asset(
@@ -414,73 +383,134 @@ class _HomePageState extends State<HomePage> {
 //      );
 //      List<Widget> lulz = [lol,lol,lol,lol,lol];
 
-
-
-
-      mainContent = Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
-          Flexible(child:champsPlayed, flex:20),
+      var content = Container(
+          margin: const EdgeInsets.only(left: 15.0, right: 15.0),
+          child: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+            Flexible(child: Container(), flex: 4),
+            Flexible(child: champsPlayed, flex: 20),
 //        SizedBox(height:10),
-        Flexible(child: Container(), flex:1),
-      Flexible(child: itemsSuggested, flex:6),
-        Flexible(child: Container(), flex:1),
-        Flexible(child: Text("${payload.num_games} games analyzed (patch ${payload.patch})", style: theme.textTheme.body2), flex:2),
-        Flexible(child: Container(), flex:1),
-      ]);
+            Flexible(child: Container(), flex: 1),
+            Flexible(child: itemsSuggested, flex: 6),
+            Flexible(child: Container(), flex: 1),
+            Flexible(
+                child: Text(
+                    "${payload.num_games} games analyzed (patch ${payload.patch})",
+                    style: theme.textTheme.body2),
+                flex: 2),
+            Flexible(child: Container(), flex: 1),
+          ]));
 
+      mainContent = Stack(children: [
+        Opacity(
+            opacity: 0.85,
+            child: Container(
+                color: Colors.black,
+                child: Column(children: [
+                  Flexible(
+                      flex: 2,
+                      child: Container(
+                          margin: EdgeInsets.all(15.0),
+                          child: Stack(
+                              fit: StackFit.loose,
+                              alignment: AlignmentDirectional.center,
+                              children: [
+                                Center(
+                                    child: ClipOval(
+                                        child: ColorFiltered(
+                                            child: Image.asset(
+                                              "assets/imgs/ai.gif",
+                                            ),
+                                            colorFilter: ColorFilter.mode(
+                                                Colors.red, BlendMode.color)))),
+                                Center(
+                                    child: Column(children: [
+                                  Flexible(flex: 1, child: Container()),
+                                  Flexible(
+                                      flex: 2,
+                                      child: ClipOval(
+                                          child: ColorFiltered(
+                                              child: Image.asset(
+                                                "assets/imgs/brain2.png",
+                                                fit: BoxFit.fitHeight,
+                                              ),
+                                              colorFilter: ColorFilter.mode(
+                                                  Colors.red,
+                                                  BlendMode.color)))),
+                                  Flexible(flex: 1, child: Container())
+                                ]))
+                              ]))),
+                  Flexible(
+                    flex: 7,
+                    child: Container(),
+                  )
+                ]))),
+        content
+      ]);
     }
- 
+
     return mainContent;
   }
 
-  void handleNewItems(Map<String, dynamic> content) async
-  {
+  void handleNewItems(Map<String, dynamic> content) async {
     String remaining;
     List<int> champsList = List<int>.from(content["champs"]);
     List<int> itemsList = List<int>.from(content["items"]);
-    Iterable<Future<Champion>> mappedListC =
-      champsList.map((i) async => await championsRepository.getChamp(i.toString()));
+    Iterable<Future<Champion>> mappedListC = champsList
+        .map((i) async => await championsRepository.getChamp(i.toString()));
     Future<List<Champion>> futureListC = Future.wait(mappedListC);
     List<Champion> champs = await futureListC;
 
     Iterable<Future<Item>> mappedList =
-      itemsList.map((i) async => await itemsRepo.getItem(i.toString()));
+        itemsList.map((i) async => await itemsRepo.getItem(i.toString()));
     Future<List<Item>> futureList = Future.wait(mappedList);
     List<Item> items = await futureList;
-print(items.length);
+    print(items.length);
 //      print("building new list1  ");
     setState(() {
       print(content);
-      payload = Payload(champs: champs, kills: content['kills'], deaths:content['deaths'], assists:content['assists'], levels:content['levels'], pos:content['pos'], suggestedItems: items, patch:content['patch']*1.0, num_games:content['num_games']);
+      payload = Payload(
+          champs: champs,
+          kills: content['kills'],
+          deaths: content['deaths'],
+          assists: content['assists'],
+          levels: content['levels'],
+          pos: content['pos'],
+          suggestedItems: items,
+          patch: content['patch'] * 1.0,
+          num_games: content['num_games']);
 
       //updateremaining does this
       //outOfPredictions = false;
 //        print("building new list2");
 
-      if (remaining!=null)
-        widget.updateRemaining(remaining);
+      if (remaining != null) widget.updateRemaining(remaining);
     });
     if (mounted) {
       _playListAnimation();
     }
   }
 
-  Map<String, dynamic> sanitizeContents(Map<String, dynamic> contents)
-  {
+  Map<String, dynamic> sanitizeContents(Map<String, dynamic> contents) {
     int maxLen = 10;
     Map<String, dynamic> result = Map<String, dynamic>();
-    for(var elem in ["champs", "kills", "deaths", "assists", "levels", "items"]) {
-      if(elem != "items")
-        result[elem] = List.filled(maxLen,0);
-      if(contents.containsKey(elem)) {
+    for (var elem in [
+      "champs",
+      "kills",
+      "deaths",
+      "assists",
+      "levels",
+      "items"
+    ]) {
+      if (elem != "items") result[elem] = List.filled(maxLen, 0);
+      if (contents.containsKey(elem)) {
         var givenData = contents[elem];
-        if(givenData is Iterable) {
-          if(elem == "items")
-            result[elem] = List.filled(min(maxLen, contents[elem].length),0);
+        if (givenData is Iterable) {
+          if (elem == "items")
+            result[elem] = List.filled(min(maxLen, contents[elem].length), 0);
           for (int i = 0; i < min(maxLen, contents[elem].length); ++i) {
             try {
               result[elem][i] = contents[elem][i] as int;
-            }
-            on TypeError catch (e) {
+            } on TypeError catch (e) {
               result[elem][i] = 0;
             }
           }
@@ -488,32 +518,32 @@ print(items.length);
       }
     }
 
-    for(String elem in ["patch", "num_games", "pos"]) {
+    for (String elem in ["patch", "num_games", "pos"]) {
       result[elem] = 0;
       if (contents.containsKey(elem))
         try {
-          if(contents[elem] is int)
+          if (contents[elem] is int)
             result[elem] = contents[elem] as int;
-          else if(contents[elem] is double)
+          else if (contents[elem] is double)
             result[elem] = contents[elem] as double;
           else
             result[elem] = contents[elem] as int;
-        }
-        on TypeError catch (e) {
+        } on TypeError catch (e) {
           continue;
         }
     }
 
-
     return result;
   }
 
-  StreamSubscription<QuerySnapshot> createItemsListener()
-  {
-    StreamSubscription<QuerySnapshot> streamSub = Firestore.instance.collection('users').document(widget.uid).collection('predictions').snapshots().listen((snapshot)
-    {
-      if(!initialDataSnapshotComplete)
-      {
+  StreamSubscription<QuerySnapshot> createItemsListener() {
+    StreamSubscription<QuerySnapshot> streamSub = Firestore.instance
+        .collection('users')
+        .document(widget.uid)
+        .collection('predictions')
+        .snapshots()
+        .listen((snapshot) {
+      if (!initialDataSnapshotComplete) {
         print("this was the initial itemslistener INIT");
         print(snapshot.documentChanges[0].document.data);
         initialDataSnapshotComplete = true;
@@ -522,33 +552,31 @@ print(items.length);
       print("this was the REAL itemslistener");
       print(snapshot.documentChanges[0].document.data);
       var newDoc = snapshot.documentChanges[0];
-      if(newDoc.type != DocumentChangeType.added)
-        return;
+      if (newDoc.type != DocumentChangeType.added) return;
 
       int counter = 0;
       var content = newDoc.document.data['contents'];
       content = sanitizeContents(content);
       var itemUpdate = content["items"][0];
 
-      if(itemUpdate == -1)
-      {
+      if (itemUpdate == -1) {
         // Future.delayed(Duration(seconds: 3), () {
-          var mySnack = SnackBar(
-              duration: const Duration(seconds: 5),
-              content: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Desktop connection established!", textAlign: TextAlign.center)
-                  ]));
-          Scaffold.of(context).showSnackBar(mySnack);
+        var mySnack = SnackBar(
+            duration: const Duration(seconds: 5),
+            content: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Desktop connection established!",
+                      textAlign: TextAlign.center)
+                ]));
+        Scaffold.of(context).showSnackBar(mySnack);
         // });
         return;
       }
 
       handleNewItems(content);
-        
-      });
+    });
     return streamSub;
   }
 
@@ -615,7 +643,6 @@ print(items.length);
 // //                      if (remaining!=null)
 // //                        widget.updateRemaining(remaining);
 
-
 //                       if (mounted) {
 //                         _playListAnimation();
 //                       }
@@ -627,7 +654,6 @@ print(items.length);
 //                 }
 //               },
 //             );
-
 
 //         }
 //       },

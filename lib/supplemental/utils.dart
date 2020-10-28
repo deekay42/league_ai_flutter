@@ -16,7 +16,7 @@ Future<void> waitForFileToFinishLoading(File file) async
       {
         //print("File is still loading...: size is $size and oldsize is $oldsize");
         oldsize = size;
-        sleep(Duration(milliseconds:50));
+        sleep(Duration(milliseconds:10));
       }
   }
   //print("File is fully loaded now");
