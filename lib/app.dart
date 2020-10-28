@@ -362,7 +362,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         else
         {
           paired = false;
-          desktopSignout();
+          if(!(Platform.isIOS || Platform.isAndroid))
+            desktopSignout();
 
         }
 

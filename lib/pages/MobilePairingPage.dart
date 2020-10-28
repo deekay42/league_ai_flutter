@@ -38,7 +38,7 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
   
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
+    return Stack(children:[Container(color:Colors.black.withOpacity(0.65)), Container(margin: EdgeInsets.symmetric(vertical:0.0,horizontal:15.0), child:Column(children: [
       Expanded(child:Container()),
       Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +80,7 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
                 side: BorderSide(color: Colors.white)
             )),
       Expanded(child:Container()),
-    ]);
+    ]))]);
   }
 
   void triggerPairing(BuildContext context) async {
