@@ -1,7 +1,185 @@
 import 'package:flutter/material.dart';
+import '../resources/Strings.dart';
+import 'dart:async';
+import 'dart:math';
+import 'dart:io';
+
+class BreathingImage extends StatefulWidget {
+  @override
+  BreathingImageState createState() => BreathingImageState();
+}
+
+class BreathingImageState extends State<BreathingImage>
+    with TickerProviderStateMixin {
+  AnimationController _controller;
+  Animation<double> animation;
+
+  AnimationController brainController;
+  Animation<double> brainAnimation;
+  Color color = Colors.transparent;
+  bool ai_loaded = false;
+  bool ai_loading = false;
+
+  @override
+  void initState() {
+    _controller = AnimationController(
+        duration: const Duration(milliseconds: 2500), vsync: this);
+
+    brainController = AnimationController(
+        duration: const Duration(milliseconds: 2500), vsync: this);
+
+    animation = Tween(begin: 250.0, end: 0.0).animate(
+      new CurvedAnimation(
+          parent: _controller, curve: Curves.elasticOut.flipped),
+    );
+
+    brainAnimation = Tween(begin: 100.0, end: 90.0).animate(
+      new CurvedAnimation(parent: brainController, curve: Curves.linear),
+    );
+
+    animation.addStatusListener((status) {
+      if (status == AnimationStatus.completed && !ai_loaded) {
+        Future.delayed(Duration(seconds: 2), () {
+          _controller.reverse();
+          setState(() {
+            color = Colors.red;
+            brainController.forward();
+            ai_loaded = true;
+          });
+        });
+      } else if (status == AnimationStatus.dismissed) {
+        setState(() {
+
+          ai_loading = false;
+        });
+      }
+    });
+
+    brainAnimation.addStatusListener((status) {
+      if (status == AnimationStatus.completed)
+        brainController.reverse();
+      else if (status == AnimationStatus.dismissed) {
+        brainController.forward();
+      }
+    });
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    brainController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [
+      Opacity(opacity:ai_loaded ? 1.0 : 0.85, child:Container(
+          color: Colors.black,
+          child: Column(children: [
+            Flexible(
+                flex: 1,
+                child: Container()),
+            Flexible(
+                flex: 4,
+                child: Center(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                      AnimatedBuilder(
+                          animation: animation,
+                          builder: (BuildContext context, Widget child) =>
+                              Stack(
+                                  fit: StackFit.loose,
+                                  alignment: AlignmentDirectional.center,
+                                  children: [
+                                    Center(
+                                        child: ClipOval(
+                                            child: ColorFiltered(
+                                                child: Image.asset(
+                                                  "assets/imgs/ai.gif",
+                                                  height: animation.value,
+                                                  width: animation.value,
+                                                ),
+                                                colorFilter: ColorFilter.mode(
+                                                    color, BlendMode.color)))),
+                                    ai_loaded
+                                        ? Container(
+                                            height: 100,
+                                            child: AnimatedBuilder(
+                                                animation: brainAnimation,
+                                                builder:
+                                                    (BuildContext context,
+                                                            Widget child) =>
+                                                        Center(
+                                                            child: Column(
+                                                                children: [
+                                                              Container(
+                                                                  height:
+                                                                      brainAnimation
+                                                                          .value,
+                                                                  child: ClipOval(
+                                                                      child: ColorFiltered(
+                                                                          child: Image.asset(
+                                                                            "assets/imgs/brain2.png",
+                                                                          ),
+                                                                          colorFilter: ColorFilter.mode(color, BlendMode.color)))),
+                                                              SizedBox(
+                                                                  height: 0)
+                                                            ]))))
+                                        : Container()
+                                  ]))
+                    ]))),
+            Flexible(
+              flex: 1,
+              child: Container(),
+            )
+          ]))),
+      Column(children: [
+        Flexible(
+            flex: 1,
+            child: Center(
+                child: !ai_loading
+                    ? BreathingText(text: Strings.marketing)
+                    : Container())),
+        Flexible(
+            flex: 4,
+            child: Container()),
+        Flexible(
+          flex: 1,
+          child: Center(
+              child: ai_loaded
+                  ? TypeEffect(strings: Strings.instructions)
+                  : (!ai_loading
+                      ? RaisedButton(
+                          child: Text(
+                            'Load AI',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)),
+                              side: BorderSide(color: Colors.white)),
+                          onPressed: () {
+                            setState(() {
+                              ai_loading = true;
+                            });
+
+                            _controller.forward();
+                          },
+                        )
+                      : Container())),
+        )
+      ])
+    ]);
+  }
+}
 
 class BreathingText extends StatefulWidget {
-  final String text;
+  final List<String> text;
 
   BreathingText({this.text});
 
@@ -13,13 +191,14 @@ class BreathingTextState extends State<BreathingText>
     with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> animation;
+  int index = 0;
 
   @override
   void initState() {
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 1500), vsync: this);
+        duration: const Duration(milliseconds: 3500), vsync: this);
 
-    animation = Tween(begin: 12.0, end: 14.0).animate(
+    animation = Tween(begin: 1.0, end: 0.0).animate(
       new CurvedAnimation(
         parent: _controller,
         curve: Curves.linear,
@@ -28,6 +207,7 @@ class BreathingTextState extends State<BreathingText>
 
     animation.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
+        ++index;
         _controller.reverse();
       } else if (status == AnimationStatus.dismissed) {
         _controller.forward();
@@ -50,11 +230,80 @@ class BreathingTextState extends State<BreathingText>
     return AnimatedBuilder(
         animation: animation,
         builder: (BuildContext context, Widget child) => Text(
-              widget.text,
-
+              widget.text[index % widget.text.length],
               style: TextStyle(
-                  fontSize: animation.value, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withOpacity(animation.value)),
+              textAlign: TextAlign.center,
             ));
+  }
+}
+
+class TypeEffect extends StatefulWidget {
+  @override
+  State createState() => new TypeEffectState();
+
+  TypeEffect({this.strings});
+
+  final List<String> strings;
+}
+
+class TypeEffectState extends State<TypeEffect> with TickerProviderStateMixin {
+  Animation<int> _characterCount;
+  int _stringIndex = 0;
+
+  String get _currentString =>
+      widget.strings[_stringIndex % widget.strings.length];
+
+  void initState() {
+    super.initState();
+    playAnimation();
+  }
+
+  void playAnimation() async {
+    for (int i = 0; i < widget.strings.length; ++i) {
+      AnimationController controller = new AnimationController(
+        duration: const Duration(milliseconds: 4000),
+        vsync: this,
+      );
+      setState(() {
+        _stringIndex = i;
+        _characterCount = new StepTween(begin: 0, end: _currentString.length)
+            .animate(
+                new CurvedAnimation(parent: controller, curve: Curves.easeIn));
+
+      });
+      await controller.forward();
+      controller.dispose();
+      sleep(const Duration(seconds: 1));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+    TextStyle textStyle = theme.textTheme.title
+        .copyWith(fontFamily: 'Courier New', color: Colors.white, fontSize: 16);
+
+    return AnimatedBuilder(
+      animation: _characterCount,
+      builder: (BuildContext context, Widget child) {
+        List<Text> texts = List<Text>();
+        for (int i = 0; i < max(_stringIndex, 0); ++i)
+          texts.add(Text(
+            widget.strings[i],
+            style: textStyle,
+            textAlign: TextAlign.start,
+          ));
+        texts.add(Text(
+          _currentString.substring(0, _characterCount.value),
+          style: textStyle,
+          textAlign: TextAlign.start,
+        ));
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start, children: texts);
+      },
+    );
   }
 }

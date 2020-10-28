@@ -11,7 +11,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>League IQ</string>
+	<string>League AI</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -54,7 +54,7 @@
 	<key>FacebookAppID</key>
 	<string>318552978963575</string>
 	<key>FacebookDisplayName</key>
-	<string>League IQ</string>
+	<string>League AI</string>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-4748256700093905~2059247399</string>
 	<key>LSApplicationQueriesSchemes</key>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">League IQ</string>
+    <string name="app_name">League AI</string>
 
     <!-- Replace "000000000000" with your Facebook App ID here. -->
     <string name="facebook_app_id">318552978963575</string>
