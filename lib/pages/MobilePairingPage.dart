@@ -49,9 +49,9 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
                 style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18),
                 children: <TextSpan>[
                   TextSpan(text: '1. Download the '),
-                  TextSpan(text: 'League IQ windows app', style: TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: 'League AI windows app', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextSpan(text: ' on your computer: '),
-                  TextSpan(text: 'http://leagueiq.gg', style: TextStyle(fontWeight: FontWeight.bold)),
+                  TextSpan(text: 'http://leagueai.gg', style: TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
@@ -61,7 +61,7 @@ class _MobilePairingPageState extends State<MobilePairingPage>  {
                 text: '2. Scan the QR Code in the ',
                 style: DefaultTextStyle.of(context).style.copyWith(fontSize: 18 ),
                 children: <TextSpan>[
-                  TextSpan(text: 'League IQ windows app', style: TextStyle(fontWeight: FontWeight.bold))
+                  TextSpan(text: 'League AI windows app', style: TextStyle(fontWeight: FontWeight.bold))
                 ],
               ),
             )]),

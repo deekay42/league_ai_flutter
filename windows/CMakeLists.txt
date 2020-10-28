@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(league_iq_flutter LANGUAGES CXX)
 
-set(BINARY_NAME "LeagueIQ")
+set(BINARY_NAME "LeagueAI")
 
 cmake_policy(SET CMP0063 NEW)
 

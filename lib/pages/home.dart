@@ -90,29 +90,29 @@ class _HomePageState extends State<HomePage> {
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
 
-    Future.delayed(Duration(seconds: 5), () {
-      print("Now sending relaymessage");
+    // Future.delayed(Duration(seconds: 5), () {
+    //   print("Now sending relaymessage");
 
-      Map<String, dynamic> payload = {
-        "timestamp": 1234321,
-        "contents": {
-          "items": [1001, 1001, 1001],
-          "champs": [24, 19, 498, 76, 83, 69, 57, 516, 412, 10],
-          "kills": [5, 4, 1, 2, 0, 0, 0, 3, 2, 1],
-          "deaths": [0, 0, 1, 2, 3, 0, 0, 0, 1, 1],
-          "assists": [5, 6, 8, 1, 5, 4, 1, 3, 4, 2],
-          "levels": [11, 11, 12, 13, 5, 11, 9, 12, 11, 7],
-          "pos": 4,
-          "patch": 10.18,
-          'num_games': 36332
-        }
-      };
+    //   Map<String, dynamic> payload = {
+    //     "timestamp": 1234321,
+    //     "contents": {
+    //       "items": [1001, 1001, 1001],
+    //       "champs": [24, 19, 498, 76, 83, 69, 57, 516, 412, 10],
+    //       "kills": [5, 4, 1, 2, 0, 0, 0, 3, 2, 1],
+    //       "deaths": [0, 0, 1, 2, 3, 0, 0, 0, 1, 1],
+    //       "assists": [5, 6, 8, 1, 5, 4, 1, 3, 4, 2],
+    //       "levels": [11, 11, 12, 13, 5, 11, 9, 12, 11, 7],
+    //       "pos": 4,
+    //       "patch": 10.18,
+    //       'num_games': 36332
+    //     }
+    //   };
 
-      Firestore.instance
-          .collection('users')
-          .document(widget.uid)
-          .collection('predictions')
-          .add(payload);
+    //   Firestore.instance
+    //       .collection('users')
+    //       .document(widget.uid)
+    //       .collection('predictions')
+    //       .add(payload);
 //      CloudFunctions.instance
 //          .getHttpsCallable(functionName: 'relayMessage')
 //          .call(payload);
@@ -201,7 +201,7 @@ class _HomePageState extends State<HomePage> {
 
   void initDesktopReadMessage() async {
 //    print("initDesktopReadMessage");
-    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League AI";
     String filePath = dirPath + "\\last";
 
     if (FileSystemEntity.typeSync(filePath) != FileSystemEntityType.notFound) {

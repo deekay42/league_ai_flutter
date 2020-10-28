@@ -116,7 +116,7 @@ std::wstring getLocalAppDataFolder()
     wchar_t* localAppData = 0;
     SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &localAppData);
     std::wstringstream base, tess;
-    base << localAppData << "\\League IQ";
+    base << localAppData << "\\League AI";
     CreateDirectoryW(base.str().c_str(), NULL);
     CoTaskMemFree(static_cast<void*>(localAppData));
     return base.str();
@@ -290,7 +290,7 @@ bool isAlreadyRunning()
 {
 	HANDLE m_singleInstanceMutex = CreateMutex(NULL, TRUE, L"ONLY_ONE_INSTACE_ALLOWED");
 	if (m_singleInstanceMutex == NULL || GetLastError() == ERROR_ALREADY_EXISTS) {
-		HWND existingApp = FindWindow(0, L"League IQ");
+		HWND existingApp = FindWindow(0, L"League AI");
 		if (existingApp) SetForegroundWindow(existingApp);
 		ReleaseMutex(m_singleInstanceMutex);
 		return true; // Exit the app. For MFC, return false from InitInstance.

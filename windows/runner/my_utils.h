@@ -40,10 +40,10 @@ int common_main() {
    printf("Python code complete\n");
    std::cout << "now runnning flutter" << std::endl;
    runFlutterCode();
+   std::cout << "flutter complete" << std::endl;
    std::ofstream outfile(getLocalAppDataFolder() + L"\\terminate");
    outfile << "terminate" << std::endl;
    outfile.close();
-   std::cout << "runnning flutter complete" << std::endl;
    std::cout << "Waiting for join" << std::endl;
    
   cythonThread.join();

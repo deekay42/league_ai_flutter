@@ -4,11 +4,11 @@
 !define MUI_COMPONENTSPAGE_NODESC
 SetCompressor /SOLID bzip2
  
-caption "Install League IQ"
+caption "Install League AI"
 ;---------------------------------
 ;General
  
-  OutFile "Install League IQ.exe"
+  OutFile "Install League AI.exe"
   ShowInstDetails "nevershow"
   ShowUninstDetails "nevershow"
   ;SetCompressor "bzip2"

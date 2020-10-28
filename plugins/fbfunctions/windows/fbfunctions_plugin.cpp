@@ -154,9 +154,7 @@ void FbfunctionsPlugin::HandleMethodCall(
     if (it != args.end()) {
       methodName = it->second.StringValue();
     }
-    std::cout << methodName << std::endl;
     if (methodName == "authenticate") {
-      std::cout << "AUTHENTICATE" << std::endl;
       if (myuid == "" || mysecret == "")
       {
         //ugly, but using result->Error apparently creates uncatchable exceptions.
@@ -182,24 +180,17 @@ void FbfunctionsPlugin::HandleMethodCall(
       for (it = args.begin(); it != args.end(); ++it)
       {
         std::string key = it->first.StringValue();
-        std::cout << key << std::endl;
         flutter::EncodableValue val = it->second;
         if(val.IsInt())
         {
-          std::cout << "its an int" << std::endl;
-          std::cout << val.IntValue() << std::endl;
           data.insert({key.c_str(), firebase::firestore::FieldValue::FieldValue::Integer(val.IntValue())});
         }
         else if(val.IsDouble())
         {
-          std::cout << "its an double" << std::endl;
-          std::cout << val.DoubleValue() << std::endl;
           data.insert({key.c_str(), firebase::firestore::FieldValue::FieldValue::Double(val.DoubleValue())});
         }
         else if(val.IsList())
         {
-          std::cout << "its an int list" << std::endl;
-          
           auto list = val.ListValue();
           auto vec = std::vector<firebase::firestore::FieldValue>();
           for(auto it2=list.begin();it2!=list.end(); ++it2)
@@ -211,8 +202,7 @@ void FbfunctionsPlugin::HandleMethodCall(
         }
         else
         {
-          std::cout << "its somet other datatype" << std::endl;
-          std::cout << (int)(val.type()) << std::endl;
+         
         }
       }
         newRecommendation(firebase::firestore::FieldValue::Map(data));

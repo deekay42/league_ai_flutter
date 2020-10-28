@@ -438,7 +438,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     setState(() {
       waitingOnInviteCodeCheck = true;
     });
-    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League AI";
     String inviteCodeFilePath = dirPath + "\\inviteCode";
     String uidFilePath = dirPath + "\\uid";
     if (FileSystemEntity.typeSync(inviteCodeFilePath) !=
@@ -470,7 +470,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 
   Future<String> getUIDForDesktop() {
     print("in getuidfordesktop");
-    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League AI";
     String filePath = dirPath + "\\uid";
     listenForUIDFile(dirPath, filePath);
 //    print("dirPath: $dirPath filePath: $filePath");
@@ -488,7 +488,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   }
 
   Future<String> getUIDDBKeyForDesktop() async {
-    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League AI";
     String filePath = dirPath + "\\db_key";
     while(FileSystemEntity.typeSync(filePath) == FileSystemEntityType.notFound)
         await Future.delayed(const Duration(seconds: 1)); 
@@ -533,7 +533,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   Future<void> resetPairingDesktop() async
   {
 
-//    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+//    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League AI";
 //    for(String path in ["\\uid", "\\secret"])
 //    {
 //
@@ -650,7 +650,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
   }
 
   void waitForAIToLoad() async {
-    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League IQ";
+    String dirPath = Platform.environment['LOCALAPPDATA'] + "\\League AI";
     String filePath = dirPath + "\\ai_loaded";
 
     Stream<FileSystemEvent> dirStream =
@@ -784,7 +784,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-              "League IQ is invite-only at this time. Please enter your invite code.",
+              "League AI is invite-only at this time. Please enter your invite code.",
               style: theme.textTheme.body2),
           SizedBox(
             height: 15,
@@ -824,7 +824,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
                 });
                 String inviteCodeFilePath =
                     Platform.environment['LOCALAPPDATA'] +
-                        "\\League IQ" +
+                        "\\League AI" +
                         "\\inviteCode";
                 File(inviteCodeFilePath).writeAsString(codeEntered);
               } else
