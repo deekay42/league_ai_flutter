@@ -48,25 +48,25 @@
     
 // #else
 int main() {
-// #ifdef NDEBUG
-// HWND consoleWnd = GetConsoleWindow();
-//   DWORD dwProcessId;
-//   GetWindowThreadProcessId(consoleWnd, &dwProcessId);
-//   if (GetCurrentProcessId()==dwProcessId)
-//     ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
-// std::wstring dirPath = getLocalAppDataFolder();
-//    DeleteFileW((dirPath + L"\\log.txt").c_str());
-//    std::remove("log.txt");
+#ifdef NDEBUG
+HWND consoleWnd = GetConsoleWindow();
+  DWORD dwProcessId;
+  GetWindowThreadProcessId(consoleWnd, &dwProcessId);
+  if (GetCurrentProcessId()==dwProcessId)
+    ::ShowWindow(::GetConsoleWindow(), SW_HIDE);
+std::wstring dirPath = getLocalAppDataFolder();
+   DeleteFileW((dirPath + L"\\log.txt").c_str());
+   std::remove("log.txt");
 
-//    FILE* unused;
-//    if (freopen_s(&unused,  ws2s(dirPath + L"\\log.txt").c_str(), "w", stdout)) {
-//       _dup2(_fileno(stdout), 1);
-//     }
-//     if (freopen_s(&unused,  ws2s(dirPath + L"\\log.txt").c_str(), "w", stderr)) {
-//       _dup2(_fileno(stdout), 2);
-//     }
-//     std::ios::sync_with_stdio();
-// #endif
+   FILE* unused;
+   if (freopen_s(&unused,  ws2s(dirPath + L"\\log.txt").c_str(), "w", stdout)) {
+      _dup2(_fileno(stdout), 1);
+    }
+    if (freopen_s(&unused,  ws2s(dirPath + L"\\log.txt").c_str(), "w", stderr)) {
+      _dup2(_fileno(stdout), 2);
+    }
+    std::ios::sync_with_stdio();
+#endif
   // printf("1");
   // HWND consoleWnd = GetConsoleWindow();
   // DWORD dwProcessId;

@@ -565,37 +565,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     Fbfunctions.fb_call(methodName: 'signout');
   }
 
-  void _testConnection()
-  {
-    print("test oco66nnection!");
-    Fbfunctions.fb_call(
-                  methodName: 'newRecommendation',
-                  args: <String, dynamic>{"items": [-1]});
-    showDialog<Null>(
-      context: context,
-      barrierDismissible: true, // user must tap button!
-      builder: (BuildContext context) =>
-          AlertDialog(
-            title: Text("Test message sent"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("If you didn't see a notification on your phone, try to pair again."),
-                SizedBox(
-                  height: 15,
-                ),
-                RaisedButton(
-                  child: Text("Cancel"),
-                  onPressed: () {
-                            Navigator.pop(context);
-
-                  },
-                ),
-              ],
-            ),
-          ),
-    );              
-  }
+  
 
   void _unsubscribe() {
 //    print('unsubscribe');
@@ -851,22 +821,22 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
     {
       if(desktopUID != null)
         
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 20),
-          child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                child:
-                    Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-                      RaisedButton(child: Text("Send test message"), onPressed: _testConnection,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(3.0),
-                        side: BorderSide(color: Colors.white)
-                    )),
-                  SizedBox(height: 8)
-                ]),
-              )),
-        );
+        // return Stack(children:[Container(color:Colors.black.withOpacity(1.0)), Center(child:Container(
+        //   margin: const EdgeInsets.symmetric(vertical: 20),
+        //   child: Align(
+        //       alignment: Alignment.center,
+        //       child: Container(
+        //         child:
+                    
+        //               RaisedButton(child: Text("Send test message"), onPressed: _testConnection,
+        //             shape: RoundedRectangleBorder(
+        //                 borderRadius: BorderRadius.circular(3.0),
+        //                 side: BorderSide(color: Colors.white)
+        //             )),
+                  
+        //       )),
+        // ))]);
+        return null;
       else
         return null;
     }

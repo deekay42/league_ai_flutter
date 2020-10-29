@@ -1,6 +1,6 @@
 !include "MUI2.nsh"
-!define MUI_ICON "..\assets\icons\logo.ico"
-!define MUI_PRODUCT "LeagueIQ"
+!define MUI_ICON "..\assets\icons\logo_new.ico"
+!define MUI_PRODUCT "LeagueAI"
 !define MUI_COMPONENTSPAGE_NODESC
 SetCompressor /SOLID bzip2
  

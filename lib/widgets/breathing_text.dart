@@ -3,6 +3,7 @@ import '../resources/Strings.dart';
 import 'dart:async';
 import 'dart:math';
 import 'dart:io';
+import 'package:fbfunctions/fbfunctions.dart';
 
 class BreathingImage extends StatefulWidget {
   @override
@@ -71,6 +72,38 @@ class BreathingImageState extends State<BreathingImage>
     _controller.dispose();
     brainController.dispose();
     super.dispose();
+  }
+
+  void _testConnection()
+  {
+    print("test oco66nnection!");
+    Fbfunctions.fb_call(
+                  methodName: 'newRecommendation',
+                  args: <String, dynamic>{"items": [-1]});
+    showDialog<Null>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) =>
+          AlertDialog(
+            title: Text("Test message sent"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("If you didn't see a notification on your phone, try to pair again."),
+                SizedBox(
+                  height: 15,
+                ),
+                RaisedButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                            Navigator.pop(context);
+
+                  },
+                ),
+              ],
+            ),
+          ),
+    );              
   }
 
   @override
@@ -150,8 +183,8 @@ class BreathingImageState extends State<BreathingImage>
         Flexible(
           flex: 1,
           child: Center(
-              child: ai_loaded
-                  ? TypeEffect(strings: Strings.instructions)
+              child: Column(children:[ai_loaded
+                  ? TypeEffect(strings:(Platform.isAndroid || Platform.isIOS) ? Strings.instructions : Strings.instructionsDesktop)
                   : (!ai_loading
                       ? RaisedButton(
                           child: Text(
@@ -171,7 +204,23 @@ class BreathingImageState extends State<BreathingImage>
                             _controller.forward();
                           },
                         )
-                      : Container())),
+                      : Container()),
+                      
+                      (Platform.isAndroid || Platform.isIOS || ai_loading) ? Container() : Center(child:Container(
+          margin: const EdgeInsets.symmetric(vertical: 10),
+          child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                child:
+                    
+                      RaisedButton(child: Text("Send test message"), onPressed: _testConnection,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3.0),
+                        side: BorderSide(color: Colors.white)
+                    )),
+                  
+              )),
+        ))])),
         )
       ])
     ]);
