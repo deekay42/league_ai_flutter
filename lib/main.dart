@@ -35,8 +35,10 @@ void _setTargetPlatformForDesktop() {
 
 void main() {
   _setTargetPlatformForDesktop();
-  runApp(MaterialApp(title: Strings.name, home: MainApp(), theme: _myTheme));
-  //runApp(MaterialApp(title: "lol", home: Container(child:Text("HI"))));
+  runApp(MaterialApp(title: Strings.name, home: MainApp(), theme: _myTheme,
+  debugShowCheckedModeBanner: false
+  ));
+
 }
 
 final ThemeData _myTheme = _buildMyTheme();

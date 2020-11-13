@@ -1,5 +1,5 @@
 name: LeagueAI
-version: 1.0.4
+version: 2.0.0
 description: League AI is the \#1 League of Legends build recommendation AI
 homepage: http://leagueai.gg/
 
@@ -9,6 +9,7 @@ environment:
   # yet stable, so it requires a very recent version of Flutter.
   # This version will increase regularly as the build scripts change.
   flutter: '>=1.16.1-pre.24'
+
 
 dependencies:
   flutter:
@@ -31,6 +32,7 @@ dependencies:
   notification_permissions: ^0.4.4
   permission_handler: ^5.0.0+hotfix.5
   apple_sign_in: ^0.1.0
+  video_player: ^1.0.0
   # btnonce:
   #   path: ./plugins/btnonce
   fbfunctions:
@@ -77,6 +79,9 @@ flutter:
 
   uses-material-design: true
   assets:
+    #videos
+    - assets/video/final_openshot_export_handbrake.mp4
+
     #json
     - assets/data/item2id.json
     - assets/data/champ2id.json
@@ -175,16 +180,16 @@ flutter:
     - assets/train_imgs/3007.png
     - assets/train_imgs/3008.png
     - assets/train_imgs/3009.png
-    - assets/train_imgs/3010.png
+
     - assets/train_imgs/3020.png
-    - assets/train_imgs/3022.png
+
     - assets/train_imgs/3024.png
-    - assets/train_imgs/3025.png
+
     - assets/train_imgs/3026.png
-    - assets/train_imgs/3027.png
-    - assets/train_imgs/3028.png
+
+
     - assets/train_imgs/3029.png
-    - assets/train_imgs/3030.png
+
     - assets/train_imgs/3031.png
     - assets/train_imgs/3033.png
     - assets/train_imgs/3035.png
@@ -198,13 +203,13 @@ flutter:
     - assets/train_imgs/3047.png
     - assets/train_imgs/3048.png
     - assets/train_imgs/3050.png
-    - assets/train_imgs/3052.png
+
     - assets/train_imgs/3053.png
     - assets/train_imgs/3056.png
     - assets/train_imgs/3057.png
     - assets/train_imgs/3065.png
     - assets/train_imgs/3067.png
-    - assets/train_imgs/3068.png
+
     - assets/train_imgs/3069.png
     - assets/train_imgs/3069_1.png
     - assets/train_imgs/3070.png
@@ -222,7 +227,7 @@ flutter:
     - assets/train_imgs/3084.png
     - assets/train_imgs/3085.png
     - assets/train_imgs/3086.png
-    - assets/train_imgs/3087.png
+
     - assets/train_imgs/3089.png
     - assets/train_imgs/3090.png
     - assets/train_imgs/3091.png
@@ -267,14 +272,14 @@ flutter:
     - assets/train_imgs/3140.png
     - assets/train_imgs/3142.png
     - assets/train_imgs/3143.png
-    - assets/train_imgs/3144.png
+
     - assets/train_imgs/3145.png
-    - assets/train_imgs/3146.png
+
     - assets/train_imgs/3147.png
     - assets/train_imgs/3148.png
     - assets/train_imgs/3149.png
-    - assets/train_imgs/3151.png
-    - assets/train_imgs/3152.png
+
+
     - assets/train_imgs/3153.png
     - assets/train_imgs/3155.png
     - assets/train_imgs/3156.png
@@ -287,7 +292,7 @@ flutter:
     - assets/train_imgs/3170.png
     - assets/train_imgs/3172.png
     - assets/train_imgs/3173.png
-    - assets/train_imgs/3174.png
+
     - assets/train_imgs/3175.png
     - assets/train_imgs/3179.png
     - assets/train_imgs/3181.png
@@ -297,7 +302,7 @@ flutter:
     - assets/train_imgs/3190.png
     - assets/train_imgs/3191.png
     - assets/train_imgs/3193.png
-    - assets/train_imgs/3194.png
+
     - assets/train_imgs/3196.png
     - assets/train_imgs/3197.png
     - assets/train_imgs/3198.png
@@ -306,7 +311,7 @@ flutter:
     - assets/train_imgs/3222.png
     - assets/train_imgs/3230.png
     - assets/train_imgs/3231.png
-    - assets/train_imgs/3285.png
+
     - assets/train_imgs/3301.png
     - assets/train_imgs/3302.png
     - assets/train_imgs/3303.png
@@ -392,7 +397,7 @@ flutter:
     - assets/train_imgs/3742.png
     - assets/train_imgs/3748.png
     - assets/train_imgs/3751.png
-    - assets/train_imgs/3800.png
+
     - assets/train_imgs/3801.png
     - assets/train_imgs/3802.png
     - assets/train_imgs/3812.png
@@ -413,8 +418,8 @@ flutter:
     - assets/train_imgs/3901.png
     - assets/train_imgs/3902.png
     - assets/train_imgs/3903.png
-    - assets/train_imgs/3905.png
-    - assets/train_imgs/3907.png
+
+
     - assets/train_imgs/3916.png
     - assets/train_imgs/4001.png
     - assets/train_imgs/4003.png
@@ -539,6 +544,7 @@ flutter:
     - assets/train_imgs/champs/Rumble.png
     - assets/train_imgs/champs/Ryze.png
     - assets/train_imgs/champs/Samira.png
+    - assets/train_imgs/champs/Seraphine.png
     - assets/train_imgs/champs/Sejuani.png
     - assets/train_imgs/champs/Senna.png
     - assets/train_imgs/champs/Sett.png
