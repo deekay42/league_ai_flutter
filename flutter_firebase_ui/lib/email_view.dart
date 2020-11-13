@@ -58,7 +58,7 @@ class _EmailViewState extends State<EmailView> {
             alignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new FlatButton(
+              FlatButton(
                   onPressed: () {
 
                     return _connexion(context);

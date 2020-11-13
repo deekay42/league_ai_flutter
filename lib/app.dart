@@ -127,7 +127,7 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
 //              return;
 //            }
             bool isPaired = documentSnapshot.data["paired"];
-            if(isPaired)
+            if( !(isPaired==null) && isPaired)
               setPairedToTrue();
             else
               setState(() {
@@ -684,7 +684,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             updateRemaining: updateRemaining,
             updateSubscription: checkIfUserHasSubscription,
             mainBodyController: mainBodyController,
-            uid: user.uid);
+            uid: user.uid,
+          tickerProvider:this);
       }
       else {
         return MobilePairingPage(setPairedToTrue: setPairedToTrue);
@@ -703,7 +704,8 @@ class _MainAppState extends State<MainApp> with TickerProviderStateMixin, Widget
             updateRemaining: updateRemaining,
             updateSubscription: checkIfUserHasSubscription,
             mainBodyController: mainBodyController,
-            uid: desktopUID);
+            uid: desktopUID,
+            tickerProvider:this);
       } else {
   //      print("returnin qrpage ");
         return QRPage(dataString: getUIDDBKeyForDesktop());

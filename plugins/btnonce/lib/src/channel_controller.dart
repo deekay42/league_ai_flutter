@@ -31,7 +31,7 @@ class BTNonceChannelController {
       new BTNonceChannelController._();
 
 
-  Future<String> finishPayment({String clientToken}) {
+  Future<String> finishPayment({String clientToken=''}) {
     Completer<String> callResult = Completer<String>();
     try {
       

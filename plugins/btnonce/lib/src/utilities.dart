@@ -14,7 +14,7 @@
 import 'channel_controller.dart';
 import 'dart:async';
 
-Future<String> finishPayment({String clientToken}) {
+Future<String> finishPayment({String clientToken=''}) {
   return BTNonceChannelController.instance
       .finishPayment(clientToken:clientToken);
 }

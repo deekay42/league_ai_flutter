@@ -34,6 +34,7 @@ class HomePage extends StatefulWidget {
   final Function updateRemaining;
   final Function updateSubscription;
   final String uid;
+  TickerProviderStateMixin tickerProvider;
 
   HomePage(
       {this.hasSubscription = false,
@@ -41,7 +42,8 @@ class HomePage extends StatefulWidget {
       this.updateRemaining,
       this.updateSubscription,
       this.mainBodyController,
-      this.uid});
+      this.uid,
+      this.tickerProvider});
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -90,35 +92,35 @@ class _HomePageState extends State<HomePage> {
 //    _firebaseMessaging.getToken().then((token){print("Got device_id: $token");});
 //
 
-    //  Future.delayed(Duration(seconds: 5), () {
-    //    print("Now sending relaymessage");
-
-    //    Map<String, dynamic> payload = {
-    //      "timestamp": 1234321,
-    //      "contents": {
-    //        "items": [1001, 1001, 1001],
-    //        "champs": [24, 19, 498, 76, 83, 69, 57, 516, 412, 10],
-    //        "kills": [5, 4, 1, 2, 0, 0, 0, 3, 2, 1],
-    //        "deaths": [0, 0, 1, 2, 3, 0, 0, 0, 1, 1],
-    //        "assists": [5, 6, 8, 1, 5, 4, 1, 3, 4, 2],
-    //        "levels": [11, 11, 12, 13, 5, 11, 9, 12, 11, 7],
-    //        "pos": 4,
-    //        "patch": 10.18,
-    //        'num_games': 36332
-    //      }
-    //    };
-
-    //    Firestore.instance
-    //        .collection('users')
-    //        .document(widget.uid)
-    //        .collection('predictions')
-    //        .add(payload);
-//      CloudFunctions.instance
-//          .getHttpsCallable(functionName: 'relayMessage')
-//          .call(payload);
+//      Future.delayed(Duration(seconds: 5), () {
+//        print("Now sending relaymessage");
 //
-////      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
-    //  });
+//        Map<String, dynamic> payload = {
+//          "timestamp": 1234321,
+//          "contents": {
+//            "items": [1001, 1001, 1001],
+//            "champs": [24, 19, 498, 76, 83, 69, 57, 516, 412, 10],
+//            "kills": [5, 4, 1, 2, 0, 0, 0, 3, 2, 1],
+//            "deaths": [0, 0, 1, 2, 3, 0, 0, 0, 1, 1],
+//            "assists": [5, 6, 8, 1, 5, 4, 1, 3, 4, 2],
+//            "levels": [11, 11, 12, 13, 5, 11, 9, 12, 11, 7],
+//            "pos": 4,
+//            "patch": 10.18,
+//            'num_games': 36332
+//          }
+//        };
+//
+//        Firestore.instance
+//            .collection('users')
+//            .document(widget.uid)
+//            .collection('predictions')
+//            .add(payload);
+////      CloudFunctions.instance
+////          .getHttpsCallable(functionName: 'relayMessage')
+////          .call(payload);
+////
+//////      _handleNewMessageIncoming({'data':{'body':"3020,3067,1052,1052"}});
+//      });
   }
 
   void didUpdateWidget(HomePage oldWidget) {
@@ -360,7 +362,8 @@ class _HomePageState extends State<HomePage> {
           scrollDir: Axis.vertical,
           title: "Based on your specific game state:",
           children: champs_list,
-          animationController: widget.mainBodyController);
+          animationController: widget.mainBodyController
+      );
 
       var itemsSuggested = SlidingList(
           scrollDir: Axis.horizontal,
