@@ -9,8 +9,8 @@ class Strings {
   // ];
   static const String probePing = "Desktop connection established";
 
-static const List<String> instructions = ["1. Start your League AI Desktop client", "2. Press <Tab> while in game"];
-static const List<String> instructionsDesktop = ["1. Start your League AI app on your phone", "2. Press <Tab> while in game"];
+static const List<String> instructions = ["1. Start your League AI Desktop client", "2. Start a game of League of Legends"];
+static const List<String> instructionsDesktop = ["Start your League AI app on your phone", "2. Start a game of League of Legends"];
 
 
 

@@ -97,6 +97,7 @@ flutter:
     - assets/imgs/brain2.png
 
 #item imgs
+
     - assets/train_imgs/0.png
     - assets/train_imgs/1001.png
     - assets/train_imgs/1004.png
@@ -112,11 +113,8 @@ flutter:
     - assets/train_imgs/1036.png
     - assets/train_imgs/1037.png
     - assets/train_imgs/1038.png
-    - assets/train_imgs/1039.png
-    - assets/train_imgs/1041.png
     - assets/train_imgs/1042.png
     - assets/train_imgs/1043.png
-    - assets/train_imgs/1051.png
     - assets/train_imgs/1052.png
     - assets/train_imgs/1053.png
     - assets/train_imgs/1054.png
@@ -124,34 +122,17 @@ flutter:
     - assets/train_imgs/1056.png
     - assets/train_imgs/1057.png
     - assets/train_imgs/1058.png
-    - assets/train_imgs/1059.png
     - assets/train_imgs/1082.png
     - assets/train_imgs/1083.png
-    - assets/train_imgs/1400.png
-    - assets/train_imgs/1401.png
-    - assets/train_imgs/1402.png
-    - assets/train_imgs/1412.png
-    - assets/train_imgs/1413.png
-    - assets/train_imgs/1414.png
-    - assets/train_imgs/1416.png
-    - assets/train_imgs/1419.png
     - assets/train_imgs/2003.png
     - assets/train_imgs/2004.png
     - assets/train_imgs/2009.png
     - assets/train_imgs/2010.png
-    - assets/train_imgs/2011.png
-    - assets/train_imgs/2012.png
     - assets/train_imgs/2013.png
+    - assets/train_imgs/2011.png
     - assets/train_imgs/2015.png
     - assets/train_imgs/2031.png
-    - assets/train_imgs/2032.png
     - assets/train_imgs/2033.png
-    - assets/train_imgs/2047.png
-    - assets/train_imgs/2050.png
-    - assets/train_imgs/2051.png
-    - assets/train_imgs/2052.png
-    - assets/train_imgs/2053.png
-    - assets/train_imgs/2054.png
     - assets/train_imgs/2055.png
     - assets/train_imgs/2056.png
     - assets/train_imgs/2057.png
@@ -160,36 +141,25 @@ flutter:
     - assets/train_imgs/2060.png
     - assets/train_imgs/2061.png
     - assets/train_imgs/2062.png
-    - assets/train_imgs/2065.png
     - assets/train_imgs/2138.png
     - assets/train_imgs/2139.png
     - assets/train_imgs/2140.png
     - assets/train_imgs/2319.png
     - assets/train_imgs/2403.png
-    - assets/train_imgs/2419.png
-    - assets/train_imgs/2420.png
-    - assets/train_imgs/2421.png
     - assets/train_imgs/2422.png
+    - assets/train_imgs/2420.png
+    - assets/train_imgs/2419.png
+    - assets/train_imgs/2421.png
     - assets/train_imgs/2423.png
     - assets/train_imgs/2424.png
     - assets/train_imgs/3001.png
     - assets/train_imgs/3003.png
     - assets/train_imgs/3004.png
-    - assets/train_imgs/3005.png
     - assets/train_imgs/3006.png
-    - assets/train_imgs/3007.png
-    - assets/train_imgs/3008.png
     - assets/train_imgs/3009.png
-
     - assets/train_imgs/3020.png
-
     - assets/train_imgs/3024.png
-
     - assets/train_imgs/3026.png
-
-
-    - assets/train_imgs/3029.png
-
     - assets/train_imgs/3031.png
     - assets/train_imgs/3033.png
     - assets/train_imgs/3035.png
@@ -197,138 +167,71 @@ flutter:
     - assets/train_imgs/3040.png
     - assets/train_imgs/3041.png
     - assets/train_imgs/3042.png
-    - assets/train_imgs/3043.png
     - assets/train_imgs/3044.png
     - assets/train_imgs/3046.png
     - assets/train_imgs/3047.png
-    - assets/train_imgs/3048.png
     - assets/train_imgs/3050.png
-
     - assets/train_imgs/3053.png
-    - assets/train_imgs/3056.png
     - assets/train_imgs/3057.png
     - assets/train_imgs/3065.png
     - assets/train_imgs/3067.png
-
-    - assets/train_imgs/3069.png
-    - assets/train_imgs/3069_1.png
     - assets/train_imgs/3070.png
     - assets/train_imgs/3071.png
     - assets/train_imgs/3072.png
-    - assets/train_imgs/3073.png
     - assets/train_imgs/3074.png
     - assets/train_imgs/3075.png
     - assets/train_imgs/3076.png
     - assets/train_imgs/3077.png
     - assets/train_imgs/3078.png
-    - assets/train_imgs/3080.png
     - assets/train_imgs/3082.png
     - assets/train_imgs/3083.png
-    - assets/train_imgs/3084.png
     - assets/train_imgs/3085.png
     - assets/train_imgs/3086.png
-
     - assets/train_imgs/3089.png
-    - assets/train_imgs/3090.png
     - assets/train_imgs/3091.png
-    - assets/train_imgs/3092.png
-    - assets/train_imgs/3092_1.png
     - assets/train_imgs/3094.png
     - assets/train_imgs/3095.png
-    - assets/train_imgs/3096.png
-    - assets/train_imgs/3096_1.png
-    - assets/train_imgs/3097.png
-    - assets/train_imgs/3097_1.png
-    - assets/train_imgs/3098.png
-    - assets/train_imgs/3098_1.png
     - assets/train_imgs/3100.png
     - assets/train_imgs/3101.png
     - assets/train_imgs/3102.png
-    - assets/train_imgs/3104.png
     - assets/train_imgs/3105.png
     - assets/train_imgs/3107.png
     - assets/train_imgs/3108.png
     - assets/train_imgs/3109.png
     - assets/train_imgs/3110.png
     - assets/train_imgs/3111.png
-    - assets/train_imgs/3112.png
     - assets/train_imgs/3113.png
     - assets/train_imgs/3114.png
     - assets/train_imgs/3115.png
     - assets/train_imgs/3116.png
     - assets/train_imgs/3117.png
-    - assets/train_imgs/3118.png
-    - assets/train_imgs/3122.png
     - assets/train_imgs/3123.png
     - assets/train_imgs/3124.png
-    - assets/train_imgs/3128.png
-    - assets/train_imgs/3131.png
     - assets/train_imgs/3133.png
     - assets/train_imgs/3134.png
     - assets/train_imgs/3135.png
     - assets/train_imgs/3136.png
-    - assets/train_imgs/3137.png
     - assets/train_imgs/3139.png
     - assets/train_imgs/3140.png
     - assets/train_imgs/3142.png
     - assets/train_imgs/3143.png
-
-    - assets/train_imgs/3145.png
-
-    - assets/train_imgs/3147.png
-    - assets/train_imgs/3148.png
-    - assets/train_imgs/3149.png
-
-
     - assets/train_imgs/3153.png
     - assets/train_imgs/3155.png
     - assets/train_imgs/3156.png
     - assets/train_imgs/3157.png
     - assets/train_imgs/3158.png
-    - assets/train_imgs/3161.png
-    - assets/train_imgs/3162.png
-    - assets/train_imgs/3163.png
     - assets/train_imgs/3165.png
-    - assets/train_imgs/3170.png
-    - assets/train_imgs/3172.png
-    - assets/train_imgs/3173.png
-
-    - assets/train_imgs/3175.png
-    - assets/train_imgs/3179.png
-    - assets/train_imgs/3181.png
-    - assets/train_imgs/3184.png
-    - assets/train_imgs/3185.png
-    - assets/train_imgs/3187.png
     - assets/train_imgs/3190.png
     - assets/train_imgs/3191.png
     - assets/train_imgs/3193.png
-
     - assets/train_imgs/3196.png
     - assets/train_imgs/3197.png
     - assets/train_imgs/3198.png
     - assets/train_imgs/3200.png
     - assets/train_imgs/3211.png
     - assets/train_imgs/3222.png
-    - assets/train_imgs/3230.png
-    - assets/train_imgs/3231.png
-
-    - assets/train_imgs/3301.png
-    - assets/train_imgs/3302.png
-    - assets/train_imgs/3303.png
-    - assets/train_imgs/3304.png
-    - assets/train_imgs/3305.png
-    - assets/train_imgs/3306.png
-    - assets/train_imgs/3307.png
-    - assets/train_imgs/3308.png
-    - assets/train_imgs/3309.png
-    - assets/train_imgs/3310.png
-    - assets/train_imgs/3311.png
-    - assets/train_imgs/3312.png
+    - assets/train_imgs/3330.png
     - assets/train_imgs/3340.png
-    - assets/train_imgs/3345.png
-    - assets/train_imgs/3348.png
-    - assets/train_imgs/3361.png
-    - assets/train_imgs/3362.png
     - assets/train_imgs/3363.png
     - assets/train_imgs/3364.png
     - assets/train_imgs/3371.png
@@ -339,106 +242,91 @@ flutter:
     - assets/train_imgs/3382.png
     - assets/train_imgs/3383.png
     - assets/train_imgs/3384.png
-    - assets/train_imgs/3385.png
     - assets/train_imgs/3386.png
     - assets/train_imgs/3387.png
     - assets/train_imgs/3388.png
     - assets/train_imgs/3389.png
     - assets/train_imgs/3390.png
     - assets/train_imgs/3400.png
-    - assets/train_imgs/3401.png
-    - assets/train_imgs/3401_1.png
-    - assets/train_imgs/3410.png
-    - assets/train_imgs/3416.png
-    - assets/train_imgs/3422.png
-    - assets/train_imgs/3455.png
-    - assets/train_imgs/3460.png
-    - assets/train_imgs/3461.png
-    - assets/train_imgs/3462.png
     - assets/train_imgs/3504.png
     - assets/train_imgs/3508.png
-    - assets/train_imgs/3512.png
     - assets/train_imgs/3513.png
-    - assets/train_imgs/3514.png
-    - assets/train_imgs/3520.png
     - assets/train_imgs/3599.png
     - assets/train_imgs/3600.png
-    - assets/train_imgs/3630.png
-    - assets/train_imgs/3631.png
-    - assets/train_imgs/3633.png
-    - assets/train_imgs/3634.png
-    - assets/train_imgs/3635.png
-    - assets/train_imgs/3636.png
-    - assets/train_imgs/3637.png
-    - assets/train_imgs/3640.png
-    - assets/train_imgs/3641.png
-    - assets/train_imgs/3642.png
-    - assets/train_imgs/3643.png
-    - assets/train_imgs/3645.png
-    - assets/train_imgs/3647.png
-    - assets/train_imgs/3648.png
-    - assets/train_imgs/3649.png
-    - assets/train_imgs/3671.png
-    - assets/train_imgs/3672.png
-    - assets/train_imgs/3673.png
-    - assets/train_imgs/3675.png
-    - assets/train_imgs/3680.png
-    - assets/train_imgs/3681.png
-    - assets/train_imgs/3682.png
-    - assets/train_imgs/3683.png
-    - assets/train_imgs/3690.png
-    - assets/train_imgs/3691.png
-    - assets/train_imgs/3692.png
-    - assets/train_imgs/3693.png
-    - assets/train_imgs/3694.png
-    - assets/train_imgs/3695.png
-    - assets/train_imgs/3706.png
-    - assets/train_imgs/3715.png
     - assets/train_imgs/3742.png
     - assets/train_imgs/3748.png
-    - assets/train_imgs/3751.png
-
+    - assets/train_imgs/6660.png
     - assets/train_imgs/3801.png
     - assets/train_imgs/3802.png
-    - assets/train_imgs/3812.png
-    - assets/train_imgs/3813.png
+    - assets/train_imgs/6333.png
     - assets/train_imgs/3814.png
-    - assets/train_imgs/3850.png
-    - assets/train_imgs/3851.png
-    - assets/train_imgs/3853.png
-    - assets/train_imgs/3854.png
-    - assets/train_imgs/3855.png
-    - assets/train_imgs/3857.png
-    - assets/train_imgs/3858.png
-    - assets/train_imgs/3859.png
-    - assets/train_imgs/3860.png
-    - assets/train_imgs/3862.png
-    - assets/train_imgs/3863.png
-    - assets/train_imgs/3864.png
     - assets/train_imgs/3901.png
     - assets/train_imgs/3902.png
     - assets/train_imgs/3903.png
-
-
     - assets/train_imgs/3916.png
-    - assets/train_imgs/4001.png
-    - assets/train_imgs/4003.png
-    - assets/train_imgs/4004.png
-    - assets/train_imgs/4101.png
-    - assets/train_imgs/4102.png
-    - assets/train_imgs/4103.png
-    - assets/train_imgs/4104.png
-    - assets/train_imgs/4105.png
-    - assets/train_imgs/4201.png
-    - assets/train_imgs/4202.png
-    - assets/train_imgs/4203.png
-    - assets/train_imgs/4204.png
-    - assets/train_imgs/4301.png
-    - assets/train_imgs/4302.png
+    - assets/train_imgs/3179.png
+    - assets/train_imgs/3181.png
+    - assets/train_imgs/3850.png
+    - assets/train_imgs/3851.png
+    - assets/train_imgs/3853.png
+    - assets/train_imgs/3862.png
+    - assets/train_imgs/3863.png
+    - assets/train_imgs/3864.png
+    - assets/train_imgs/3858.png
+    - assets/train_imgs/3859.png
+    - assets/train_imgs/3860.png
+    - assets/train_imgs/3854.png
+    - assets/train_imgs/3855.png
+    - assets/train_imgs/3857.png
+    - assets/train_imgs/6671.png
+    - assets/train_imgs/6672.png
+    - assets/train_imgs/6673.png
+    - assets/train_imgs/3068.png
+    - assets/train_imgs/6662.png
+    - assets/train_imgs/6664.png
+    - assets/train_imgs/6691.png
+    - assets/train_imgs/6692.png
+    - assets/train_imgs/6693.png
+    - assets/train_imgs/6653.png
+    - assets/train_imgs/6655.png
+    - assets/train_imgs/6656.png
+    - assets/train_imgs/3152.png
+    - assets/train_imgs/4633.png
+    - assets/train_imgs/4636.png
+    - assets/train_imgs/6630.png
+    - assets/train_imgs/6631.png
+    - assets/train_imgs/6632.png
+    - assets/train_imgs/2065.png
+    - assets/train_imgs/6617.png
+    - assets/train_imgs/4005.png
+    - assets/train_imgs/6676.png
+    - assets/train_imgs/6675.png
     - assets/train_imgs/4401.png
-    - assets/train_imgs/4402.png
-    - assets/train_imgs/4403.png
-
+    - assets/train_imgs/6695.png
+    - assets/train_imgs/4628.png
+    - assets/train_imgs/4629.png
+    - assets/train_imgs/4637.png
+    - assets/train_imgs/6694.png
+    - assets/train_imgs/6035.png
+    - assets/train_imgs/6609.png
+    - assets/train_imgs/3011.png
+    - assets/train_imgs/6616.png
+    - assets/train_imgs/4641.png
+    - assets/train_imgs/4638.png
+    - assets/train_imgs/4643.png
+    - assets/train_imgs/1035.png
+    - assets/train_imgs/1039.png
+    - assets/train_imgs/6670.png
+    - assets/train_imgs/6677.png
+    - assets/train_imgs/4630.png
+    - assets/train_imgs/4635.png
+    - assets/train_imgs/3145.png
+    - assets/train_imgs/3066.png
+    - assets/train_imgs/4632.png
+    - assets/train_imgs/3051.png
+    - assets/train_imgs/6029.png
+    - assets/train_imgs/4642.png
+    
     - assets/train_imgs/champs/Aatrox.png
     - assets/train_imgs/champs/Ahri.png
     - assets/train_imgs/champs/Akali.png

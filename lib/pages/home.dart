@@ -216,7 +216,7 @@ class _HomePageState extends State<HomePage> {
     desktopLastFileStream = dirStream.listen((foo) async {
       if (FileSystemEntity.typeSync(filePath) !=
           FileSystemEntityType.notFound) {
-//        print("New last file detected!");
+       print("New last file detected!");
 //        print("mounted is $mounted");
         //apparently creating a new file causes this loop to fire multiple times...
         //need to make sure only one event is processed
@@ -226,7 +226,14 @@ class _HomePageState extends State<HomePage> {
         String contentsString = await file.readAsString();
         var contents = jsonDecode(contentsString);
 
-        file.delete();
+        try
+        {
+          file.delete();
+        }
+        on FileSystemException catch(e) 
+        {
+          print('unable to delete file: $e');
+        }
 
         contents = sanitizeContents(contents);
 
